@@ -1548,3 +1548,13 @@ solution whose smooth re-optimisation lands at χ²/dof 1.0–2.1 (clean 278: 40
 227: 29.7 → 1.07, 347: 150 → 1.48). Part of what the paper counts as "macro-fit failure" is optimiser failure that a wider search
 rescues — one more reason the conservative completeness (Sect. metric) counts gate-rejected lenses as misses. Sentence added to
 Sect. 4.2 ¶3. Bound for "all other lenses" is ≤10⁻³ (multipole population max 1.0e-3), not 10⁻⁴.
+
+## 2026-09-12 (late night): round 11 — fifth external report (8/10, "accept after minor revisions")
+No new experiments requested. Fixed: Sect. 4.3 detection count 62/75 → 61/75 (basin-corrected, matches Table 5); Sect. 4.1 now
+states that the scan's coincidence against S/N_pert is expected by construction (S/N² is the perturbation χ², the scan's statistic
+is a χ² difference) and that the non-trivial results are B and the U-Net; the U-Net's non-coincidence is given its two
+inseparable readings (c=60-only training set vs 2-pixel-disc target; the c–M-trained network reached chance so they cannot be
+separated); Fig. 13 and Table tab:signal captions name the U-Net seed (seed 0 of four, every lens scored); "at the widest bin" →
+"at the bin with the largest gap"; gate loop closed (5/24 rescuable ≈ one in five of the excluded lenses per seed set; the reported
+and conservative completeness bounds already bracket it); main.tex header comment updated to aa.cls 9.4.
+Referee's placement advice: A&A section "Numerical methods and codes" (alternative: Cosmology).
