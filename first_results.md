@@ -1558,3 +1558,9 @@ separated); Fig. 13 and Table tab:signal captions name the U-Net seed (seed 0 of
 "at the bin with the largest gap"; gate loop closed (5/24 rescuable ≈ one in five of the excluded lenses per seed set; the reported
 and conservative completeness bounds already bracket it); main.tex header comment updated to aa.cls 9.4.
 Referee's placement advice: A&A section "Numerical methods and codes" (alternative: Cosmology).
+
+### 2026-09-12 (late night): release repository made public; subtitle dropped
+Full-history secret scan clean (token patterns, private keys, e-mails, "tomtom"/"password"/"secret": 0 hits in 496 tracked files);
+`gh repo edit --visibility public` on rishabhramteke/lensing_substructure_stress_test. Paper's Data availability now gives the
+URL alone. The 13-word subtitle was removed at the user's request (the abstract carries its content); title unchanged.
+Margin line numbers are aa.cls 9.4's referee mode (`\linenumbers` set by the class), removed in the typeset article.
