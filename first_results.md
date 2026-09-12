@@ -728,6 +728,26 @@ Where the blind fit converges (95% of clean lenses, ~80% of subhalo lenses) it l
 optimum; the idealization only changes *how often* the fit fails, and those failures are already
 reported as exclusions. Paper: Sect. 3.2 "What the numbers mean".
 
+### Multipole in the macro-model (referee round 3, point 2; 2026-09-12)
+
+`run_baseline_a.py --macro-multipole` (fit.py: `MULTIPOLE` m=4 term with free a_m, phi_m appended to the
+vector, initialised at zero) on the seed-0 subsamples → `results/baseline_a_mpmacro/`. On the a=0.03 multipole
+population the smooth fit recovers a_m to 4 digits and χ²/N → 0.99 (bare EPL: 4–7). At the common threshold the
+multipole FPR falls **32→8.5%** (a=0.01) and **77→9.7%** (a=0.03); at Δχ²>20: 8.5→1.1% and 58→0%; at >100: 1.8→0.7%
+and 33→0%. c=60 completeness 12/18/32/76/78/86% (bare: 12/17/38/71/85/85) — unchanged within scatter; localization
+14%; mass bias unchanged (15/15 low). Macro-fit exclusions on the multipole populations 17/36 → 16/23; clean 5 → 10.
+**The 77% headline is the cost of a bare EPL macro-model; the post-Lange+2024 fix removes it completely at no
+completeness cost.** Paper: abstract, Sect. 4.2 + Table `tab:mpmacro`, Conclusion 2, Fig. 10 cell.
+
+### Family B on Tier 1 (referee round 3, point 5; 2026-09-12)
+
+`run_family_b.py --data-root data/tier1` (fitted variant, 300 lenses/population) → `results/baseline_b_tier1/`,
+`scripts/evaluate_family_b_tier1.py`. The misspecified single-Sérsic source (inherited from Family A's fit)
+drives 281/300 clean fits past the χ²/N<10 gate (median 43); gated numbers are meaningless (19 clean lenses left).
+Gate lifted: threshold on max|δκ| **0.09 → 1.97** (20×), multipole FPR 7%, completeness 15/3/11/7/14/20% — chance
+in every bin. Same failure as A on Tier 1: the source model, not the detector, is the limit. Paper: Sect. 4.5,
+Fig. 10 cell.
+
 ### Grid localization ceiling (provenance, 2026-09-12)
 
 `scripts/grid_localization_ceiling.py` → `results/grid_localization_ceiling.json`: with the scan's 3-radii × 8-angle

@@ -432,7 +432,7 @@ def fig12_summary():
         ("concentration $c=60\\to15$\n(completeness, $10^{10}$--$10^{10.5}\\,M_\\odot$)",
          [("89 $\\to$ 78%\nno collapse", GREEN), ("94 $\\to$ 77%;\n65 $\\to$ 17% below $10^{9.5}$", AMBER), ("51 $\\to$ 15%\ncollapse to chance", RED)]),
         ("lens-shape multipole, $a_4=3\\%\\,\\theta_E$\n(false positives, subhalo-free)",
-         [("77%\n(100% joint re-fit)", RED), ("86%", RED), ("11%\nunmoved", GREEN)]),
+         [("77% (100% joint re-fit);\n10% with $m{=}4$ in macro", AMBER), ("86%", RED), ("11%\nunmoved", GREEN)]),
         ("non-physical decoy, 10$\\sigma$ bump\n(false positives)",
          [("2--4%\nignores it", GREEN), ("63--76%\nresponds most", RED), ("19--21%\nfires", AMBER)]),
         ("real COSMOS source (Tier 1)",
