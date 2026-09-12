@@ -1057,7 +1057,7 @@ fit + 0.4 s inversion per lens. Output mirrors Family A's `scan_results.jsonl`, 
    perturbation to the inversion; a peak-height statistic can't tell a compact lump from an
    extended m=4 pattern. **No λ escapes it**: λ=1e4 → 22 / 50% FPR but −40 points of completeness
    at 10^9–10^9.5; λ=1e6 → 64 / 97%. A shape/extent criterion on δκ is the obvious fix and is not
-   in the published recipe. (Decoy control not run for B.)
+   in the published recipe. (Decoy control for B: see "Round 5" — 67–76% at 10σ, the most decoy-prone family.)
 4. **Localizes like the U-Net:** 51.5% within 0.16″ (median 0.14″ = one mesh pixel), 3.7× Family
    A on the same macro fit. B's detections are *positions*; A's are *hypotheses*. Find-and-localize
    ledger: B 69 correct vs 228 false alarms; A 15 vs 198; C 149 vs 95.
@@ -1116,6 +1116,7 @@ bit-identical decoys of `noise_decoy_control.py` as `data/decoy_{gaussian,dipole
 |---|---|---|---|
 | Gaussian bump — B FPR | 12.5% | 28% | **67%** |
 | dipole — B FPR | 17% | 49% | **76%** |
+| Gaussian, **seed 43** (round 8) — B FPR | 14% | 50% | **63%** |
 | (U-Net, same decoys) | 10–11% | 13–16% | 19–21% |
 | (Family A, same decoys) | 3% | 2–3% | 2–4% |
 
@@ -1326,7 +1327,7 @@ an expected and honest gap, not a contradiction of their result.
    Family A's Tier-1 confounder numbers are noise-dominated at n=300 (heavy-tailed Δχ² from a
    misspecified source). Neither is evidence the Tier-1 signal is unlearnable.
 7. **The decoy control is Tier 0 only, n=100 per amplitude** — two Gaussian seeds plus one
-   dipole run; Family B was not run on the decoys.
+   dipole run; Family B was run on the identical decoys in round 5 (one seed set of 100 lenses, a second Gaussian seed added in round 8).
 8. **The real-lens test used our own corner-pixel noise estimate** (two arrays of Şengül+2022's
    reduction are not public) and a single-Sérsic source that the χ²/dof≈4 fit shows is inadequate;
    it demonstrates the misspecification, not a reproduction of their result.

@@ -121,7 +121,7 @@ def offset_hist(ax, tp, color):
     d = np.array([np.hypot(t[2] - t[0], t[3] - t[1]) for t in tp])
     ax.hist(d, bins=np.linspace(0, 1.2, 25), color=color, alpha=0.85)
     ax.axvline(LOCALIZED_ARCSEC, color="#2fbf71", lw=1.2)
-    ax.text(LOCALIZED_ARCSEC + 0.02, ax.get_ylim()[1] * 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", fontsize=6.8, va="top", color="#2fbf71")
+    ax.text(0.97, 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", transform=ax.transAxes, ha="right", va="top", fontsize=6.8, color="#2fbf71")
     ax.set_xlabel("offset from true subhalo (arcsec)"); ax.set_ylabel("correct finds")
 
 

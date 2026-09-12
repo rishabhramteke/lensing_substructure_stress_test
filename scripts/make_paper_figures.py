@@ -193,7 +193,7 @@ def fig3_confounders():
     fb = ROOT / "results/noise_decoy_control_familyB/results.json"
     if fb.exists():   # Family B on the identical decoys (round-5 addition)
         d = json.loads(fb.read_text())
-        for shape, mk, ls, lab in (("gaussian", "o", "-", "Gaussian, seed 42"), ("dipole", "^", "--", "dipole (asymmetric), seed 42")):
+        for shape, mk, ls, lab in (("gaussian", "o", "-", "Gaussian, seed 42"), ("gaussian_seed43", "o", ":", "Gaussian, seed 43"), ("dipole", "^", "--", "dipole (asymmetric), seed 42")):
             if shape in d:
                 amps = sorted(float(k) for k in d[shape])
                 ax.plot(amps, [100 * d[shape][str(a_)]["b_fpr"] for a_ in amps], marker=mk, ls=ls, color=C_B, ms=3.5, label=f"Family B — {lab}")
@@ -390,7 +390,7 @@ def fig12_summary():
         ("lens-shape multipole, $a_4=3\\%\\,\\theta_E$\n(false positives, subhalo-free)",
          [("77%\n(100% joint re-fit)", RED), ("86%", RED), ("11%\nunmoved", GREEN)]),
         ("non-physical decoy, 10$\\sigma$ bump\n(false positives)",
-         [("2--4%\nignores it", GREEN), ("67--76%\nfooled most", RED), ("19--21%\nfires", AMBER)]),
+         [("2--4%\nignores it", GREEN), ("63--76%\nresponds most", RED), ("19--21%\nfires", AMBER)]),
         ("real COSMOS source (Tier 1)",
          [("fits misspecified\n($\\chi^2$/dof 58--79)", AMBER), ("not run", GREY), ("AUC 0.62 $\\to$ 0.48\nchance", RED)]),
         ("lens light, single-S\u00e9rsic subtraction\n(clean FPR at $\\Delta\\chi^2>20$ / completeness)",
