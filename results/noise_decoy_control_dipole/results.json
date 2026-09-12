@@ -1,0 +1,27 @@
+{
+  "3.0": {
+    "unet_fpr": 0.11,
+    "a_fpr": 0.031578947368421054,
+    "n_a_reliable": 95
+  },
+  "6.0": {
+    "unet_fpr": 0.16,
+    "a_fpr": 0.021505376344086023,
+    "n_a_reliable": 93
+  },
+  "10.0": {
+    "unet_fpr": 0.21,
+    "a_fpr": 0.03125,
+    "n_a_reliable": 96
+  },
+  "config": {
+    "shape": "dipole",
+    "seed": 42,
+    "n": 100,
+    "unet_ckpt": "/Users/rishabh.ramteke/Documents/space_research/projects/05_dark_matter_strong_lensing/checkpoints/unet_v0/model_best.pt"
+  },
+  "baseline_fpr_clean_no_subhalo": {
+    "unet": 0.1,
+    "family_a": 0.1
+  }
+}

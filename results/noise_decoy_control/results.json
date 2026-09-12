@@ -1,0 +1,21 @@
+{
+  "3.0": {
+    "unet_fpr": 0.1,
+    "a_fpr": 0.031578947368421054,
+    "n_a_reliable": 95
+  },
+  "6.0": {
+    "unet_fpr": 0.13,
+    "a_fpr": 0.03225806451612903,
+    "n_a_reliable": 93
+  },
+  "10.0": {
+    "unet_fpr": 0.19,
+    "a_fpr": 0.020833333333333332,
+    "n_a_reliable": 96
+  },
+  "baseline_fpr_clean_no_subhalo": {
+    "unet": 0.1,
+    "family_a": 0.1
+  }
+}

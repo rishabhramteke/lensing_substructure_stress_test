@@ -1,0 +1,60 @@
+{
+  "population": "test_fixed60",
+  "n_subhalo_lenses": 275,
+  "n_reliable": 226,
+  "concentration": 60.0,
+  "n_with_joint_dchi2_gt_20": 178,
+  "fixed_macro_mass_free": {
+    "signal": {
+      "n": 178,
+      "median_error_dex": -1.0819962093243571,
+      "mean_abs_error_dex": 1.12836438015971,
+      "n_underestimated": 178,
+      "n_within_0p5dex": 13,
+      "n_within_0p25dex": 2
+    },
+    "all_reliable": {
+      "n": 226,
+      "median_error_dex": -0.9568986787082387,
+      "mean_abs_error_dex": 1.056591304312891,
+      "n_underestimated": 224,
+      "n_within_0p5dex": 19,
+      "n_within_0p25dex": 6
+    }
+  },
+  "joint_refit": {
+    "signal": {
+      "n": 178,
+      "median_error_dex": 0.003863932956973848,
+      "mean_abs_error_dex": 0.046754246214616546,
+      "n_underestimated": 74,
+      "n_within_0p5dex": 175,
+      "n_within_0p25dex": 174
+    },
+    "all_reliable": {
+      "n": 226,
+      "median_error_dex": 0.003706543224462955,
+      "mean_abs_error_dex": 0.09228275997790807,
+      "n_underestimated": 100,
+      "n_within_0p5dex": 216,
+      "n_within_0p25dex": 208
+    }
+  },
+  "median_joint_dchi2_minus_fixed_dchi2": 321.27045822442096,
+  "median_abs_macro_shift_signal": {
+    "theta_E": 0.0036725831118674668,
+    "gamma": 0.010823370938456534,
+    "e1": 0.005241413152506182,
+    "e2": 0.0051549266142544535,
+    "g1": 0.002521306087724921,
+    "g2": 0.002327628037328248,
+    "src_x": 0.002210201288595535,
+    "src_y": 0.0022565945289659307,
+    "R": 0.0017836948470569824,
+    "n": 0.015888746610206894,
+    "e1s": 0.0037378466814066147,
+    "e2s": 0.0031937511514852114,
+    "amp": 1.6915689286102022
+  },
+  "note": "Subhalo at TRUE position and TRUE c for every lens. (i) reproduces the fit-then-scan shortcut with a continuous mass; (ii) is what published pipelines do at each grid cell."
+}

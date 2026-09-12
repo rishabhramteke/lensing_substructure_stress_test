@@ -1,0 +1,33 @@
+{
+  "alpha": 1.9,
+  "bin_weights": {
+    "8.0-8.5": 0.6464765009663156,
+    "8.5-9.0": 0.22937851836772125,
+    "9.0-9.5": 0.08138656951942713,
+    "9.5-10.0": 0.028877044569281946,
+    "10.0-10.5": 0.010245962054675947,
+    "10.5-11.0": 0.003635404522578181
+  },
+  "results": [
+    {
+      "label": "U-Net (Family C), c=60",
+      "naive_unweighted": 0.2956094887646441,
+      "cdm_mass_function_weighted": 0.1215574705443349
+    },
+    {
+      "label": "U-Net (Family C), c=15",
+      "naive_unweighted": 0.11723430636888998,
+      "cdm_mass_function_weighted": 0.09574699935048674
+    },
+    {
+      "label": "Family A, c=60",
+      "naive_unweighted": 0.5309296662895225,
+      "cdm_mass_function_weighted": 0.21361875870570732
+    },
+    {
+      "label": "Family A, c=15",
+      "naive_unweighted": 0.4823195476869743,
+      "cdm_mass_function_weighted": 0.19687775503527333
+    }
+  ]
+}

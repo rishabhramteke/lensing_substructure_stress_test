@@ -1,0 +1,37 @@
+{
+  "population": "test_fixed60",
+  "n_subhalo_lenses": 275,
+  "n_reliable": 226,
+  "concentration": 60.0,
+  "n_with_signal_dchi2_gt_20_at_true_position": 121,
+  "median_nearest_grid_offset_arcsec": 0.24083274560104534,
+  "true_position_three_masses": {
+    "n": 121,
+    "median_error_dex": -1.0620571996796428,
+    "n_underestimated": 116,
+    "n_within_0p5dex": 22,
+    "frac_on_smallest_hypothesis": 0.8016528925619835
+  },
+  "true_position_fine_masses": {
+    "n": 121,
+    "median_error_dex": -1.0184189419911807,
+    "n_underestimated": 121,
+    "n_within_0p5dex": 11,
+    "frac_on_smallest_hypothesis": 0.4132231404958678
+  },
+  "nearest_grid_point_three_masses": {
+    "n": 121,
+    "median_error_dex": -1.254951850569805,
+    "n_underestimated": 116,
+    "n_within_0p5dex": 16,
+    "frac_on_smallest_hypothesis": 0.9256198347107438
+  },
+  "all_reliable_true_position_fine": {
+    "n": 226,
+    "median_error_dex": -0.8122618113767599,
+    "n_underestimated": 226,
+    "n_within_0p5dex": 58,
+    "frac_on_smallest_hypothesis": 0.6858407079646017
+  },
+  "note": "Same Delta-chi2 statistic, same c, same smooth fit as the scan; only the subhalo position is oracle. If mass is recovered here but not at the nearest grid point, the scan's mass bias is caused by its position grid, not by its concentration assumption."
+}

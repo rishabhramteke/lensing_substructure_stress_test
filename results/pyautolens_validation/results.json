@@ -1,0 +1,44 @@
+{
+  "population": "test_fixed60",
+  "n": 5,
+  "mean_pearson_corr": 0.9785526911100939,
+  "min_pearson_corr": 0.9389308222941258,
+  "per_lens": [
+    {
+      "index": 0,
+      "has_subhalo": true,
+      "pearson_corr": 0.9983635007086673,
+      "max_abs_diff_normalized": 0.19882130103380435,
+      "mean_abs_diff_normalized": 0.006000520978817032
+    },
+    {
+      "index": 1,
+      "has_subhalo": true,
+      "pearson_corr": 0.9891692274639741,
+      "max_abs_diff_normalized": 0.2114363398487915,
+      "mean_abs_diff_normalized": 0.001981069617186977
+    },
+    {
+      "index": 2,
+      "has_subhalo": true,
+      "pearson_corr": 0.9958652242456695,
+      "max_abs_diff_normalized": 0.19460296578824232,
+      "mean_abs_diff_normalized": 0.005468666639187889
+    },
+    {
+      "index": 7,
+      "has_subhalo": false,
+      "pearson_corr": 0.9389308222941258,
+      "max_abs_diff_normalized": 0.46999878192679867,
+      "mean_abs_diff_normalized": 0.004626777968029502
+    },
+    {
+      "index": 8,
+      "has_subhalo": true,
+      "pearson_corr": 0.9704346808380334,
+      "max_abs_diff_normalized": 0.31818557667816516,
+      "mean_abs_diff_normalized": 0.0033249267146424934
+    }
+  ],
+  "scope_note": "pre-PSF macro-model (EPL+shear+Sersic) forward-model comparison only; subhalo/TNFW forward model not cross-checked (kappa_s vs alpha_Rs parameterization conversion not attempted); not a comparison of PyAutoLens's own published nested-sampling fit."
+}

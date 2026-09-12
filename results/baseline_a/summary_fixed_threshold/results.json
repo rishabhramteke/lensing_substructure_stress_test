@@ -1,0 +1,241 @@
+{
+  "root": "results/baseline_a",
+  "reference_10pct_fpr_threshold": -10.628952986416875,
+  "note": "Delta chi^2 > 20 / > 100 approximate Delta ln Z > 10 (Nightingale+2024) / Delta log E >= 50 (Despali+2022) via Delta ln L ~ Delta chi^2/2, with no Occam penalty (which would only tighten them).",
+  "at_threshold": [
+    {
+      "threshold_delta_chi2": -10.628952986416875,
+      "fpr_no_subhalo": 0.1016949152542373,
+      "n_reliable_no_subhalo": 295,
+      "fpr_multipole_m4_a1": 0.30742049469964666,
+      "n_reliable_multipole_m4_a1": 283,
+      "fpr_multipole_m4_a3": 0.75,
+      "n_reliable_multipole_m4_a3": 264,
+      "completeness_c60_by_mass_bin": {
+        "8.0-8.5": {
+          "n": 51,
+          "completeness": 0.11764705882352941
+        },
+        "8.5-9.0": {
+          "n": 46,
+          "completeness": 0.17391304347826086
+        },
+        "9.0-9.5": {
+          "n": 32,
+          "completeness": 0.375
+        },
+        "9.5-10.0": {
+          "n": 42,
+          "completeness": 0.7142857142857143
+        },
+        "10.0-10.5": {
+          "n": 48,
+          "completeness": 0.8541666666666666
+        },
+        "10.5-11.0": {
+          "n": 13,
+          "completeness": 0.8461538461538461
+        }
+      },
+      "completeness_c15_by_mass_bin": {
+        "8.0-8.5": {
+          "n": 51,
+          "completeness": 0.09803921568627451
+        },
+        "8.5-9.0": {
+          "n": 44,
+          "completeness": 0.1590909090909091
+        },
+        "9.0-9.5": {
+          "n": 32,
+          "completeness": 0.25
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.5581395348837209
+        },
+        "10.0-10.5": {
+          "n": 56,
+          "completeness": 0.75
+        },
+        "10.5-11.0": {
+          "n": 33,
+          "completeness": 0.9090909090909091
+        }
+      },
+      "c60_detections": {
+        "n_detected": 108,
+        "n_positive_reliable": 232,
+        "frac_localized_2px": 0.1388888888888889,
+        "n_localized": 15,
+        "median_offset_arcsec": 0.2967313587646371,
+        "mass_error_dex_localized": {
+          "n": 15,
+          "median": -0.9972281911909491,
+          "n_underestimated": 15,
+          "n_within_0p5dex": 1
+        },
+        "mass_error_dex_all_detected": {
+          "median": -1.3662387016437476,
+          "n_underestimated": 102
+        }
+      }
+    },
+    {
+      "threshold_delta_chi2": 20.0,
+      "fpr_no_subhalo": 0.006779661016949152,
+      "n_reliable_no_subhalo": 295,
+      "fpr_multipole_m4_a1": 0.1166077738515901,
+      "n_reliable_multipole_m4_a1": 283,
+      "fpr_multipole_m4_a3": 0.5757575757575758,
+      "n_reliable_multipole_m4_a3": 264,
+      "completeness_c60_by_mass_bin": {
+        "8.0-8.5": {
+          "n": 51,
+          "completeness": 0.0196078431372549
+        },
+        "8.5-9.0": {
+          "n": 46,
+          "completeness": 0.0
+        },
+        "9.0-9.5": {
+          "n": 32,
+          "completeness": 0.1875
+        },
+        "9.5-10.0": {
+          "n": 42,
+          "completeness": 0.6666666666666666
+        },
+        "10.0-10.5": {
+          "n": 48,
+          "completeness": 0.7291666666666666
+        },
+        "10.5-11.0": {
+          "n": 13,
+          "completeness": 0.8461538461538461
+        }
+      },
+      "completeness_c15_by_mass_bin": {
+        "8.0-8.5": {
+          "n": 51,
+          "completeness": 0.0
+        },
+        "8.5-9.0": {
+          "n": 44,
+          "completeness": 0.0
+        },
+        "9.0-9.5": {
+          "n": 32,
+          "completeness": 0.0625
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.3488372093023256
+        },
+        "10.0-10.5": {
+          "n": 56,
+          "completeness": 0.6071428571428571
+        },
+        "10.5-11.0": {
+          "n": 33,
+          "completeness": 0.8484848484848485
+        }
+      },
+      "c60_detections": {
+        "n_detected": 81,
+        "n_positive_reliable": 232,
+        "frac_localized_2px": 0.16049382716049382,
+        "n_localized": 13,
+        "median_offset_arcsec": 0.26696219364290336,
+        "mass_error_dex_localized": {
+          "n": 13,
+          "median": -1.235049184612663,
+          "n_underestimated": 13,
+          "n_within_0p5dex": 0
+        },
+        "mass_error_dex_all_detected": {
+          "median": -1.4483705262591648,
+          "n_underestimated": 80
+        }
+      }
+    },
+    {
+      "threshold_delta_chi2": 100.0,
+      "fpr_no_subhalo": 0.0,
+      "n_reliable_no_subhalo": 295,
+      "fpr_multipole_m4_a1": 0.028268551236749116,
+      "n_reliable_multipole_m4_a1": 283,
+      "fpr_multipole_m4_a3": 0.32954545454545453,
+      "n_reliable_multipole_m4_a3": 264,
+      "completeness_c60_by_mass_bin": {
+        "8.0-8.5": {
+          "n": 51,
+          "completeness": 0.0196078431372549
+        },
+        "8.5-9.0": {
+          "n": 46,
+          "completeness": 0.0
+        },
+        "9.0-9.5": {
+          "n": 32,
+          "completeness": 0.0625
+        },
+        "9.5-10.0": {
+          "n": 42,
+          "completeness": 0.40476190476190477
+        },
+        "10.0-10.5": {
+          "n": 48,
+          "completeness": 0.5833333333333334
+        },
+        "10.5-11.0": {
+          "n": 13,
+          "completeness": 0.7692307692307693
+        }
+      },
+      "completeness_c15_by_mass_bin": {
+        "8.0-8.5": {
+          "n": 51,
+          "completeness": 0.0
+        },
+        "8.5-9.0": {
+          "n": 44,
+          "completeness": 0.0
+        },
+        "9.0-9.5": {
+          "n": 32,
+          "completeness": 0.03125
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.20930232558139536
+        },
+        "10.0-10.5": {
+          "n": 56,
+          "completeness": 0.4642857142857143
+        },
+        "10.5-11.0": {
+          "n": 33,
+          "completeness": 0.696969696969697
+        }
+      },
+      "c60_detections": {
+        "n_detected": 58,
+        "n_positive_reliable": 232,
+        "frac_localized_2px": 0.15517241379310345,
+        "n_localized": 9,
+        "median_offset_arcsec": 0.261821524836922,
+        "mass_error_dex_localized": {
+          "n": 9,
+          "median": -1.235049184612663,
+          "n_underestimated": 9,
+          "n_within_0p5dex": 0
+        },
+        "mass_error_dex_all_detected": {
+          "median": -1.468354850051342,
+          "n_underestimated": 57
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# large or regenerable artefacts
+*.npy
+*.log
+__pycache__/
+*.pyc
+.DS_Store
+# manuscript and personal notes stay out until acceptance
+paper/
+papers/
+sbi-logs/
+notebooks/
+web/
+fulltext_findings.md
+learning_guide.md
+# per-lens diagnostic images and rasters (all regenerable from the JSON summaries)
+results/**/*.png
+results/**/*.pdf
+results/**/*.jpg
+# the two large training-set truth files are regenerable from their manifests
+data/train_fixed60_big/truth.jsonl
+data/train_fixed60_30k/truth.jsonl
+# NPE stand-in checkpoints (negative result; the U-Net checkpoints are kept)
+checkpoints/npe_*/
+data/real_lens_b1938/*.fits

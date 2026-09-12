@@ -1,0 +1,1086 @@
+{
+  "root": "results/baseline_b",
+  "fitted": {
+    "n_unreliable": {
+      "test_fixed60": 44,
+      "test_fixed15": 16,
+      "no_subhalo": 5,
+      "multipole_m4_a1": 17,
+      "multipole_m4_a3": 36
+    },
+    "n_records": {
+      "test_fixed60": 300,
+      "test_fixed15": 300,
+      "no_subhalo": 300,
+      "multipole_m4_a1": 300,
+      "multipole_m4_a3": 300
+    },
+    "timing_test_fixed60": {
+      "mean_t_fit_s": 1.3914033524195353,
+      "mean_t_inv_s_3lams": 0.39533076524734495,
+      "mean_total_s": 1.7867341176668803,
+      "n_errors": 0
+    },
+    "by_lambda": {
+      "1e4": {
+        "threshold": 0.31910753426047656,
+        "n_null": 295,
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.11764705882352941
+          },
+          "8.5-9.0": {
+            "n": 45,
+            "completeness": 0.022222222222222223
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.375
+          },
+          "9.5-10.0": {
+            "n": 42,
+            "completeness": 0.6428571428571429
+          },
+          "10.0-10.5": {
+            "n": 48,
+            "completeness": 0.8541666666666666
+          },
+          "10.5-11.0": {
+            "n": 13,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.0392156862745098
+          },
+          "8.5-9.0": {
+            "n": 44,
+            "completeness": 0.09090909090909091
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.03125
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.3953488372093023
+          },
+          "10.0-10.5": {
+            "n": 56,
+            "completeness": 0.4642857142857143
+          },
+          "10.5-11.0": {
+            "n": 33,
+            "completeness": 0.7575757575757576
+          }
+        },
+        "paired_flip": {
+          "n_pairs": 230,
+          "detected_at_c60": 100,
+          "detected_at_c15": 53,
+          "detected_at_c60_not_c15": 57,
+          "detected_at_c15_not_c60": 10
+        },
+        "confounder_fpr": {
+          "no_subhalo": {
+            "n_reliable": 295,
+            "fpr": 0.1016949152542373
+          },
+          "multipole_m4_a1": {
+            "n_reliable": 283,
+            "fpr": 0.21554770318021202
+          },
+          "multipole_m4_a3": {
+            "n_reliable": 264,
+            "fpr": 0.5037878787878788
+          }
+        },
+        "null_percentiles": {
+          "p50": 0.2569555056731046,
+          "p90": 0.31910753426047656,
+          "p99": 0.3935746049364119,
+          "max": 1.8026796890532768
+        }
+      },
+      "1e5": {
+        "threshold": 0.09186965656016045,
+        "n_null": 295,
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.13725490196078433
+          },
+          "8.5-9.0": {
+            "n": 45,
+            "completeness": 0.17777777777777778
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.75
+          },
+          "9.5-10.0": {
+            "n": 42,
+            "completeness": 0.8809523809523809
+          },
+          "10.0-10.5": {
+            "n": 48,
+            "completeness": 0.9375
+          },
+          "10.5-11.0": {
+            "n": 13,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.11764705882352941
+          },
+          "8.5-9.0": {
+            "n": 44,
+            "completeness": 0.09090909090909091
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.125
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.6511627906976745
+          },
+          "10.0-10.5": {
+            "n": 56,
+            "completeness": 0.7142857142857143
+          },
+          "10.5-11.0": {
+            "n": 33,
+            "completeness": 0.9696969696969697
+          }
+        },
+        "paired_flip": {
+          "n_pairs": 230,
+          "detected_at_c60": 134,
+          "detected_at_c15": 86,
+          "detected_at_c60_not_c15": 58,
+          "detected_at_c15_not_c60": 10
+        },
+        "confounder_fpr": {
+          "no_subhalo": {
+            "n_reliable": 295,
+            "fpr": 0.1016949152542373
+          },
+          "multipole_m4_a1": {
+            "n_reliable": 283,
+            "fpr": 0.392226148409894
+          },
+          "multipole_m4_a3": {
+            "n_reliable": 264,
+            "fpr": 0.8636363636363636
+          }
+        },
+        "null_percentiles": {
+          "p50": 0.07456179125781351,
+          "p90": 0.09186965656016045,
+          "p99": 0.12330727864681147,
+          "max": 0.6856387763498739
+        }
+      },
+      "1e6": {
+        "threshold": 0.02737376968035653,
+        "n_null": 295,
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.11764705882352941
+          },
+          "8.5-9.0": {
+            "n": 45,
+            "completeness": 0.3333333333333333
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.75
+          },
+          "9.5-10.0": {
+            "n": 42,
+            "completeness": 0.9523809523809523
+          },
+          "10.0-10.5": {
+            "n": 48,
+            "completeness": 0.9166666666666666
+          },
+          "10.5-11.0": {
+            "n": 13,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.11764705882352941
+          },
+          "8.5-9.0": {
+            "n": 44,
+            "completeness": 0.13636363636363635
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.4375
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.813953488372093
+          },
+          "10.0-10.5": {
+            "n": 56,
+            "completeness": 0.8571428571428571
+          },
+          "10.5-11.0": {
+            "n": 33,
+            "completeness": 0.9696969696969697
+          }
+        },
+        "paired_flip": {
+          "n_pairs": 230,
+          "detected_at_c60": 142,
+          "detected_at_c15": 113,
+          "detected_at_c60_not_c15": 40,
+          "detected_at_c15_not_c60": 11
+        },
+        "confounder_fpr": {
+          "no_subhalo": {
+            "n_reliable": 295,
+            "fpr": 0.1016949152542373
+          },
+          "multipole_m4_a1": {
+            "n_reliable": 283,
+            "fpr": 0.6360424028268551
+          },
+          "multipole_m4_a3": {
+            "n_reliable": 264,
+            "fpr": 0.9696969696969697
+          }
+        },
+        "null_percentiles": {
+          "p50": 0.021306031362395055,
+          "p90": 0.02737376968035653,
+          "p99": 0.038606450788789444,
+          "max": 0.18163713130828926
+        }
+      }
+    },
+    "localization_lam1e5_10pct_fpr": {
+      "n_detected": 134,
+      "median_offset_arcsec": 0.14152594639201052,
+      "frac_within_2px_0p16": 0.5149253731343284,
+      "n_within_2px_0p16": 69,
+      "frac_within_2meshpx_0p32": 0.6119402985074627,
+      "n_within_2meshpx_0p32": 82,
+      "frac_aperture_mass_negative_among_detected": 0.208955223880597,
+      "mass_error_dex_localized_0p16": {
+        "n": 67,
+        "n_negative_proxy_excluded": 2,
+        "median": -0.6392492796813958,
+        "mad": 0.22758967514167822,
+        "min": -1.8066596090091718,
+        "max": 0.17396032275715534,
+        "n_within_0p5dex": 15,
+        "n_underestimated": 65
+      },
+      "mass_error_dex_localized_0p32": {
+        "n": 78,
+        "n_negative_proxy_excluded": 4,
+        "median": -0.6412890631909578,
+        "mad": 0.22812468700624583,
+        "min": -1.8066596090091718,
+        "max": 0.17396032275715534,
+        "n_within_0p5dex": 17,
+        "n_underestimated": 76
+      }
+    },
+    "absolute_operating_points": {
+      "p99_null (~1% FPR)": {
+        "threshold": 0.12330727864681147,
+        "fpr": {
+          "no_subhalo": 0.010169491525423728,
+          "multipole_m4_a1": 0.1625441696113074,
+          "multipole_m4_a3": 0.5681818181818182
+        },
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.0392156862745098
+          },
+          "8.5-9.0": {
+            "n": 45,
+            "completeness": 0.0
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.28125
+          },
+          "9.5-10.0": {
+            "n": 42,
+            "completeness": 0.7380952380952381
+          },
+          "10.0-10.5": {
+            "n": 48,
+            "completeness": 0.8333333333333334
+          },
+          "10.5-11.0": {
+            "n": 13,
+            "completeness": 0.9230769230769231
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.0196078431372549
+          },
+          "8.5-9.0": {
+            "n": 44,
+            "completeness": 0.022727272727272728
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.0
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.3023255813953488
+          },
+          "10.0-10.5": {
+            "n": 56,
+            "completeness": 0.5357142857142857
+          },
+          "10.5-11.0": {
+            "n": 33,
+            "completeness": 0.9393939393939394
+          }
+        },
+        "localization": {
+          "n_detected": 94,
+          "median_offset_arcsec": 0.11488962416097385,
+          "frac_within_2px_0p16": 0.6276595744680851,
+          "n_within_2px_0p16": 59,
+          "frac_within_2meshpx_0p32": 0.723404255319149,
+          "n_within_2meshpx_0p32": 68,
+          "frac_aperture_mass_negative_among_detected": 0.1702127659574468,
+          "mass_error_dex_localized_0p16": {
+            "n": 57,
+            "n_negative_proxy_excluded": 2,
+            "median": -0.6498300345743129,
+            "mad": 0.21073456512813582,
+            "min": -1.8066596090091718,
+            "max": 0.17396032275715534,
+            "n_within_0p5dex": 10,
+            "n_underestimated": 56
+          },
+          "mass_error_dex_localized_0p32": {
+            "n": 65,
+            "n_negative_proxy_excluded": 3,
+            "median": -0.6588506860448966,
+            "mad": 0.22410858299842326,
+            "min": -1.8066596090091718,
+            "max": 0.17396032275715534,
+            "n_within_0p5dex": 12,
+            "n_underestimated": 64
+          }
+        }
+      },
+      "max_null (0/n FPR)": {
+        "threshold": 0.6856387773498739,
+        "fpr": {
+          "no_subhalo": 0.0,
+          "multipole_m4_a1": 0.0035335689045936395,
+          "multipole_m4_a3": 0.022727272727272728
+        },
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.0
+          },
+          "8.5-9.0": {
+            "n": 45,
+            "completeness": 0.0
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.0
+          },
+          "9.5-10.0": {
+            "n": 42,
+            "completeness": 0.07142857142857142
+          },
+          "10.0-10.5": {
+            "n": 48,
+            "completeness": 0.041666666666666664
+          },
+          "10.5-11.0": {
+            "n": 13,
+            "completeness": 0.23076923076923078
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 51,
+            "completeness": 0.0196078431372549
+          },
+          "8.5-9.0": {
+            "n": 44,
+            "completeness": 0.0
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.0
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.023255813953488372
+          },
+          "10.0-10.5": {
+            "n": 56,
+            "completeness": 0.017857142857142856
+          },
+          "10.5-11.0": {
+            "n": 33,
+            "completeness": 0.09090909090909091
+          }
+        },
+        "localization": {
+          "n_detected": 8,
+          "median_offset_arcsec": 0.3176501598842441,
+          "frac_within_2px_0p16": 0.125,
+          "n_within_2px_0p16": 1,
+          "frac_within_2meshpx_0p32": 0.5,
+          "n_within_2meshpx_0p32": 4,
+          "frac_aperture_mass_negative_among_detected": 0.375,
+          "mass_error_dex_localized_0p16": {
+            "n": 1,
+            "n_negative_proxy_excluded": 0,
+            "median": -1.0894052616985839,
+            "mad": 0.0,
+            "min": -1.0894052616985839,
+            "max": -1.0894052616985839,
+            "n_within_0p5dex": 0,
+            "n_underestimated": 1
+          },
+          "mass_error_dex_localized_0p32": {
+            "n": 4,
+            "n_negative_proxy_excluded": 0,
+            "median": -0.7885159509832036,
+            "mad": 0.5774731680239712,
+            "min": -1.3772424485654025,
+            "max": -0.3104046303428962,
+            "n_within_0p5dex": 2,
+            "n_underestimated": 4
+          }
+        }
+      }
+    }
+  },
+  "oracle": {
+    "n_unreliable": {
+      "test_fixed60": 0,
+      "test_fixed15": 0,
+      "no_subhalo": 0,
+      "multipole_m4_a1": 0,
+      "multipole_m4_a3": 0
+    },
+    "n_records": {
+      "test_fixed60": 300,
+      "test_fixed15": 300,
+      "no_subhalo": 300,
+      "multipole_m4_a1": 300,
+      "multipole_m4_a3": 300
+    },
+    "timing_test_fixed60": {
+      "mean_t_fit_s": 0.00018139203389485678,
+      "mean_t_inv_s_3lams": 0.4003365198771159,
+      "mean_total_s": 0.4005179119110107,
+      "n_errors": 0
+    },
+    "by_lambda": {
+      "1e4": {
+        "threshold": 0.31928757735467217,
+        "n_null": 300,
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.21153846153846154
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.1956521739130435
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.75
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.8837209302325582
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 0.9838709677419355
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.1346153846153846
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.2608695652173913
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.5625
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.6976744186046512
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 0.967741935483871
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "paired_flip": {
+          "n_pairs": 275,
+          "detected_at_c60": 183,
+          "detected_at_c15": 167,
+          "detected_at_c60_not_c15": 26,
+          "detected_at_c15_not_c60": 10
+        },
+        "confounder_fpr": {
+          "no_subhalo": {
+            "n_reliable": 300,
+            "fpr": 0.1
+          },
+          "multipole_m4_a1": {
+            "n_reliable": 300,
+            "fpr": 0.42
+          },
+          "multipole_m4_a3": {
+            "n_reliable": 300,
+            "fpr": 0.6866666666666666
+          }
+        },
+        "null_percentiles": {
+          "p50": 0.25706342417662986,
+          "p90": 0.31928757735467217,
+          "p99": 0.3919539146398805,
+          "max": 0.46577484903635047
+        }
+      },
+      "1e5": {
+        "threshold": 0.09210760897048585,
+        "n_null": 300,
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.2692307692307692
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.3695652173913043
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.90625
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.9767441860465116
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 1.0
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.2692307692307692
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.4782608695652174
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.6875
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.8604651162790697
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 1.0
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "paired_flip": {
+          "n_pairs": 275,
+          "detected_at_c60": 204,
+          "detected_at_c15": 197,
+          "detected_at_c60_not_c15": 23,
+          "detected_at_c15_not_c60": 16
+        },
+        "confounder_fpr": {
+          "no_subhalo": {
+            "n_reliable": 300,
+            "fpr": 0.1
+          },
+          "multipole_m4_a1": {
+            "n_reliable": 300,
+            "fpr": 0.62
+          },
+          "multipole_m4_a3": {
+            "n_reliable": 300,
+            "fpr": 0.92
+          }
+        },
+        "null_percentiles": {
+          "p50": 0.07471135125237799,
+          "p90": 0.09210760897048585,
+          "p99": 0.1187126991196727,
+          "max": 0.13094871579350004
+        }
+      },
+      "1e6": {
+        "threshold": 0.02726238255813954,
+        "n_null": 300,
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.36538461538461536
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.5652173913043478
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 1.0
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 1.0
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 1.0
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.34615384615384615
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.5869565217391305
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.9375
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 1.0
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 1.0
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "paired_flip": {
+          "n_pairs": 275,
+          "detected_at_c60": 222,
+          "detected_at_c15": 220,
+          "detected_at_c60_not_c15": 18,
+          "detected_at_c15_not_c60": 16
+        },
+        "confounder_fpr": {
+          "no_subhalo": {
+            "n_reliable": 300,
+            "fpr": 0.1
+          },
+          "multipole_m4_a1": {
+            "n_reliable": 300,
+            "fpr": 0.8066666666666666
+          },
+          "multipole_m4_a3": {
+            "n_reliable": 300,
+            "fpr": 1.0
+          }
+        },
+        "null_percentiles": {
+          "p50": 0.0214817870221856,
+          "p90": 0.02726238255813954,
+          "p99": 0.03279966587661751,
+          "max": 0.040032821654541924
+        }
+      }
+    },
+    "localization_lam1e5_10pct_fpr": {
+      "n_detected": 204,
+      "median_offset_arcsec": 0.8016815460393705,
+      "frac_within_2px_0p16": 0.13725490196078433,
+      "n_within_2px_0p16": 28,
+      "frac_within_2meshpx_0p32": 0.2107843137254902,
+      "n_within_2meshpx_0p32": 43,
+      "frac_aperture_mass_negative_among_detected": 0.36764705882352944,
+      "mass_error_dex_localized_0p16": {
+        "n": 27,
+        "n_negative_proxy_excluded": 1,
+        "median": -0.4742912263292798,
+        "mad": 0.1405870936926067,
+        "min": -0.8046817187009623,
+        "max": 0.27739487016912534,
+        "n_within_0p5dex": 14,
+        "n_underestimated": 25
+      },
+      "mass_error_dex_localized_0p32": {
+        "n": 39,
+        "n_negative_proxy_excluded": 4,
+        "median": -0.4742912263292798,
+        "mad": 0.21365579728591055,
+        "min": -1.4667717743992377,
+        "max": 0.27739487016912534,
+        "n_within_0p5dex": 20,
+        "n_underestimated": 36
+      }
+    },
+    "absolute_operating_points": {
+      "p99_null (~1% FPR)": {
+        "threshold": 0.1187126991196727,
+        "fpr": {
+          "no_subhalo": 0.01,
+          "multipole_m4_a1": 0.44,
+          "multipole_m4_a3": 0.77
+        },
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.21153846153846154
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.17391304347826086
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.71875
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.9534883720930233
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 1.0
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.1346153846153846
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.1956521739130435
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.5625
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.7906976744186046
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 0.9516129032258065
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "localization": {
+          "n_detected": 185,
+          "median_offset_arcsec": 0.7633251156157845,
+          "frac_within_2px_0p16": 0.14054054054054055,
+          "n_within_2px_0p16": 26,
+          "frac_within_2meshpx_0p32": 0.21621621621621623,
+          "n_within_2meshpx_0p32": 40,
+          "frac_aperture_mass_negative_among_detected": 0.3837837837837838,
+          "mass_error_dex_localized_0p16": {
+            "n": 25,
+            "n_negative_proxy_excluded": 1,
+            "median": -0.5066600034867133,
+            "mad": 0.13415875753301562,
+            "min": -0.8046817187009623,
+            "max": 0.27739487016912534,
+            "n_within_0p5dex": 12,
+            "n_underestimated": 23
+          },
+          "mass_error_dex_localized_0p32": {
+            "n": 36,
+            "n_negative_proxy_excluded": 4,
+            "median": -0.5115788999696296,
+            "mad": 0.2567866668797744,
+            "min": -1.4667717743992377,
+            "max": 0.27739487016912534,
+            "n_within_0p5dex": 17,
+            "n_underestimated": 33
+          }
+        }
+      },
+      "max_null (0/n FPR)": {
+        "threshold": 0.13094871679350004,
+        "fpr": {
+          "no_subhalo": 0.0,
+          "multipole_m4_a1": 0.4166666666666667,
+          "multipole_m4_a3": 0.7366666666666667
+        },
+        "completeness_c60": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.17307692307692307
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.15217391304347827
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.71875
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.9069767441860465
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 1.0
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "completeness_c15": {
+          "8.0-8.5": {
+            "n": 52,
+            "completeness": 0.09615384615384616
+          },
+          "8.5-9.0": {
+            "n": 46,
+            "completeness": 0.17391304347826086
+          },
+          "9.0-9.5": {
+            "n": 32,
+            "completeness": 0.5625
+          },
+          "9.5-10.0": {
+            "n": 43,
+            "completeness": 0.7209302325581395
+          },
+          "10.0-10.5": {
+            "n": 62,
+            "completeness": 0.9516129032258065
+          },
+          "10.5-11.0": {
+            "n": 40,
+            "completeness": 1.0
+          }
+        },
+        "localization": {
+          "n_detected": 180,
+          "median_offset_arcsec": 0.7710624395433407,
+          "frac_within_2px_0p16": 0.14444444444444443,
+          "n_within_2px_0p16": 26,
+          "frac_within_2meshpx_0p32": 0.21666666666666667,
+          "n_within_2meshpx_0p32": 39,
+          "frac_aperture_mass_negative_among_detected": 0.37222222222222223,
+          "mass_error_dex_localized_0p16": {
+            "n": 25,
+            "n_negative_proxy_excluded": 1,
+            "median": -0.5066600034867133,
+            "mad": 0.13415875753301562,
+            "min": -0.8046817187009623,
+            "max": 0.27739487016912534,
+            "n_within_0p5dex": 12,
+            "n_underestimated": 23
+          },
+          "mass_error_dex_localized_0p32": {
+            "n": 35,
+            "n_negative_proxy_excluded": 4,
+            "median": -0.5066600034867133,
+            "mad": 0.2616457462995214,
+            "min": -1.4667717743992377,
+            "max": 0.27739487016912534,
+            "n_within_0p5dex": 17,
+            "n_underestimated": 32
+          }
+        }
+      }
+    }
+  },
+  "fit_error_diagnostic_fitted": {
+    "n": 295,
+    "spearman_rho_score_vs_chi2dof": 0.19530976843325515,
+    "spearman_p": 0.0007439361285291363,
+    "median_chi2_smooth_per_dof": 0.9850757275619537,
+    "median_null_score_fitted": 0.07456179125781351,
+    "median_null_score_oracle": 0.07467670968167751,
+    "median_ratio_fitted_over_oracle_same_image": 0.9986062769496364,
+    "frac_images_where_fitted_null_exceeds_oracle": 0.47796610169491527,
+    "fpr_of_fitted_at_oracle_threshold": 0.09830508474576272
+  },
+  "reference": {
+    "family_a_seed0": {
+      "completeness_c60": {
+        "8.0-8.5": 0.11764705882352941,
+        "8.5-9.0": 0.17391304347826086,
+        "9.0-9.5": 0.375,
+        "9.5-10.0": 0.7142857142857143,
+        "10.0-10.5": 0.8541666666666666,
+        "10.5-11.0": 0.8461538461538461
+      },
+      "completeness_c15": {
+        "8.0-8.5": 0.09803921568627451,
+        "8.5-9.0": 0.1590909090909091,
+        "9.0-9.5": 0.25,
+        "9.5-10.0": 0.5581395348837209,
+        "10.0-10.5": 0.75,
+        "10.5-11.0": 0.9090909090909091
+      },
+      "paired_flip": {
+        "n_pairs": 230,
+        "detected_at_c60": 108,
+        "detected_at_c15": 91,
+        "detected_at_c60_not_c15": 21,
+        "detected_at_c15_not_c60": 4
+      },
+      "confounder_fpr": {
+        "no_subhalo (calibration set)": 0.1016949152542373,
+        "multipole m=4, a=0.01*thetaE": 0.30742049469964666,
+        "multipole m=4, a=0.03*thetaE": 0.75
+      },
+      "mean_time_per_image_s": 3.412001581986745
+    },
+    "family_c_unet_4seeds": {
+      "completeness_c60": {
+        "8.0-8.5": 0.11666666666666667,
+        "8.5-9.0": 0.08012820512820513,
+        "9.0-9.5": 0.14705882352941177,
+        "9.5-10.0": 0.28598484848484845,
+        "10.0-10.5": 0.5098314606741574,
+        "10.5-11.0": 0.6339869281045751
+      },
+      "completeness_c15": {
+        "8.0-8.5": 0.09333333333333335,
+        "8.5-9.0": 0.08653846153846154,
+        "9.0-9.5": 0.12683823529411764,
+        "9.5-10.0": 0.10984848484848486,
+        "10.0-10.5": 0.1544943820224719,
+        "10.5-11.0": 0.1323529411764706
+      },
+      "paired_flip": {
+        "c60_not_c15_mean": 198.75,
+        "c60_not_c15_std": 41.16936563352254,
+        "c15_not_c60_mean": 30.25,
+        "c15_not_c60_std": 16.760568804985905,
+        "ratio_of_means": 6.570247933884297,
+        "per_seed": [
+          [
+            189,
+            25
+          ],
+          [
+            145,
+            18
+          ],
+          [
+            237,
+            55
+          ],
+          [
+            224,
+            23
+          ]
+        ]
+      },
+      "confounder_fpr": {
+        "no_subhalo (calibration set)": 0.1,
+        "multipole m=4, a=0.01*thetaE": 0.11274999999999999,
+        "multipole m=4, a=0.03*thetaE": 0.1055
+      }
+    },
+    "localization_2px": {
+      "family_a": {
+        "a_root": "/Users/rishabh.ramteke/Documents/space_research/projects/05_dark_matter_strong_lensing/results/baseline_a",
+        "threshold_delta_chi2": -10.628952986416875,
+        "n_correct_find": 108,
+        "frac_localized_2px": 0.1388888888888889,
+        "n_localized": 15,
+        "median_offset_arcsec": 0.2967313587646371,
+        "n_negative_delta_chi2_among_correct": 18,
+        "localized_mass_error_dex": {
+          "n": 15,
+          "median": -0.9972281911909491,
+          "min": -1.9369150005979758,
+          "max": -0.47314360713965264,
+          "n_underestimated": 15,
+          "n_within_0p5dex": 1
+        },
+        "n_false_alarms_shown": 198
+      },
+      "family_c_unet": {
+        "unet_ckpt": "/Users/rishabh.ramteke/Documents/space_research/projects/05_dark_matter_strong_lensing/checkpoints/unet_v0/model_best.pt",
+        "n_correct_find": 263,
+        "frac_localized_2px": 0.5665399239543726,
+        "median_offset_arcsec": 0.1349373209852209,
+        "n_false_alarms_shown": 95
+      }
+    }
+  }
+}

@@ -1,0 +1,300 @@
+{
+  "conversion": {
+    "kappa_s": "alpha_Rs / (4 * Rs * (1 + ln(1/2)))  [alpha_Rs, Rs in arcsec]",
+    "scale_radius": "Rs [arcsec]",
+    "truncation_radius": "r_trunc [arcsec]; tau = r_trunc/Rs identical in both codes (Baltz+2009 form)",
+    "note": "lenstronomy's alpha_Rs is the UNtruncated NFW deflection at Rs (TNFW.alpha2rho0 'neglects the truncation'); PyAutoLens's kappa_s = rho_s r_s / Sigma_crit. Row-flip applied to PyAutoLens images as in validate_pyautolens.py. Absolute flux units differ between codes (SimAPI band scaling vs PyAutoLens intensity); residuals compared as fractions of each code's own total flux."
+  },
+  "isolated_profile_check": [
+    {
+      "M200": 10000000000.0,
+      "c": 60.0,
+      "tau": 20.0,
+      "Rs_arcsec": 0.10015013569858383,
+      "alpha_Rs_arcsec": 0.02625019140033621,
+      "kappa_s": 0.213545696117994,
+      "eta_range": [
+        0.001,
+        5.0
+      ],
+      "deflection_ratio_pal_over_lens": {
+        "mean": 0.9999999449444509,
+        "min": 0.9999915831216506,
+        "max": 1.000001708813495
+      },
+      "convergence_ratio_pal_over_lens_excluding_R_eq_Rs": {
+        "mean": 0.9999999999999736,
+        "min": 0.9999999999954272,
+        "max": 1.0000000000026799
+      },
+      "lenstronomy_kappa_at_R_eq_Rs": 0.13892099940515967,
+      "pyautolens_kappa_at_R_eq_Rs": 0.13892099940525085
+    },
+    {
+      "M200": 1000000000.0,
+      "c": 15.0,
+      "tau": 20.0,
+      "Rs_arcsec": 0.18594230061734052,
+      "alpha_Rs_arcsec": 0.0024094269005582643,
+      "kappa_s": 0.01055711969048779,
+      "eta_range": [
+        0.001,
+        5.0
+      ],
+      "deflection_ratio_pal_over_lens": {
+        "mean": 0.9999999449577719,
+        "min": 0.9999915843970266,
+        "max": 1.00000170917365
+      },
+      "convergence_ratio_pal_over_lens_excluding_R_eq_Rs": {
+        "mean": 0.9999999999999735,
+        "min": 0.9999999999954271,
+        "max": 1.0000000000026794
+      },
+      "lenstronomy_kappa_at_R_eq_Rs": 0.006867877203350827,
+      "pyautolens_kappa_at_R_eq_Rs": 0.0068678772033553305
+    },
+    {
+      "M200": 10000000000.0,
+      "c": 60.0,
+      "tau": 5.0,
+      "Rs_arcsec": 0.10015013569858383,
+      "alpha_Rs_arcsec": 0.02625019140033621,
+      "kappa_s": 0.213545696117994,
+      "eta_range": [
+        0.001,
+        5.0
+      ],
+      "deflection_ratio_pal_over_lens": {
+        "mean": 0.9999999505163043,
+        "min": 0.9999924346402275,
+        "max": 1.00000153645834
+      },
+      "convergence_ratio_pal_over_lens_excluding_R_eq_Rs": {
+        "mean": 0.9999999999999728,
+        "min": 0.9999999999952502,
+        "max": 1.000000000002785
+      },
+      "lenstronomy_kappa_at_R_eq_Rs": 0.12323453093659935,
+      "pyautolens_kappa_at_R_eq_Rs": 0.12323453093668713
+    }
+  ],
+  "macro_agreement_filter": {
+    "min_corr": 0.97,
+    "excluded_lenses": [
+      {
+        "index": 3,
+        "macro_corr_no_subhalo": 0.6369642019544011,
+        "gamma": 1.534894320657326,
+        "q": 0.8223033093408405,
+        "phi_deg": 176.4545992706882
+      },
+      {
+        "index": 4,
+        "macro_corr_no_subhalo": 0.29674288261104786,
+        "gamma": 2.4511148453496348,
+        "q": 0.7271020487975159,
+        "phi_deg": 134.44622527113958
+      },
+      {
+        "index": 6,
+        "macro_corr_no_subhalo": 0.9480537336436082,
+        "gamma": 1.9034558557478496,
+        "q": 0.5439154921399965,
+        "phi_deg": 75.76291790095492
+      },
+      {
+        "index": 8,
+        "macro_corr_no_subhalo": 0.961610529816683,
+        "gamma": 1.9794784175407987,
+        "q": 0.7966458436667854,
+        "phi_deg": 52.019496443254546
+      }
+    ],
+    "note": "pure-macro (no subhalo) images disagree between codes for some lenses independent of pixel sampling -- an EPL/PowerLaw macro-model convention question, out of scope for the subhalo check and flagged separately in first_results.md"
+  },
+  "n_lenses_used": 5,
+  "min_residual_pearson": 0.6411617542917584,
+  "residual_rms_ratio_range": [
+    0.9417184211519536,
+    1.2684030148125223
+  ],
+  "max_subhalo_deflection_abs_diff_arcsec": 2.0816681711721685e-17,
+  "per_lens": [
+    {
+      "index": 0,
+      "macro_corr_no_subhalo": 0.9986985033382517,
+      "gamma": 1.8594210333415733,
+      "q": 0.8924027059849886,
+      "phi_deg": 106.43007334129412,
+      "log10_M200": 10.684394609248391,
+      "concentration": 60.0,
+      "Rs_arcsec": 0.16934917235371122,
+      "alpha_Rs_arcsec": 0.07505775099085613,
+      "kappa_s": 0.3610957353679431,
+      "r_trunc_arcsec": 3.3869834470742246,
+      "raw_peak_ratio_pal_over_lens_flux_units": 161.35583070449647,
+      "residual_pearson": 0.985906172266903,
+      "residual_rms_ratio_pal_over_lens": 0.9920071881794863,
+      "residual_peak_pixel_lenstronomy_yx": [
+        44,
+        16
+      ],
+      "residual_peak_pixel_pyautolens_yx": [
+        44,
+        16
+      ],
+      "subhalo_deflection_at_residual_peak": {
+        "lenstronomy_xy": [
+          -0.05585176719560441,
+          0.04233600854434484
+        ],
+        "pyautolens_xy": [
+          -0.055851767195604404,
+          0.04233600854434482
+        ],
+        "max_abs_diff": 2.0816681711721685e-17
+      }
+    },
+    {
+      "index": 1,
+      "macro_corr_no_subhalo": 0.9840714045248266,
+      "gamma": 1.847028424612676,
+      "q": 0.7537899540745849,
+      "phi_deg": 66.76842648785599,
+      "log10_M200": 10.867853741801142,
+      "concentration": 60.0,
+      "Rs_arcsec": 0.19495578319159,
+      "alpha_Rs_arcsec": 0.09947217992236983,
+      "kappa_s": 0.4156955768804364,
+      "r_trunc_arcsec": 3.8991156638318,
+      "raw_peak_ratio_pal_over_lens_flux_units": 227.33934366642276,
+      "residual_pearson": 0.882432190152114,
+      "residual_rms_ratio_pal_over_lens": 1.2159713260730383,
+      "residual_peak_pixel_lenstronomy_yx": [
+        38,
+        29
+      ],
+      "residual_peak_pixel_pyautolens_yx": [
+        17,
+        44
+      ],
+      "subhalo_deflection_at_residual_peak": {
+        "lenstronomy_xy": [
+          0.07094711382864868,
+          -0.04186988000441575
+        ],
+        "pyautolens_xy": [
+          0.07094711382864868,
+          -0.04186988000441575
+        ],
+        "max_abs_diff": 0.0
+      }
+    },
+    {
+      "index": 2,
+      "macro_corr_no_subhalo": 0.9999567656849561,
+      "gamma": 2.017826827284849,
+      "q": 0.9509467008476996,
+      "phi_deg": 128.57319821052766,
+      "log10_M200": 9.705161474912567,
+      "concentration": 60.0,
+      "Rs_arcsec": 0.07986785737484331,
+      "alpha_Rs_arcsec": 0.016694501582428287,
+      "kappa_s": 0.17029869287341115,
+      "r_trunc_arcsec": 1.5973571474968662,
+      "raw_peak_ratio_pal_over_lens_flux_units": 158.16980015335943,
+      "residual_pearson": 0.9997398495347577,
+      "residual_rms_ratio_pal_over_lens": 1.0146102865409952,
+      "residual_peak_pixel_lenstronomy_yx": [
+        30,
+        43
+      ],
+      "residual_peak_pixel_pyautolens_yx": [
+        30,
+        43
+      ],
+      "subhalo_deflection_at_residual_peak": {
+        "lenstronomy_xy": [
+          -0.009781117751762786,
+          0.013497534694487555
+        ],
+        "pyautolens_xy": [
+          -0.009781117751762783,
+          0.013497534694487551
+        ],
+        "max_abs_diff": 3.469446951953614e-18
+      }
+    },
+    {
+      "index": 5,
+      "macro_corr_no_subhalo": 0.9954121873125472,
+      "gamma": 1.8812482550937526,
+      "q": 0.8347633231275792,
+      "phi_deg": 83.74722173460917,
+      "log10_M200": 9.150616535021843,
+      "concentration": 60.0,
+      "Rs_arcsec": 0.0521823604569603,
+      "alpha_Rs_arcsec": 0.00712650888682177,
+      "kappa_s": 0.11126613469999763,
+      "r_trunc_arcsec": 1.043647209139206,
+      "raw_peak_ratio_pal_over_lens_flux_units": 164.17327143739877,
+      "residual_pearson": 0.6411617542917584,
+      "residual_rms_ratio_pal_over_lens": 1.2684030148125223,
+      "residual_peak_pixel_lenstronomy_yx": [
+        36,
+        20
+      ],
+      "residual_peak_pixel_pyautolens_yx": [
+        37,
+        20
+      ],
+      "subhalo_deflection_at_residual_peak": {
+        "lenstronomy_xy": [
+          -0.001347912751829271,
+          0.0021856626810443413
+        ],
+        "pyautolens_xy": [
+          -0.0013479127518292709,
+          0.0021856626810443404
+        ],
+        "max_abs_diff": 8.673617379884035e-19
+      }
+    },
+    {
+      "index": 9,
+      "macro_corr_no_subhalo": 0.9995236914281094,
+      "gamma": 1.8467293658956374,
+      "q": 0.5499997612513683,
+      "phi_deg": 58.7787891889807,
+      "log10_M200": 8.667839660516048,
+      "concentration": 60.0,
+      "Rs_arcsec": 0.036024511100387895,
+      "alpha_Rs_arcsec": 0.0033964527822558125,
+      "kappa_s": 0.07681346856479113,
+      "r_trunc_arcsec": 0.7204902220077579,
+      "raw_peak_ratio_pal_over_lens_flux_units": 146.8201178121542,
+      "residual_pearson": 0.9981947612715748,
+      "residual_rms_ratio_pal_over_lens": 0.9417184211519536,
+      "residual_peak_pixel_lenstronomy_yx": [
+        25,
+        47
+      ],
+      "residual_peak_pixel_pyautolens_yx": [
+        25,
+        47
+      ],
+      "subhalo_deflection_at_residual_peak": {
+        "lenstronomy_xy": [
+          -0.00016394452457396954,
+          -0.0019525543839146711
+        ],
+        "pyautolens_xy": [
+          -0.0001639445245739695,
+          -0.001952554383914671
+        ],
+        "max_abs_diff": 2.168404344971009e-19
+      }
+    }
+  ]
+}

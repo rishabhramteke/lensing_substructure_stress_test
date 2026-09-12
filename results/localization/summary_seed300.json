@@ -1,0 +1,27 @@
+{
+  "family_a": {
+    "a_root": "results/baseline_a_seed300",
+    "threshold_delta_chi2": -15.007679938442838,
+    "n_correct_find": 107,
+    "frac_localized_2px": 0.09345794392523364,
+    "n_localized": 10,
+    "median_offset_arcsec": 0.30435851739211295,
+    "n_negative_delta_chi2_among_correct": 27,
+    "localized_mass_error_dex": {
+      "n": 10,
+      "median": -1.116138687901806,
+      "min": -1.997367724431113,
+      "max": -0.5113777979377705,
+      "n_underestimated": 10,
+      "n_within_0p5dex": 0
+    },
+    "n_false_alarms_shown": 208
+  },
+  "family_c_unet": {
+    "unet_ckpt": "/Users/rishabh.ramteke/Documents/space_research/projects/05_dark_matter_strong_lensing/checkpoints/unet_v0/model_best.pt",
+    "n_correct_find": 263,
+    "frac_localized_2px": 0.5665399239543726,
+    "median_offset_arcsec": 0.1349373209852209,
+    "n_false_alarms_shown": 95
+  }
+}

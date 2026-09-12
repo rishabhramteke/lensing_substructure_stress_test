@@ -1,0 +1,13 @@
+{
+  "population": "multipole_m4_a3",
+  "n": 99,
+  "seed": 3,
+  "subsample_n": 300,
+  "concentration_assumed": "15",
+  "joint_refit_per_cell": true,
+  "grid": "3 radii x 8 angles, mass free in [7.5, 11.5]",
+  "chi2_dof_unreliable_threshold": 10.0,
+  "n_unreliable_fits": 7,
+  "note": "index 32 (an unreliable macro fit, chi2/N=27.9, 27 s smooth fit in the frozen run) was killed after >10 min of joint fitting and is absent; it would have been excluded from every denominator anyway.",
+  "workers": 6
+}
