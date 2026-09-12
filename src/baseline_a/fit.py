@@ -14,10 +14,24 @@ PARAM_NAMES = ["theta_E", "gamma", "e1", "e2", "g1", "g2", "src_x", "src_y", "R_
 
 N_MACRO = 13          # EPL+shear+Sersic-source parameters
 N_LENS_LIGHT = 5      # optional single-Sersic lens light: amp, R, n, e1, e2 (centre fixed at the lens centre)
+N_MULTIPOLE = 2       # optional m=4 multipole in the macro-model: a_m, phi_m (added 2026-09-12, referee round 3)
+MULTIPOLE_M = 4
 
 
-def _sim(kwargs_band, num_pix, model_list, lens_light=0):
-    """`lens_light` = number of single-Sersic lens-light components in the model (0, 1 or 2)."""
+def _layout(vec):
+    """(n_lens_light_components, has_multipole) from the vector length: 13 + 5*n_ll + 2*mp."""
+    n_extra = len(vec) - N_MACRO
+    has_mp = (n_extra % N_LENS_LIGHT) == N_MULTIPOLE
+    n_ll = (n_extra - (N_MULTIPOLE if has_mp else 0)) // N_LENS_LIGHT
+    return n_ll, has_mp
+
+
+def _sim(kwargs_band, num_pix, model_list, lens_light=0, multipole=False):
+    """`lens_light` = number of single-Sersic lens-light components (0, 1 or 2); `multipole` adds an
+    m=4 MULTIPOLE term to the macro-model, inserted before any TNFW so the kwargs order matches _unpack3."""
+    if multipole and "MULTIPOLE" not in model_list:
+        model_list = list(model_list)
+        model_list.insert(model_list.index("TNFW") if "TNFW" in model_list else len(model_list), "MULTIPOLE")
     kwargs_model = {"lens_model_list": model_list, "source_light_model_list": ["SERSIC_ELLIPSE"]}
     n_ll = int(lens_light)
     if n_ll:
@@ -36,7 +50,11 @@ def _unpack(vec):
 
 
 def n_lens_light_components(vec):
-    return (len(vec) - N_MACRO) // N_LENS_LIGHT
+    return _layout(vec)[0]
+
+
+def has_multipole(vec):
+    return _layout(vec)[1]
 
 
 def _unpack3(vec):
@@ -44,14 +62,17 @@ def _unpack3(vec):
     light; each further block of 5 is one Sersic lens-light component (1 = the pipeline's
     usual single Sersic, 2 = a correctly specified double Sersic; added 2026-09-11/12)."""
     kl, ks = _unpack(vec)
-    n_ll = n_lens_light_components(vec)
+    n_ll, has_mp = _layout(vec)
+    if has_mp:   # multipole block sits at the very end of the vector
+        a_m, phi_m = vec[-2], vec[-1]
+        kl = kl + [{"m": MULTIPOLE_M, "a_m": a_m, "phi_m": phi_m, "center_x": 0.0, "center_y": 0.0, "r_E": vec[0]}]
+    kll = None
     if n_ll:
         kll = []
         for k in range(n_ll):
             amp_l, R_l, n_l, e1_l, e2_l = vec[N_MACRO + k * N_LENS_LIGHT:N_MACRO + (k + 1) * N_LENS_LIGHT]
             kll.append({"amp": max(amp_l, 1e-3), "R_sersic": max(R_l, 1e-3), "n_sersic": np.clip(n_l, 0.3, 8.0), "e1": e1_l, "e2": e2_l, "center_x": 0.0, "center_y": 0.0})
-        return kl, ks, kll
-    return kl, ks, None
+    return kl, ks, kll
 
 
 def _truth_vec(truth):
@@ -98,7 +119,7 @@ def _residuals(vec, image_model, data, noise_std):
 def lens_light_image(vec, kwargs_band, num_pix):
     """The fitted single-Sersic lens light alone (PSF-convolved), for subtraction."""
     kl, ks, kll = _unpack3(vec)
-    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=len(kll))
+    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=len(kll), multipole=has_multipole(vec))
     image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
     return image_model.lens_surface_brightness(kwargs_lens_light=kll)
 
@@ -116,6 +137,9 @@ SCALE = [0.5, 0.5, 0.3, 0.3, 0.15, 0.15, 0.3, 0.3, 0.15, 1.5, 0.3, 0.3, 100.0]
 # single-Sersic lens light (amp, R, n, e1, e2): generic bounds/scales; centre fixed at the lens centre
 BOUNDS_LL = [(0.1, 2000.0), (0.05, 3.0), (0.5, 8.0), (-0.6, 0.6), (-0.6, 0.6)]
 SCALE_LL = [50.0, 0.3, 2.0, 0.3, 0.3]
+# m=4 multipole in the macro-model (a_m in the same units as the simulator's, phi_m in radians)
+BOUNDS_MP = [(-0.15, 0.15), (-np.pi, np.pi)]
+SCALE_MP = [0.02, 0.5]
 
 
 def _blind_init_vec(data, kwargs_band, num_pix, noise_std):
@@ -135,7 +159,7 @@ def _blind_init_vec(data, kwargs_band, num_pix, noise_std):
     return np.array([theta_E, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.15, 1.5, 0.0, 0.0, amp])
 
 
-def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, maxiter=200, blind=False, lens_light_components=1):
+def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, maxiter=200, blind=False, lens_light_components=1, macro_multipole=False):
     """MLE fit of EPL+shear+Sersic, initialized near the truth (see module
     docstring: this is the stated idealization, not a blind global fit) -- or,
     with blind=True, from the data alone (`_blind_init_vec`).
@@ -143,7 +167,7 @@ def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, ma
     rng = rng or np.random.default_rng(0)
     has_ll = truth.get("lens_light") is not None
     n_ll = int(lens_light_components) if has_ll else 0
-    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=n_ll)
+    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=n_ll, multipole=macro_multipole)
     image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
     noise_std = sim.estimate_noise(data)
 
@@ -164,6 +188,9 @@ def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, ma
         inits = [[amp_guess, 0.5, 4.0, 0.0, 0.0], [amp_guess * 0.3, 1.0, 1.0, 0.0, 0.0]][:n_ll]
         for ini in inits:
             x_init = np.concatenate([x_init, ini]); bounds += BOUNDS_LL; scale += SCALE_LL
+    if macro_multipole:
+        # the macro-model now carries an m=4 multipole, initialised at zero amplitude (never from the truth)
+        x_init = np.concatenate([x_init, [0.0, 0.0]]); bounds += BOUNDS_MP; scale += SCALE_MP
     x_init = np.clip(x_init, [b[0] for b in bounds], [b[1] for b in bounds])
 
     lo = [b[0] for b in bounds]; hi = [b[1] for b in bounds]
@@ -181,7 +208,7 @@ def scan_subhalo(data, noise_std, smooth_vec, kwargs_band, num_pix, theta_E, chi
     theta_E; mass on a coarse log-grid. Returns the max Delta-chi2 over the
     grid (the detection statistic) and the argmax (position, mass)."""
     kwargs_lens_smooth, kwargs_source, kwargs_ll = _unpack3(smooth_vec)
-    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR", "TNFW"], lens_light=0 if kwargs_ll is None else len(kwargs_ll))
+    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR", "TNFW"], lens_light=0 if kwargs_ll is None else len(kwargs_ll), multipole=has_multipole(smooth_vec))
     image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
     lc = LensCosmo(z_lens=z_lens, z_source=z_source)
 

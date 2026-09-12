@@ -73,10 +73,23 @@ def evaluate(root_joint, root_frozen, label):
 
 
 def main():
-    results = {"c15": evaluate("results/baseline_a_joint_c15", "results/baseline_a", "joint vs frozen, c=15, first 100 lenses of seed-0/1/3 subsamples")}
+    import argparse
+    ap = argparse.ArgumentParser(); ap.add_argument("--joint-root", default="results/baseline_a_joint_c15"); ap.add_argument("--tag", default="")
+    args = ap.parse_args()
+    results = {"c15": evaluate(args.joint_root, "results/baseline_a", f"joint vs frozen, c=15, first 100 lenses of the seed-0 subsamples ({args.joint_root})")}
+    # null-control fields, if the joint run carries them
+    jr = ROOT / args.joint_root / "multipole_m4_a3" / "scan_results.jsonl"
+    if jr.exists():
+        recs = [json.loads(l) for l in open(jr)]
+        if "chi2_polish_gain" in recs[0]:
+            rel = [r for r in recs if r["reliable_fit"]]
+            results["null_control"] = {"median_polish_gain_multipole": float(np.median([r["chi2_polish_gain"] for r in rel])),
+                                       "median_polish_gain_clean": float(np.median([r["chi2_polish_gain"] for r in (json.loads(l) for l in open(ROOT / args.joint_root / "no_subhalo" / "scan_results.jsonl")) if r["reliable_fit"]])),
+                                       "median_dchi2_vs_unpolished_multipole": float(np.median([r["delta_chi2_vs_unpolished_smooth"] for r in rel])),
+                                       "median_dchi2_vs_polished_multipole": float(np.median([r["delta_chi2"] for r in rel]))}
     if (ROOT / "results/baseline_a_joint_c60/test_fixed60/scan_results.jsonl").exists():
         results["c60_mass_only"] = evaluate("results/baseline_a_joint_c60", "results/baseline_a_c60", "joint vs frozen, c=60, test_fixed60 only (threshold from c15 joint run not applicable)")
-    (ROOT / "results/baseline_a_joint_c15/summary_vs_frozen.json").write_text(json.dumps(results, indent=2))
+    (ROOT / args.joint_root / f"summary_vs_frozen{args.tag}.json").write_text(json.dumps(results, indent=2))
     print(json.dumps(results, indent=1))
 
 

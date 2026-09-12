@@ -113,7 +113,7 @@ def panel(ax, tp, fp, title, stat_line):
     ax.set_xlim(-1.8, 1.8); ax.set_ylim(-1.8, 1.8); ax.set_aspect("equal")
     ax.set_xlabel("x (arcsec)"); ax.set_ylabel("y (arcsec)")
     ax.set_title(title, fontweight="bold")
-    ax.text(0.02, 0.02, stat_line + (f" · {len(fp)} false alarms" if fp else ""), transform=ax.transAxes, fontsize=6.8, color="#444", va="bottom")
+    # (stat line moved to the caption on referee request -- illegible at print size)
 
 
 def offset_hist(ax, tp, color):

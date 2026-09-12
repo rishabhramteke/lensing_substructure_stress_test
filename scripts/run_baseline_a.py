@@ -46,6 +46,7 @@ def main():
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--seed", type=int, default=0, help="which images to sample (indices), not the fit itself")
     p.add_argument("--lens-light-components", type=int, default=1, choices=[1, 2], help="Sersic components fitted for lens light when the population has it (1 = usual single Sersic, 2 = correctly specified)")
+    p.add_argument("--macro-multipole", action="store_true", help="include an m=4 multipole (a_m, phi_m free) in the smooth macro-model, as post-Lange+2024 pipelines do")
     p.add_argument("--blind", action="store_true", help="initialize the smooth fit from the data alone (no truth), see fit._blind_init_vec")
     p.add_argument("--maxiter", type=int, default=60, help="least-squares max_nfev multiplier (60 = the value used throughout)")
     p.add_argument("--concentration", type=str, default="15",
@@ -86,7 +87,7 @@ def main():
             truth = truths[i]
             theta_E = truth["lens_macro"]["theta_E"]
             t1 = time.time()
-            vec, chi2_smooth, image_model, noise_std = fit_smooth(images[i], truth, kwargs_band, num_pix, rng=rng_fit, maxiter=args.maxiter, blind=args.blind, lens_light_components=args.lens_light_components)
+            vec, chi2_smooth, image_model, noise_std = fit_smooth(images[i], truth, kwargs_band, num_pix, rng=rng_fit, maxiter=args.maxiter, blind=args.blind, lens_light_components=args.lens_light_components, macro_multipole=args.macro_multipole)
             t_fit = time.time() - t1
             if has_ll:
                 subtracted[k] = images[i] - lens_light_image(vec, kwargs_band, num_pix)
@@ -114,7 +115,7 @@ def main():
 
     manifest_out = {
         "population": args.population, "n": n, "seed": args.seed, "concentration_assumed": conc_label,
-        "blind_initialization": args.blind, "lens_light_components": args.lens_light_components, "maxiter": args.maxiter, "chi2_dof_unreliable_threshold": CHI2_DOF_UNRELIABLE,
+        "blind_initialization": args.blind, "lens_light_components": args.lens_light_components, "macro_multipole": args.macro_multipole, "maxiter": args.maxiter, "chi2_dof_unreliable_threshold": CHI2_DOF_UNRELIABLE,
         "n_unreliable_fits": n_unreliable, "elapsed_s": time.time() - t0,
         "source_manifest": manifest,
     }

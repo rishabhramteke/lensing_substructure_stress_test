@@ -728,6 +728,33 @@ Where the blind fit converges (95% of clean lenses, ~80% of subhalo lenses) it l
 optimum; the idealization only changes *how often* the fit fails, and those failures are already
 reported as exclusions. Paper: Sect. 3.2 "What the numbers mean".
 
+### Grid localization ceiling (provenance, 2026-09-12)
+
+`scripts/grid_localization_ceiling.py` → `results/grid_localization_ceiling.json`: with the scan's 3-radii × 8-angle
+grid (nodes 0.45″ apart radially, ~0.8″ in angle) and the simulator's placement prior, only **21.4%** of subhalo
+positions lie within 0.16″ (2 px) of any node; the median nearest-node distance is **0.23″**. The scan's 13–15%
+localized fraction is therefore ~⅔ of what a perfect scan on this grid could report (Sect. 4.3).
+
+### Completeness vs projected signal (referee round 3, point 6; 2026-09-12)
+
+`scripts/completeness_vs_signal.py` → `results/completeness_vs_signal.json` (0.1″ aperture) and
+`_0p2.json` (0.2″). TNFW mass projected within the aperture (lenstronomy `TNFW.mass_2d` × Σ_crit) as a
+concentration-independent signal proxy; completeness of each family on both matched populations binned by it
+(seed-0 A/B results; U-Net v0):
+
+| log M_proj(<0.1″) bin | A c60 / c15 | B c60 / c15 | C c60 / c15 |
+|---|---|---|---|
+| 7.5–8.0 | 12 / 12% | 14 / 12% | 7 / 10% |
+| 8.0–8.5 | 18 / 52% | 30 / 49% | 9 / 11% |
+| 8.5–9.0 | 67 / 82% | 87 / 84% | **23 / 13%** |
+| 9.0–9.5 | 85 / — | 95 / — | 55 / — |
+
+Physical methods: the two populations coincide (within binomial scatter; the c15 template even gives the scan a
+small edge on the c15 population) → the concentration collapse is the *signal* (less projected mass inside the
+resolution element). U-Net: at equal projected signal the c=15 population is still missed (13% vs 23%, and flat
+at chance everywhere) → a second, *learned* component (shape of the dense-perturber signature). Same at 0.2″
+(U-Net 38 vs 13% at 9.0–9.5). Paper: Sect. 4.1 paragraph + Fig. `fig13_signal`, abstract, Conclusions 1, Sect. 5.1.
+
 ### Then what causes it? Oracle-position test: not the position grid either
 
 Next suspect: the 3-radii × 8-angle position grid (median nearest-grid-point offset 0.24″). If

@@ -28,6 +28,16 @@
       "label": "Family A, c=15",
       "naive_unweighted": 0.4823195476869743,
       "cdm_mass_function_weighted": 0.19687775503527333
+    },
+    {
+      "label": "Family B, c=60",
+      "naive_unweighted": 0.6259900695833404,
+      "cdm_mass_function_weighted": 0.22052703671686416
+    },
+    {
+      "label": "Family B, c=15",
+      "naive_unweighted": 0.43808074820112103,
+      "cdm_mass_function_weighted": 0.12220285235778428
     }
   ]
 }

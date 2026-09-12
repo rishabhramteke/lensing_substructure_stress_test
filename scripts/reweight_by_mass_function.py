@@ -48,12 +48,17 @@ def main():
     d_a = json.loads((ROOT / "results/baseline_a/aggregate/summary.json").read_text())
 
     rows = []
-    for label, comp in [
+    entries = [
         ("U-Net (Family C), c=60", d_unet["completeness_c60"]),
         ("U-Net (Family C), c=15", d_unet["completeness_c15"]),
         ("Family A, c=60", d_a["completeness_c60"]),
         ("Family A, c=15", d_a["completeness_c15"]),
-    ]:
+    ]
+    b_agg = next((ROOT / f"results/baseline_b/aggregate_fitted_{k}seeds.json" for k in (4, 3, 2) if (ROOT / f"results/baseline_b/aggregate_fitted_{k}seeds.json").exists()), None)
+    if b_agg is not None:   # Family B (fitted variant), added 2026-09-12 -- pure arithmetic on numbers already in hand
+        d_b = json.loads(b_agg.read_text())
+        entries += [("Family B, c=60", d_b["completeness_c60"]), ("Family B, c=15", d_b["completeness_c15"])]
+    for label, comp in entries:
         w, u = weighted_and_naive(comp, weights)
         rows.append({"label": label, "naive_unweighted": u, "cdm_mass_function_weighted": w})
 

@@ -127,21 +127,57 @@ def family_b_summary():
             "fpr_mp_a3": {"mean": conf["multipole m=4, a=0.03*thetaE"], "std": 0.0}}, 1
 
 
+def wilson(k, n, z=1.0):
+    if n == 0: return (np.nan, np.nan, np.nan)
+    p = k / n; d = 1 + z * z / n; c = (p + z * z / (2 * n)) / d; h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return p, max(0.0, c - h), min(1.0, c + h)
+
+
+def _binomial_from_scans(root, pop_clean="no_subhalo", pops=("test_fixed60", "test_fixed15")):
+    """Completeness per bin with Wilson 68% half-widths from a full-population scan root (A or B format)."""
+    ns = [json.loads(l) for l in open(ROOT / root / pop_clean / "scan_results.jsonl")]
+    thr = float(np.quantile([r["delta_chi2"] for r in ns if r["reliable_fit"]], 0.90))
+    out = {}
+    for pop, key in zip(pops, ("completeness_c60", "completeness_c15")):
+        recs = [json.loads(l) for l in open(ROOT / root / pop / "scan_results.jsonl")]
+        rel = [r for r in recs if r["reliable_fit"] and r["has_subhalo"]]
+        d = {}
+        for lo, hi in [(8.0, 8.5), (8.5, 9.0), (9.0, 9.5), (9.5, 10.0), (10.0, 10.5), (10.5, 11.0)]:
+            sel = [r for r in rel if lo <= r["log10_M200_true"] < hi]
+            k = sum(1 for r in sel if r["delta_chi2"] >= thr); n = len(sel)
+            p_, l_, h_ = wilson(k, n) if n else (np.nan, np.nan, np.nan)
+            d[f"{lo}-{hi}"] = {"mean": p_, "lo": l_, "hi": h_, "n": n}
+        out[key] = d
+    return out
+
+
 def fig2_completeness():
     u = load("results/aggregate/summary.json")
     a = load("results/baseline_a/aggregate/summary.json")
     b, nb = family_b_summary()
+    def _complete(root):   # a run is usable only once every population has written its manifest (files are buffered while running)
+        return all((ROOT / root / p / "manifest.json").exists() for p in ("no_subhalo", "test_fixed60", "test_fixed15"))
+    a_full = _binomial_from_scans("results/baseline_a_full") if _complete("results/baseline_a_full") else None
+    b_full = _binomial_from_scans("results/baseline_b_full/fitted") if _complete("results/baseline_b_full/fitted") else None
     fig, axes = plt.subplots(1, 3, figsize=(DBL_W, 2.6), sharey=True)
-    for ax, d, name, col, n in [(axes[0], u, "Family C — U-Net", C_UNET, u["n_seeds"]),
-                                 (axes[1], a, "Family A — parametric scan", C_A, a["n_seeds"]),
-                                 (axes[2], b, "Family B — potential correction", C_B, nb)]:
+    panels = [(axes[0], u, None, "Family C — U-Net", C_UNET, f"n = {u['n_seeds']} seeds; bars: seed s.d. ⊕ binomial"),
+              (axes[1], a, a_full, "Family A — parametric scan", C_A, "full 1 000-lens populations; bars: 68% binomial" if a_full else f"n = {a['n_seeds']} seeds"),
+              (axes[2], b, b_full, "Family B — potential correction", C_B, "full 1 000-lens populations; bars: 68% binomial" if b_full else f"n = {nb} seed sets")]
+    for ax, d, full, name, col, sub in panels:
         for key, ls, mk, lab, c in [("completeness_c60", "-", "o", "c = 60 (literature fiducial)", col), ("completeness_c15", "--", "s", "c = 15 (Tsang+2024's low-c ablation)", GRAY)]:
-            m = [100 * d[key][k]["mean"] for k in KEYS]; sd = [100 * d[key][k]["std"] for k in KEYS]
-            ax.errorbar(MIDS, m, yerr=sd if n > 1 else None, fmt=mk + ls, color=c, ms=3.5, capsize=2, lw=1.1, label=lab)
+            if full is not None:
+                m = [100 * full[key][k]["mean"] for k in KEYS]
+                lo = [100 * (full[key][k]["mean"] - full[key][k]["lo"]) for k in KEYS]; hi = [100 * (full[key][k]["hi"] - full[key][k]["mean"]) for k in KEYS]
+                ax.errorbar(MIDS, m, yerr=[lo, hi], fmt=mk + ls, color=c, ms=3.5, capsize=2, lw=1.1, label=lab)
+            else:
+                m = [100 * d[key][k]["mean"] for k in KEYS]; sd = np.array([100 * d[key][k]["std"] for k in KEYS])
+                # binomial half-width from the per-bin count of the full 1 000-lens test populations (U-Net scores every lens)
+                nbin = np.array([170, 170, 170, 170, 170, 150]) if "U-Net" in name else np.array([50] * 6)
+                binom = 100 * np.sqrt(np.array(m) / 100 * (1 - np.array(m) / 100) / nbin)
+                ax.errorbar(MIDS, m, yerr=np.sqrt(sd ** 2 + binom ** 2), fmt=mk + ls, color=c, ms=3.5, capsize=2, lw=1.1, label=lab)
         ax.axhline(10, color=BLACK, ls=":", lw=0.7)
-        ax.set_title(f"{name}\n(n = {n} seed{'s' if n > 1 else ' set'}{', mean ± s.d.' if n > 1 else ''})", fontsize=7.5)
-        ax.set_xlabel(r"$\log_{10}(M_{200}/M_\odot)$")
-        ax.set_ylim(0, 100)
+        ax.set_title(f"{name}\n({sub})", fontsize=7.2)
+        ax.set_xlabel(r"$\log_{10}(M_{200}/M_\odot)$"); ax.set_ylim(0, 100)
     axes[0].set_ylabel("completeness at 10% FPR  [%]")
     axes[0].text(9.55, 3, "10% = chance level", fontsize=6.3, color=BLACK)
     axes[0].legend(loc="upper left", fontsize=6.3)
@@ -179,33 +215,38 @@ def fig3_confounders():
     ax.legend(loc="upper left")
 
     ax = axes[1]
-    # every decoy run that exists is drawn: the original Gaussian (seed 42), a second Gaussian seed,
-    # and the asymmetric dipole decoy the self-review asked for
-    runs = [("results/noise_decoy_control/results.json", "Gaussian, seed 42", "o", "-"),
-            ("results/noise_decoy_control_seed43/results.json", "Gaussian, seed 43", "o", ":"),
-            ("results/noise_decoy_control_dipole/results.json", "dipole (asymmetric), seed 42", "^", "--")]
-    amps_ref = None
-    for rel, lab, mk, ls in runs:
-        if not (ROOT / rel).exists():
-            continue
-        d = load(rel)
-        amps = sorted(float(k) for k in d if k not in ("baseline_fpr_clean_no_subhalo", "config"))
-        amps_ref = amps_ref or amps
-        ax.plot(amps, [100 * d[str(a_)]["unet_fpr"] for a_ in amps], marker=mk, ls=ls, color=C_UNET, ms=3.5, label=f"U-Net — {lab}")
-        ax.plot(amps, [100 * d[str(a_)]["a_fpr"] for a_ in amps], marker=mk, ls=ls, color=C_A, ms=3.5, label=f"Family A — {lab}")
+    # decoy runs: Gaussian seeds 42+43 collapsed into a mean line with a min-max band, dipole as its own line
+    def series(rels, key):
+        vals = []
+        for rel in rels:
+            if (ROOT / rel).exists():
+                d = load(rel); amps = sorted(float(k) for k in d if k not in ("baseline_fpr_clean_no_subhalo", "config"))
+                vals.append([100 * d[str(a_)][key] for a_ in amps])
+        return (amps, np.array(vals)) if vals else (None, None)
+    for key, col, name in (("unet_fpr", C_UNET, "U-Net"), ("a_fpr", C_A, "Family A")):
+        amps, v = series(["results/noise_decoy_control/results.json", "results/noise_decoy_control_seed43/results.json"], key)
+        if v is not None:
+            ax.plot(amps, v.mean(0), marker="o", ls="-", color=col, ms=3.5, label=f"{name} — Gaussian ({len(v)} seeds)")
+            if len(v) > 1: ax.fill_between(amps, v.min(0), v.max(0), color=col, alpha=0.18, lw=0)
+        amps, v = series(["results/noise_decoy_control_dipole/results.json"], key)
+        if v is not None: ax.plot(amps, v[0], marker="^", ls="--", color=col, ms=3.5, label=f"{name} — dipole")
     fb = ROOT / "results/noise_decoy_control_familyB/results.json"
-    if fb.exists():   # Family B on the identical decoys (round-5 addition)
+    if fb.exists():
         d = json.loads(fb.read_text())
-        for shape, mk, ls, lab in (("gaussian", "o", "-", "Gaussian, seed 42"), ("gaussian_seed43", "o", ":", "Gaussian, seed 43"), ("dipole", "^", "--", "dipole (asymmetric), seed 42")):
-            if shape in d:
-                amps = sorted(float(k) for k in d[shape])
-                ax.plot(amps, [100 * d[shape][str(a_)]["b_fpr"] for a_ in amps], marker=mk, ls=ls, color=C_B, ms=3.5, label=f"Family B — {lab}")
+        g = [k for k in ("gaussian", "gaussian_seed43") if k in d]
+        if g:
+            amps = sorted(float(k) for k in d[g[0]]); v = np.array([[100 * d[k][str(a_)]["b_fpr"] for a_ in amps] for k in g])
+            ax.plot(amps, v.mean(0), marker="o", ls="-", color=C_B, ms=3.5, label=f"Family B — Gaussian ({len(g)} seeds)")
+            if len(g) > 1: ax.fill_between(amps, v.min(0), v.max(0), color=C_B, alpha=0.18, lw=0)
+        if "dipole" in d:
+            amps = sorted(float(k) for k in d["dipole"]); ax.plot(amps, [100 * d["dipole"][str(a_)]["b_fpr"] for a_ in amps], marker="^", ls="--", color=C_B, ms=3.5, label="Family B — dipole")
+    amps_ref = [3, 6, 10]
     ax.axhline(10, color=BLACK, ls=":", lw=0.7, label="clean-image baseline (10%)")
     ax.set_xlabel(r"decoy amplitude  [$\sigma$ of local noise]")
     ax.set_ylabel("flagged as detection  [%]")
     ax.set_ylim(0, 88); ax.set_xticks(amps_ref or [3, 6, 10])
     ax.set_title("(b) non-physical decoys (no lensing signature)")
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2, fontsize=5.6, frameon=False)
+    ax.legend(loc="upper left", ncol=1, fontsize=5.8, framealpha=0.9)
     save(fig, "fig3_confounders")
 
 
@@ -405,9 +446,9 @@ def fig12_summary():
         ("mass estimate\n(localized detections)",
          [("$-1.1$ dex, 44/44 low\n(frozen macro-model)", RED), ("$-0.65$ dex\n(aperture, calibratable)", AMBER), ("not attempted", GREY)]),
         ("CDM mass-function weighting\n(population completeness, $c=60$)",
-         [("53 $\\to$ 21%", AMBER), ("--", GREY), ("30 $\\to$ 12%", AMBER)]),
+         [("53 $\\to$ 21%", AMBER), ("63 $\\to$ 22%", AMBER), ("30 $\\to$ 12%", AMBER)]),
     ]
-    cols = ["A  parametric scan", "B  potential correction", "C  U-Net"]
+    cols = ["A  parametric scan", "B  potential correction\n(fixed-source variant)", "C  U-Net"]
     fig, ax = plt.subplots(figsize=(DBL_W, 0.42 * len(rows) + 0.7))
     ax.set_xlim(0, 3.9); ax.set_ylim(0, len(rows)); ax.axis("off")
     for j, c in enumerate(cols):
@@ -422,6 +463,29 @@ def fig12_summary():
     handles = [mpatches.Patch(fc=GREEN, label="robust / recovered"), mpatches.Patch(fc=AMBER, label="degraded"), mpatches.Patch(fc=RED, label="fails"), mpatches.Patch(fc=GREY, label="not tested / n.a.")]
     ax.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, -0.09), ncol=4, fontsize=6.5, frameon=False)
     save(fig, "fig12_summary")
+
+
+# ======================================================================
+# Fig 13 -- completeness vs projected signal: is the concentration collapse a property of the signal?
+# ======================================================================
+def fig13_signal():
+    d = load("results/completeness_vs_signal.json")
+    edges = np.arange(7.0, 10.01, 0.5); mids = 0.5 * (edges[:-1] + edges[1:])
+    fig, axes = plt.subplots(1, 3, figsize=(DBL_W, 2.6), sharey=True)
+    for ax, (fam, name, col) in zip(axes, (("A", "Family A — parametric scan", C_A), ("B", "Family B — potential correction", C_B), ("C", "Family C — U-Net", C_UNET))):
+        for c, ls, mk, lab, colr in (("c60", "-", "o", "$c=60$ population", col), ("c15", "--", "s", "$c=15$ population", GRAY)):
+            if c not in d["families"][fam]: continue
+            mp = np.array(d["families"][fam][c]["log10_Mproj"]); det = np.array(d["families"][fam][c]["detected"])
+            x, y, lo, hi = [], [], [], []
+            for a, b, m in zip(edges[:-1], edges[1:], mids):
+                sel = (mp >= a) & (mp < b)
+                if sel.sum() >= 8:
+                    p, l, h = wilson(det[sel].sum(), sel.sum()); x.append(m); y.append(100 * p); lo.append(100 * (p - l)); hi.append(100 * (h - p))
+            ax.errorbar(x, y, yerr=[lo, hi], fmt=mk + ls, color=colr, ms=3.5, capsize=2, lw=1.1, label=lab)
+        ax.axhline(10, color=BLACK, ls=":", lw=0.7); ax.set_ylim(0, 100); ax.set_title(name, fontsize=8)
+        ax.set_xlabel(r"$\log_{10} M_{\rm proj}(<0.1'')\,[M_\odot]$")
+    axes[0].set_ylabel("completeness at 10% FPR  [%]"); axes[0].legend(loc="upper left", fontsize=6.5)
+    save(fig, "fig13_signal")
 
 
 # ======================================================================
@@ -487,7 +551,7 @@ def fig7_tier1():
 
 
 ALL = {"fig1": fig1_examples, "fig2": fig2_completeness, "fig3": fig3_confounders, "fig4": fig4_localization,
-       "fig5": fig5_mass_bias, "fig6": fig6_mass_function, "fig7": fig7_tier1, "fig8": fig8_family_b, "fig9": fig9_scaleup, "fig11": fig11_lenslight, "fig12": fig12_summary}
+       "fig5": fig5_mass_bias, "fig6": fig6_mass_function, "fig7": fig7_tier1, "fig8": fig8_family_b, "fig9": fig9_scaleup, "fig11": fig11_lenslight, "fig12": fig12_summary, "fig13": fig13_signal}
 
 if __name__ == "__main__":
     import sys

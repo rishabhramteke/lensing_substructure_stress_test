@@ -59,6 +59,19 @@ def one_lens(args):
     vec, chi2_smooth, _, noise_std = fit_smooth(data, truth, G["kwargs_band"], G["num_pix"], rng=rng_fit, maxiter=60)
     t_fit = time.time() - t1
     reliable = (chi2_smooth / G["num_pix"] ** 2) < CHI2_DOF_UNRELIABLE
+    # ---- null control (referee round 3): give the SMOOTH model the same total optimizer budget the 24 joint
+    # fits get (24 x 40 x 14 function evaluations), continuing from the smooth solution. Any chi^2 gain here is
+    # convergence, not a perturber, so the joint statistic is measured against the polished smooth chi^2.
+    lo13 = [b[0] for b in BOUNDS]; hi13 = [b[1] for b in BOUNDS]
+    sim_s = _sim(G["kwargs_band"], G["num_pix"], ["EPL", "SHEAR"])
+    im_s = sim_s.image_model_class(kwargs_numerics={"supersampling_factor": 1})
+
+    def resid_smooth(v):
+        kl, ks = _unpack(v)
+        return ((data - im_s.image(kwargs_lens=kl, kwargs_source=ks)) / noise_std).ravel()
+
+    r0 = least_squares(resid_smooth, vec, bounds=(lo13, hi13), x_scale=SCALE, method="trf", max_nfev=24 * 40 * 14)   # same total budget as the 24 joint fits; default tolerances, so it stops when converged
+    chi2_polished = min(chi2_smooth, float(np.sum(r0.fun ** 2))); polish_nfev = int(r0.nfev)
     lo = [b[0] for b in BOUNDS] + [7.5]; hi = [b[1] for b in BOUNDS] + [11.5]
     radii = np.linspace(0.5, 1.4, 3) * theta_E; angles = np.linspace(0, 2 * np.pi, 8, endpoint=False)
     best = {"delta_chi2": -np.inf, "x": None, "y": None, "log10_m": None, "nfev": 0}
@@ -81,8 +94,11 @@ def one_lens(args):
             "concentration_true": (truth["subhalo"] or {}).get("concentration"),
             "has_multipole": truth.get("multipole") is not None,
             "chi2_smooth_per_dof": chi2_smooth / G["num_pix"] ** 2, "reliable_fit": reliable,
-            "delta_chi2": best["delta_chi2"], "best_x": best["x"], "best_y": best["y"], "best_log10_m": best["log10_m"],
-            "t_fit_s": t_fit, "t_scan_s": time.time() - t2, "joint_refit": True}
+            # delta_chi2 is now measured against the POLISHED smooth fit (null control); the raw one is kept alongside
+            "delta_chi2": best["delta_chi2"] - (chi2_smooth - chi2_polished), "delta_chi2_vs_unpolished_smooth": best["delta_chi2"],
+            "chi2_polish_gain": chi2_smooth - chi2_polished, "chi2_smooth_polished_per_dof": chi2_polished / G["num_pix"] ** 2,
+            "best_x": best["x"], "best_y": best["y"], "best_log10_m": best["log10_m"],
+            "t_fit_s": t_fit, "t_scan_s": time.time() - t2, "joint_refit": True, "null_control_polish_nfev": polish_nfev}
 
 
 def main():
@@ -119,7 +135,7 @@ def main():
             f.write(json.dumps(r) + "\n")
     (args.out / "manifest.json").write_text(json.dumps({
         "population": args.population, "n": len(recs), "seed": args.seed, "subsample_n": args.n_subsample,
-        "concentration_assumed": args.concentration, "joint_refit_per_cell": True, "grid": "3 radii x 8 angles, mass free in [7.5, 11.5]",
+        "concentration_assumed": args.concentration, "joint_refit_per_cell": True, "grid": "3 radii x 8 angles, mass free in [7.5, 11.5]", "null_control": "delta_chi2 relative to the smooth fit continued with the joint fits' total budget (max_nfev 24*40*14, tight tolerances)",
         "chi2_dof_unreliable_threshold": CHI2_DOF_UNRELIABLE, "n_unreliable_fits": sum(1 for r in recs if not r["reliable_fit"]),
         "elapsed_s": time.time() - t0, "workers": args.workers}, indent=2))
     print(f"wrote {len(recs)} joint scans to {args.out}  ({time.time()-t0:.0f}s)")
