@@ -1444,7 +1444,7 @@ population method works; instrument transfer to Euclid/Rubin resolution; scaling
 
 - `paper/aa.cls` + `paper/aa.bst` replaced by the official macro package v9.4 (aa.cls dated
   2025-11-27; `macro-latex-aa.zip` downloaded by hand from aanda.org — the site returns 403 to
-  curl). The 2016 v9.0 files are kept in `paper/aa_kit/aa_9.0_previous/` for rollback only.
+  curl). The 2016 v9.0 files were deleted at the user's request (no rollback copy).
 - Consequences under 9.4: `\email{}` in `\institute` is ignored at compile time (reserved for
   metadata extraction) → e-mail moved to `\corrauth{}` in the `\author` line, rendered as the
   "Corresponding author" footnote; margin line numbers are hard-coded (referee copy, intended);
