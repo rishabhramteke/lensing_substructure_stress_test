@@ -30,7 +30,10 @@ sys.path.insert(0, str(ROOT / "src"))
 
 # ---- A&A geometry + a colorblind-safe (Okabe-Ito) palette ----
 COL_W, DBL_W = 3.46, 7.09  # inches: 88 mm, 180 mm
-BLUE, ORANGE, GREEN, VERM, PURPLE, GRAY, BLACK = "#0072B2", "#E69F00", "#009E73", "#D55E00", "#CC79A7", "#7F7F7F", "#222222"
+# Palette: matplotlib "tab10", the line palette used by the A&A lensing papers we compare to (Tsang+2024,
+# Biggio+2022); switched from Okabe-Ito on 2026-09-12 to match journal practice. Image maps stay inferno
+# (Galan+2022, Biggio+2022) and residuals a diverging RdBu.
+BLUE, ORANGE, GREEN, VERM, PURPLE, GRAY, BLACK = "#1f77b4", "#ff7f0e", "#2ca02c", "#ff7f0e", "#9467bd", "#7f7f7f", "#222222"
 C_UNET, C_A, C_D, C_B = BLUE, VERM, PURPLE, GREEN
 plt.rcParams.update({
     "font.family": "serif", "font.serif": ["STIXGeneral", "DejaVu Serif"], "mathtext.fontset": "stix",

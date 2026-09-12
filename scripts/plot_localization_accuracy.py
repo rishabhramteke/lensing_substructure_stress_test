@@ -103,13 +103,13 @@ def panel(ax, tp, fp, title, stat_line):
     small red stars = false alarms. Redrawn 2026-09-12 after a referee found the lined version unreadable."""
     theta = np.linspace(0, 2 * np.pi, 200)
     for r in (0.6, 1.3):
-        ax.plot(r * np.cos(theta), r * np.sin(theta), color="#3a4368", lw=0.8, ls=":", zorder=0)
+        ax.plot(r * np.cos(theta), r * np.sin(theta), color="#555555", lw=0.8, ls=":", zorder=0)
     if fp:
-        ax.plot([f[0] for f in fp], [f[1] for f in fp], "*", color="#ff5470", ms=4.5, mew=0, alpha=0.45, zorder=1)
+        ax.plot([f[0] for f in fp], [f[1] for f in fp], "*", color="#d62728", ms=4.5, mew=0, alpha=0.45, zorder=1)
     for row in tp:
         tx, ty, gx, gy = row[0], row[1], row[2], row[3]
         d = np.hypot(gx - tx, gy - ty)
-        ax.plot(gx, gy, "o", color="#2fbf71" if d < LOCALIZED_ARCSEC else "#e8973a", ms=3.6, mew=0, alpha=0.9, zorder=2)
+        ax.plot(gx, gy, "o", color="#2ca02c" if d < LOCALIZED_ARCSEC else "#ff7f0e", ms=3.6, mew=0, alpha=0.9, zorder=2)
     ax.set_xlim(-1.8, 1.8); ax.set_ylim(-1.8, 1.8); ax.set_aspect("equal")
     ax.set_xlabel("x (arcsec)"); ax.set_ylabel("y (arcsec)")
     ax.set_title(title, fontweight="bold")
@@ -120,17 +120,17 @@ def offset_hist(ax, tp, color):
     """Bottom row: distribution of |reported - true| for the correct finds, with the 2-px criterion."""
     d = np.array([np.hypot(t[2] - t[0], t[3] - t[1]) for t in tp])
     ax.hist(d, bins=np.linspace(0, 1.2, 25), color=color, alpha=0.85)
-    ax.axvline(LOCALIZED_ARCSEC, color="#2fbf71", lw=1.2)
-    ax.text(0.97, 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", transform=ax.transAxes, ha="right", va="top", fontsize=6.8, color="#2fbf71")
+    ax.axvline(LOCALIZED_ARCSEC, color="#2ca02c", lw=1.2)
+    ax.text(0.97, 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", transform=ax.transAxes, ha="right", va="top", fontsize=6.8, color="#2ca02c")
     ax.set_xlabel("offset from true subhalo (arcsec)"); ax.set_ylabel("correct finds")
 
 
 def shared_legend(fig):
     """One legend for all panels (referee: per-panel legends covered the data)."""
     from matplotlib.lines import Line2D
-    handles = [Line2D([], [], marker="o", color="#2fbf71", ls="none", ms=5, label=f"correct find, localized (≤{LOCALIZED_PX:.0f} px of truth)"),
-               Line2D([], [], marker="o", color="#e8973a", ls="none", ms=5, label="correct find, mislocalized (right call, wrong spot)"),
-               Line2D([], [], marker="*", color="#ff5470", ls="none", ms=7, mew=0, alpha=0.6, label="false alarm (no subhalo present; multipole population)")]
+    handles = [Line2D([], [], marker="o", color="#2ca02c", ls="none", ms=5, label=f"correct find, localized (≤{LOCALIZED_PX:.0f} px of truth)"),
+               Line2D([], [], marker="o", color="#ff7f0e", ls="none", ms=5, label="correct find, mislocalized (right call, wrong spot)"),
+               Line2D([], [], marker="*", color="#d62728", ls="none", ms=7, mew=0, alpha=0.6, label="false alarm (no subhalo present; multipole population)")]
     fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=7, frameon=False, bbox_to_anchor=(0.5, -0.01))
 
 
@@ -171,10 +171,10 @@ def main():
               f"localized ≤{LOCALIZED_PX:.0f} px: {100*(b_d<LOCALIZED_ARCSEC).mean():.0f}% of {len(b_tp)} correct finds · median offset {np.median(b_d):.2f}″")
     panel(axes[-1], c_tp, c_fp, "Family C (U-Net)",
           f"localized ≤{LOCALIZED_PX:.0f} px: {100*(c_d<LOCALIZED_ARCSEC).mean():.0f}% of {len(c_tp)} correct finds · median offset {np.median(c_d):.2f}″")
-    offset_hist(axes2[1][0], a_tp, "#D55E00")
+    offset_hist(axes2[1][0], a_tp, "#ff7f0e")
     if b_tp is not None:
-        offset_hist(axes2[1][1], b_tp, "#009E73")
-    offset_hist(axes2[1][-1], c_tp, "#0072B2")
+        offset_hist(axes2[1][1], b_tp, "#2ca02c")
+    offset_hist(axes2[1][-1], c_tp, "#1f77b4")
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     shared_legend(fig)
     fig.savefig(OUT / f"localization_accuracy{suffix}.png", dpi=200, bbox_inches="tight")
