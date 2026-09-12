@@ -1,0 +1,96 @@
+{
+  "c15": {
+    "label": "joint vs frozen, c=15, first 100 lenses of the seed-0 subsamples (results/baseline_a_joint_null_c15)",
+    "joint": {
+      "threshold_10pct_fpr": 7.228810934695412,
+      "n_no_subhalo_reliable": 97,
+      "fpr_multipole_a3": {
+        "at_10pct": 1.0,
+        "at_20": 0.9782608695652174,
+        "at_100": 0.9021739130434783,
+        "n_reliable": 92
+      },
+      "fpr_clean": {
+        "at_20": 0.010309278350515464,
+        "at_100": 0.010309278350515464
+      },
+      "multipole_median_dchi2": 737.3078481883022
+    },
+    "frozen_same_lenses": {
+      "threshold_10pct_fpr": -10.68467728114606,
+      "n_no_subhalo_reliable": 98,
+      "fpr_multipole_a3": {
+        "at_10pct": 0.7727272727272727,
+        "at_20": 0.6363636363636364,
+        "at_100": 0.3522727272727273,
+        "n_reliable": 88
+      },
+      "fpr_clean": {
+        "at_20": 0.01020408163265306,
+        "at_100": 0.0
+      },
+      "multipole_median_dchi2": 58.114095397973415,
+      "c60": {
+        "n_positive_reliable": 0,
+        "n_detected": 0,
+        "frac_localized_2px": null,
+        "n_localized": 0,
+        "median_offset_arcsec": null,
+        "completeness": {
+          "8.0-8.5": {
+            "n": 0,
+            "completeness": null
+          },
+          "8.5-9.0": {
+            "n": 0,
+            "completeness": null
+          },
+          "9.0-9.5": {
+            "n": 0,
+            "completeness": null
+          },
+          "9.5-10.0": {
+            "n": 0,
+            "completeness": null
+          },
+          "10.0-10.5": {
+            "n": 0,
+            "completeness": null
+          },
+          "10.5-11.0": {
+            "n": 0,
+            "completeness": null
+          }
+        },
+        "mass_error_localized": {
+          "n": 0,
+          "median": null,
+          "n_low": 0,
+          "n_within_0p25": 0,
+          "n_within_0p5": 0
+        },
+        "mass_error_all_detected": {
+          "median": null,
+          "n_low": 0,
+          "n": 0
+        },
+        "median_dchi2_detected": null
+      }
+    },
+    "multipole_joint_minus_frozen_dchi2": {
+      "n": 87,
+      "median": 651.6560260093811,
+      "frac_positive": 1.0
+    },
+    "clean_joint_minus_frozen_dchi2": {
+      "n": 96,
+      "median": 64.58470263419349
+    }
+  },
+  "null_control": {
+    "median_polish_gain_multipole": 7.559401637990959e-08,
+    "median_polish_gain_clean": 1.4551915228366852e-11,
+    "median_dchi2_vs_unpolished_multipole": 737.3078489557402,
+    "median_dchi2_vs_polished_multipole": 737.3078481883022
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "population": "no_subhalo",
+  "n": 100,
+  "seed": 1,
+  "subsample_n": 300,
+  "concentration_assumed": "15",
+  "joint_refit_per_cell": true,
+  "grid": "3 radii x 8 angles, mass free in [7.5, 11.5]",
+  "null_control": "delta_chi2 relative to the smooth fit continued with the joint fits' total budget (max_nfev 24*40*14, tight tolerances)",
+  "chi2_dof_unreliable_threshold": 10.0,
+  "n_unreliable_fits": 3,
+  "elapsed_s": 1790.0656249523163,
+  "workers": 3
+}

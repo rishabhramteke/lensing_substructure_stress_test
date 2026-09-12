@@ -728,6 +728,31 @@ Where the blind fit converges (95% of clean lenses, ~80% of subhalo lenses) it l
 optimum; the idealization only changes *how often* the fit fails, and those failures are already
 reported as exclusions. Paper: Sect. 3.2 "What the numbers mean".
 
+### Joint-scan null control (referee round 3, point 1; 2026-09-12)
+
+`run_baseline_a_joint.py` now continues the 13-parameter smooth fit from its solution with the 24 joint fits'
+total budget (max_nfev 24×40×14, default tolerances) before scanning; Δχ² is measured against the polished smooth
+fit. `results/baseline_a_joint_null_c15/{no_subhalo,multipole_m4_a3}` (100 lenses each; evaluated by
+`evaluate_joint_vs_frozen.py --joint-root ... --tag _null`): **polish gain = 0.0 on every lens** (median and max,
+97 clean + 92 multipole; optimizer stops after 2 evaluations) → the smooth fits were converged and the joint
+numbers are unchanged (thr +7.2; multipole FPR 100 / 98 / 90% at 10%/Δχ²>20/>100; median Δχ² 737). The joint
+improvement is the perturber's, not a local optimum's. Paper: Table `tab:joint` row + caption, Sect. 4.2.
+
+### Full 1000-lens populations (referee round 3, point 4; 2026-09-12)
+
+`results/baseline_a_full/` (frozen scan, c=15 template, all 5 Tier-0 populations, 1000 lenses each) and
+`results/baseline_b_full/fitted/`; `scripts/evaluate_full_populations.py` → `results/full_populations.json`,
+`paper/tables/full_populations.tex` (Wilson 68% intervals). The three 300-lens subsamples overlap (83–105 lenses
+per pair, 647 distinct) — stated in the paper — so the full runs are the independent check:
+
+| | A c60 (9–9.5 / 9.5–10 / 10–10.5 / 10.5–11) | A c15 | A FPR a1 / a3 | A flip | B c60 | B c15 | B FPR | B flip |
+|---|---|---|---|---|---|---|---|---|
+| 3 × 300 subsamples | 40±6 / 69±3 / 89±7 / 83±2 | 28 / 58 / 78 / 89 | 32.1 / 76.6 | 55:10 | 65±9 / 88±1 / 94±3 / 96±7 | 17 / 56 / 77 / 95 | 38.7 / 85.8 | 55:8 |
+| **full 1000** | **36±4 / 69±4 / 89±3 / 81±5** | 25 / 59 / 78 / 84 | **31.5 [30–33] / 76.7 [75–78]** | 63:8 (732 pairs) | **58±4 / 87±3 / 96±2 / 93±3** | 23 / 52 / 79 / 94 | **39.6 [38–41] / 84.7 [83.5–86]** | 177:29 |
+
+Everything within the subsample scatter; per-bin n = 124–163 (59 in A's top c60 bin). Paper: Sect. 4.1 paragraph +
+Table `tab:fullpop`; Fig. 2 error bars are now binomial for A/B (full populations) and seed s.d. ⊕ binomial for the U-Net.
+
 ### Multipole in the macro-model (referee round 3, point 2; 2026-09-12)
 
 `run_baseline_a.py --macro-multipole` (fit.py: `MULTIPOLE` m=4 term with free a_m, phi_m appended to the
