@@ -1439,3 +1439,19 @@ training at realistic concentrations (start at c=60, anneal toward the ΛCDM rel
 source-aware preprocessing for a Tier-1 U-Net; posterior coverage (`tarp`/SBC) once any
 population method works; instrument transfer to Euclid/Rubin resolution; scaling training to
 ~10⁵ images to see whether the RQ6 completeness gap closes.
+
+## 2026-09-12 (late): A&A class upgraded to v9.4
+
+- `paper/aa.cls` + `paper/aa.bst` replaced by the official macro package v9.4 (aa.cls dated
+  2025-11-27; `macro-latex-aa.zip` downloaded by hand from aanda.org — the site returns 403 to
+  curl). The 2016 v9.0 files are kept in `paper/aa_kit/aa_9.0_previous/` for rollback only.
+- Consequences under 9.4: `\email{}` in `\institute` is ignored at compile time (reserved for
+  metadata extraction) → e-mail moved to `\corrauth{}` in the `\author` line, rendered as the
+  "Corresponding author" footnote; margin line numbers are hard-coded (referee copy, intended);
+  the 28 natbib "multiply defined" warnings of v9.0 disappear (9.2 "fix hyperlinks").
+- 9.4 counts the abstract: it was **461 words**, not the ~300 previously logged (the earlier
+  count evidently missed the structured-abstract fields). Rewritten to ≤300 by the class's own
+  count (all headline numbers kept; 'customary' and hedging words dropped; conclusions shortened).
+- `\titlerunning{Assumptions under stress: a common-suite test of substructure detectors}` and
+  `\authorrunning{R. Ramteke}` added (without them 9.4 prints a request into the body text).
+- Build: 17 pages, 0 errors, 0 undefined, 0 overfull, 0 class warnings.
