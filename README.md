@@ -13,10 +13,10 @@ regenerate every population, every fit and every number in the paper.
 | `src/detector/` | Family C: U-Net, dataset, training |
 | `src/baseline_d/` | the per-lens NPE stand-in (Appendix A, negative result) |
 | `scripts/generate_tier0.py` | writes any population from a named config and a seed (`--config`, `--n`, `--seed`, `--out`) |
-| `scripts/run_baseline_a.py`, `run_baseline_a_joint.py` | Family A scans (frozen and joint-refit macro-model) |
+| `scripts/run_baseline_a.py`, `run_baseline_a_joint.py` | Family A scans: frozen macro-model (`--macro-multipole --macro-multipole-orders 3,4` adds free multipole terms) and joint re-fit at every grid cell with the polish and macro-basin controls (every cell's solution stored) |
 | `scripts/run_family_b.py`, `launch_family_b.sh` | Family B: `PyAutoLens` `potential_correction` driver |
 | `scripts/train_detector.py`, `evaluate_detector.py` | Family C training and scoring |
-| `scripts/evaluate_*.py`, `aggregate_*.py`, `conservative_completeness.py`, `reweight_by_mass_function.py`, `oracle_position_mass_test.py`, `joint_refit_mass_test.py`, `evaluate_lens_light.py`, `noise_decoy_control.py`, `make_decoy_populations.py` | every evaluation in the paper |
+| `scripts/evaluate_*.py`, `aggregate_*.py`, `conservative_completeness.py`, `reweight_by_mass_function.py`, `oracle_position_mass_test.py`, `joint_refit_mass_test.py`, `evaluate_lens_light.py`, `noise_decoy_control.py`, `make_decoy_populations.py` | every evaluation in the paper, `completeness_vs_signal.py` (completeness vs perturbation S/N and projected mass), `evaluate_multipole_orders.py` (Table on multipole freedom), `evaluate_joint_vs_frozen.py` (joint vs frozen scan, basin control) |
 | `scripts/make_paper_figures.py` | every figure in the paper (`python scripts/make_paper_figures.py fig5` rebuilds one) |
 | `data/<population>/manifest.json`, `truth.jsonl` | the hidden truth and regeneration recipe for every population used (image arrays are not stored; regenerate with `generate_tier0.py` from the manifest's config and seed) |
 | `checkpoints/unet_*` | trained U-Net weights (Tier-0 seeds, 30k scale-up, Tier-1, c–M training) |

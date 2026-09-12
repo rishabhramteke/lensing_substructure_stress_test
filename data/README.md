@@ -14,6 +14,7 @@ nothing in `data/` should be hand-edited.
 | `no_subhalo/` | 1000 | Subhalo off entirely | RQ2 control: zero-subhalo baseline for false-positive-rate measurement |
 | `multipole_m4_a3/` | 1000 | No subhalo, m=4 multipole at 3% of θ_E | RQ2 confounder: O'Riordan+2025's amplitude where the population signal goes to zero |
 | `multipole_m4_a1/` | 1000 | No subhalo, m=4 multipole at 1% of θ_E | RQ2 confounder, weaker amplitude |
+| `multipole_m3_a3/` | 1000 | No subhalo, m=3 multipole at 3% of θ_E (generation seed 2: same macro-lenses and sources as `multipole_m4_a3/`) | Round-4 referee test: the lens-shape form the m=4 macro-model fix was not built for |
 
 Each folder contains:
 - `images_full_noiseless.npy`, `images_control_noiseless.npy` — float32 `(n, 64, 64)`. "Control" is the paired ablation (no-subhalo, or no-multipole if no subhalo is present) rendered with the *same* macro-model, source and noise draw — so `full - control` is exactly the perturbation's signature, nothing else.

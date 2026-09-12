@@ -1,0 +1,20 @@
+{
+  "population": "test_fixed60",
+  "n": 100,
+  "seed": 0,
+  "subsample_n": 300,
+  "skipped_indices": [],
+  "concentration_assumed": "15",
+  "joint_refit_per_cell": true,
+  "grid": "3 radii x 8 angles, mass free in [7.5, 11.5]",
+  "controls": {
+    "polish": "smooth fit continued from its solution with max_nfev 24*40*14",
+    "macro_basin": "every cell's joint macro solution, perturber removed, 13 params re-optimised (max_nfev 40*14); delta_chi2 is measured against the best smooth chi2 over all starts"
+  },
+  "lens_timeout_s": 900.0,
+  "n_truncated": 2,
+  "chi2_dof_unreliable_threshold": 10.0,
+  "n_unreliable_fits": 14,
+  "elapsed_s": 2937.8860428333282,
+  "workers": 3
+}

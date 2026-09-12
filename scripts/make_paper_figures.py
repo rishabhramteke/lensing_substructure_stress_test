@@ -160,9 +160,9 @@ def fig2_completeness():
     a_full = _binomial_from_scans("results/baseline_a_full") if _complete("results/baseline_a_full") else None
     b_full = _binomial_from_scans("results/baseline_b_full/fitted") if _complete("results/baseline_b_full/fitted") else None
     fig, axes = plt.subplots(1, 3, figsize=(DBL_W, 2.6), sharey=True)
-    panels = [(axes[0], u, None, "Family C — U-Net", C_UNET, f"n = {u['n_seeds']} seeds; bars: seed s.d. ⊕ binomial"),
-              (axes[1], a, a_full, "Family A — parametric scan", C_A, "full 1 000-lens populations; bars: 68% binomial" if a_full else f"n = {a['n_seeds']} seeds"),
-              (axes[2], b, b_full, "Family B — potential correction", C_B, "full 1 000-lens populations; bars: 68% binomial" if b_full else f"n = {nb} seed sets")]
+    panels = [(axes[0], u, None, "Family C — U-Net", C_UNET, f"n = {u['n_seeds']} seeds"),
+              (axes[1], a, a_full, "Family A — parametric scan", C_A, "full populations, n = 1 000" if a_full else f"n = {a['n_seeds']} seeds"),
+              (axes[2], b, b_full, "Family B — potential correction", C_B, "full populations, n = 1 000" if b_full else f"n = {nb} seed sets")]
     for ax, d, full, name, col, sub in panels:
         for key, ls, mk, lab, c in [("completeness_c60", "-", "o", "c = 60 (literature fiducial)", col), ("completeness_c15", "--", "s", "c = 15 (Tsang+2024's low-c ablation)", GRAY)]:
             if full is not None:
@@ -432,11 +432,11 @@ def fig12_summary():
         ("concentration $c=60\\to15$\n(completeness, $10^{10}$--$10^{10.5}\\,M_\\odot$)",
          [("89 $\\to$ 78%\nno collapse", GREEN), ("94 $\\to$ 77%;\n65 $\\to$ 17% below $10^{9.5}$", AMBER), ("51 $\\to$ 15%\ncollapse to chance", RED)]),
         ("lens-shape multipole, $a_4=3\\%\\,\\theta_E$\n(false positives, subhalo-free)",
-         [("77% (100% joint re-fit);\n10% with $m{=}4$ in macro", AMBER), ("86%", RED), ("11%\nunmoved", GREEN)]),
+         [("77% (100% joint re-fit);\n$m{=}4$ term: 10%, but 83% on $m{=}3$", AMBER), ("86%", RED), ("11%\nunmoved", GREEN)]),
         ("non-physical decoy, 10$\\sigma$ bump\n(false positives)",
          [("2--4%\nignores it", GREEN), ("63--76%\nresponds most", RED), ("19--21%\nfires", AMBER)]),
         ("real COSMOS source (Tier 1)",
-         [("fits misspecified\n($\\chi^2$/dof 58--79)", AMBER), ("not run", GREY), ("AUC 0.62 $\\to$ 0.48\nchance", RED)]),
+         [("fits misspecified\n($\\chi^2$/dof 58--79)", AMBER), ("281/300 gated;\nnull $\\times$20, chance", RED), ("AUC 0.62 $\\to$ 0.48\nchance", RED)]),
         ("lens light, single-S\u00e9rsic subtraction\n(clean FPR at $\\Delta\\chi^2>20$ / completeness)",
          [("0.2 $\\to$ 25%;\ncompleteness halves", RED), ("null $\\times$10;\nchance", RED), ("AUC 0.55;\nchance", RED)]),
         ("lens light, double-S\u00e9rsic subtraction",
@@ -469,22 +469,33 @@ def fig12_summary():
 # Fig 13 -- completeness vs projected signal: is the concentration collapse a property of the signal?
 # ======================================================================
 def fig13_signal():
+    """Completeness vs two concentration-independent signal variables on the full 1 000-lens populations:
+    top, the perturbation S/N a detector sees; bottom, the projected mass within 0.2" (what a peak statistic measures)."""
     d = load("results/completeness_vs_signal.json")
-    edges = np.arange(7.0, 10.01, 0.5); mids = 0.5 * (edges[:-1] + edges[1:])
-    fig, axes = plt.subplots(1, 3, figsize=(DBL_W, 2.6), sharey=True)
-    for ax, (fam, name, col) in zip(axes, (("A", "Family A — parametric scan", C_A), ("B", "Family B — potential correction", C_B), ("C", "Family C — U-Net", C_UNET))):
-        for c, ls, mk, lab, colr in (("c60", "-", "o", "$c=60$ population", col), ("c15", "--", "s", "$c=15$ population", GRAY)):
-            if c not in d["families"][fam]: continue
-            mp = np.array(d["families"][fam][c]["log10_Mproj"]); det = np.array(d["families"][fam][c]["detected"])
-            x, y, lo, hi = [], [], [], []
-            for a, b, m in zip(edges[:-1], edges[1:], mids):
-                sel = (mp >= a) & (mp < b)
-                if sel.sum() >= 8:
-                    p, l, h = wilson(det[sel].sum(), sel.sum()); x.append(m); y.append(100 * p); lo.append(100 * (p - l)); hi.append(100 * (h - p))
-            ax.errorbar(x, y, yerr=[lo, hi], fmt=mk + ls, color=colr, ms=3.5, capsize=2, lw=1.1, label=lab)
-        ax.axhline(10, color=BLACK, ls=":", lw=0.7); ax.set_ylim(0, 100); ax.set_title(name, fontsize=8)
-        ax.set_xlabel(r"$\log_{10} M_{\rm proj}(<0.1'')\,[M_\odot]$")
-    axes[0].set_ylabel("completeness at 10% FPR  [%]"); axes[0].legend(loc="upper left", fontsize=6.5)
+    rows = [("log10_snr", r"$\log_{10}$ S/N$_{\rm pert}$", 0.25),
+            ("log10_Mproj_0p2", r"$\log_{10} M_{\rm proj}(<0.2'')\,[M_\odot]$", 0.5)]
+    fig, axes = plt.subplots(2, 3, figsize=(DBL_W, 5.1), sharey=True, sharex="row", gridspec_kw={"hspace": 0.55})
+    fams = (("A", "Family A — parametric scan", C_A), ("B", "Family B — potential correction", C_B), ("C", "Family C — U-Net", C_UNET))
+    for (var, xlab, w), axrow in zip(rows, axes):
+        for ax, (fam, name, col) in zip(axrow, fams):
+            for c, ls, mk, lab, colr in (("c60", "-", "o", "$c=60$ population", col), ("c15", "--", "s", "$c=15$ population", GRAY)):
+                if c not in d["families"][fam]: continue
+                xv = np.array(d["families"][fam][c][var]); det = np.array(d["families"][fam][c]["detected"])
+                lo0 = np.floor(xv.min() / w) * w; edges = np.arange(lo0, xv.max() + w, w)
+                x, y, lo, hi = [], [], [], []
+                for a, b in zip(edges[:-1], edges[1:]):
+                    sel = (xv >= a) & (xv < b)
+                    if sel.sum() >= d["min_n_per_bin"]:
+                        p, l, h = wilson(det[sel].sum(), sel.sum()); x.append(0.5 * (a + b)); y.append(100 * p); lo.append(100 * (p - l)); hi.append(100 * (h - p))
+                ax.errorbar(x, y, yerr=[lo, hi], fmt=mk + ls, color=colr, ms=3.5, capsize=2, lw=1.1, label=lab)
+            comp = d["comparison"][fam][var]
+            zmax = max(abs(r["z"]) for r in comp) if comp else 0
+            ztxt = f"$c{{=}}60$ vs $c{{=}}15$: largest $|z|$ = {zmax:.1f} over {len(comp)} bins"
+            ax.axhline(10, color=BLACK, ls=":", lw=0.7); ax.set_ylim(0, 100)
+            ax.set_title((name + "\n" if var == "log10_snr" else "") + ztxt, fontsize=7.2 if var == "log10_snr" else 6.8)
+            ax.set_xlabel(xlab)
+    for ax in axes[:, 0]: ax.set_ylabel("completeness at 10% FPR  [%]")
+    axes[0, 0].legend(loc="upper left", fontsize=6.5)
     save(fig, "fig13_signal")
 
 

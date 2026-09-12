@@ -14,24 +14,44 @@ PARAM_NAMES = ["theta_E", "gamma", "e1", "e2", "g1", "g2", "src_x", "src_y", "R_
 
 N_MACRO = 13          # EPL+shear+Sersic-source parameters
 N_LENS_LIGHT = 5      # optional single-Sersic lens light: amp, R, n, e1, e2 (centre fixed at the lens centre)
-N_MULTIPOLE = 2       # optional m=4 multipole in the macro-model: a_m, phi_m (added 2026-09-12, referee round 3)
-MULTIPOLE_M = 4
+N_MULTIPOLE = 2       # parameters per multipole order in the macro-model: a_m, phi_m (added 2026-09-12, referee round 3)
+MULTIPOLE_ORDERS = (4,)   # orders carried when multipoles are switched on; (3, 4) tests the cost of the extra freedom (round 4)
+
+
+def set_multipole_orders(orders):
+    """Choose which multipole orders a `macro_multipole` macro-model carries (process-wide; one configuration per run)."""
+    global MULTIPOLE_ORDERS
+    MULTIPOLE_ORDERS = tuple(int(m) for m in orders)
 
 
 def _layout(vec):
-    """(n_lens_light_components, has_multipole) from the vector length: 13 + 5*n_ll + 2*mp."""
+    """(n_lens_light_components, n_multipole_orders) from the vector length 13 + 5*n_ll + 2*n_mp,
+    n_ll in {0,1,2}, n_mp in {0,1,2}: all nine lengths are distinct, so the layout is unambiguous."""
     n_extra = len(vec) - N_MACRO
-    has_mp = (n_extra % N_LENS_LIGHT) == N_MULTIPOLE
-    n_ll = (n_extra - (N_MULTIPOLE if has_mp else 0)) // N_LENS_LIGHT
-    return n_ll, has_mp
+    n_mp = {0: 0, 2: 1, 4: 2}[n_extra % N_LENS_LIGHT]
+    n_ll = (n_extra - N_MULTIPOLE * n_mp) // N_LENS_LIGHT
+    return n_ll, n_mp
 
 
-def _sim(kwargs_band, num_pix, model_list, lens_light=0, multipole=False):
-    """`lens_light` = number of single-Sersic lens-light components (0, 1 or 2); `multipole` adds an
-    m=4 MULTIPOLE term to the macro-model, inserted before any TNFW so the kwargs order matches _unpack3."""
-    if multipole and "MULTIPOLE" not in model_list:
+def _n_multipole(multipole):
+    """Normalise the `multipole` argument: False/0 -> 0, True -> len(MULTIPOLE_ORDERS), a sequence of orders -> its length, an int -> itself."""
+    if multipole is True:
+        return len(MULTIPOLE_ORDERS)
+    if isinstance(multipole, (tuple, list)):
+        return len(multipole)
+    return int(multipole or 0)
+
+
+def _sim(kwargs_band, num_pix, model_list, lens_light=0, multipole=0):
+    """`lens_light` = number of single-Sersic lens-light components (0, 1 or 2); `multipole` = number of
+    MULTIPOLE terms (or True / a sequence of orders) added to the macro-model, inserted before any TNFW so
+    the kwargs order matches _unpack3."""
+    n_mp = _n_multipole(multipole)
+    if n_mp:
         model_list = list(model_list)
-        model_list.insert(model_list.index("TNFW") if "TNFW" in model_list else len(model_list), "MULTIPOLE")
+        pos = model_list.index("TNFW") if "TNFW" in model_list else len(model_list)
+        for _ in range(n_mp - model_list.count("MULTIPOLE")):
+            model_list.insert(pos, "MULTIPOLE")
     kwargs_model = {"lens_model_list": model_list, "source_light_model_list": ["SERSIC_ELLIPSE"]}
     n_ll = int(lens_light)
     if n_ll:
@@ -62,10 +82,13 @@ def _unpack3(vec):
     light; each further block of 5 is one Sersic lens-light component (1 = the pipeline's
     usual single Sersic, 2 = a correctly specified double Sersic; added 2026-09-11/12)."""
     kl, ks = _unpack(vec)
-    n_ll, has_mp = _layout(vec)
-    if has_mp:   # multipole block sits at the very end of the vector
-        a_m, phi_m = vec[-2], vec[-1]
-        kl = kl + [{"m": MULTIPOLE_M, "a_m": a_m, "phi_m": phi_m, "center_x": 0.0, "center_y": 0.0, "r_E": vec[0]}]
+    n_ll, n_mp = _layout(vec)
+    if n_mp:   # multipole block(s) sit at the very end of the vector, one (a_m, phi_m) pair per order in MULTIPOLE_ORDERS
+        if n_mp != len(MULTIPOLE_ORDERS):
+            raise ValueError(f"vector carries {n_mp} multipole orders but MULTIPOLE_ORDERS={MULTIPOLE_ORDERS}; call set_multipole_orders first")
+        mp = vec[-N_MULTIPOLE * n_mp:]
+        for k, m in enumerate(MULTIPOLE_ORDERS):
+            kl = kl + [{"m": int(m), "a_m": mp[2 * k], "phi_m": mp[2 * k + 1], "center_x": 0.0, "center_y": 0.0, "r_E": vec[0]}]
     kll = None
     if n_ll:
         kll = []
@@ -137,7 +160,7 @@ SCALE = [0.5, 0.5, 0.3, 0.3, 0.15, 0.15, 0.3, 0.3, 0.15, 1.5, 0.3, 0.3, 100.0]
 # single-Sersic lens light (amp, R, n, e1, e2): generic bounds/scales; centre fixed at the lens centre
 BOUNDS_LL = [(0.1, 2000.0), (0.05, 3.0), (0.5, 8.0), (-0.6, 0.6), (-0.6, 0.6)]
 SCALE_LL = [50.0, 0.3, 2.0, 0.3, 0.3]
-# m=4 multipole in the macro-model (a_m in the same units as the simulator's, phi_m in radians)
+# one multipole order in the macro-model (a_m in the same units as the simulator's, phi_m in radians)
 BOUNDS_MP = [(-0.15, 0.15), (-np.pi, np.pi)]
 SCALE_MP = [0.02, 0.5]
 
@@ -167,7 +190,10 @@ def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, ma
     rng = rng or np.random.default_rng(0)
     has_ll = truth.get("lens_light") is not None
     n_ll = int(lens_light_components) if has_ll else 0
-    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=n_ll, multipole=macro_multipole)
+    if isinstance(macro_multipole, (tuple, list)):
+        set_multipole_orders(macro_multipole)
+    n_mp = _n_multipole(macro_multipole)
+    sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=n_ll, multipole=n_mp)
     image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
     noise_std = sim.estimate_noise(data)
 
@@ -188,8 +214,8 @@ def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, ma
         inits = [[amp_guess, 0.5, 4.0, 0.0, 0.0], [amp_guess * 0.3, 1.0, 1.0, 0.0, 0.0]][:n_ll]
         for ini in inits:
             x_init = np.concatenate([x_init, ini]); bounds += BOUNDS_LL; scale += SCALE_LL
-    if macro_multipole:
-        # the macro-model now carries an m=4 multipole, initialised at zero amplitude (never from the truth)
+    for _ in range(n_mp):
+        # the macro-model now carries one multipole term per order in MULTIPOLE_ORDERS, each initialised at zero amplitude (never from the truth)
         x_init = np.concatenate([x_init, [0.0, 0.0]]); bounds += BOUNDS_MP; scale += SCALE_MP
     x_init = np.clip(x_init, [b[0] for b in bounds], [b[1] for b in bounds])
 

@@ -16,13 +16,26 @@ BINS = [(8.0, 8.5), (8.5, 9.0), (9.0, 9.5), (9.5, 10.0), (10.0, 10.5), (10.5, 11
 truth60 = [json.loads(l) for l in open(ROOT / "data/test_fixed60/truth.jsonl")]
 
 
-def load(p):
-    return {r["index"]: r for r in (json.loads(l) for l in open(p))} if p.exists() else None
+def load(p, stat_key="delta_chi2"):
+    """Records by index; `stat_key` selects which stored statistic is scored as `delta_chi2`
+    (the round-4 joint runs carry the basin-corrected `delta_chi2` plus the raw and polished-only forms)."""
+    if not p.exists():
+        return None
+    recs = {}
+    for l in open(p):
+        try:
+            r = json.loads(l)
+        except json.JSONDecodeError:   # a run still writing
+            continue
+        if stat_key != "delta_chi2":
+            r = dict(r); r["delta_chi2"] = r[stat_key]
+        recs[r["index"]] = r
+    return recs
 
 
-def evaluate(root_joint, root_frozen, label):
-    out = {"label": label}
-    J = {n: load(ROOT / root_joint / n / "scan_results.jsonl") for n in ("no_subhalo", "multipole_m4_a3", "test_fixed60")}
+def evaluate(root_joint, root_frozen, label, stat_key="delta_chi2"):
+    out = {"label": label, "joint_statistic": stat_key}
+    J = {n: load(ROOT / root_joint / n / "scan_results.jsonl", stat_key) for n in ("no_subhalo", "multipole_m4_a3", "test_fixed60")}
     F = {n: load(ROOT / root_frozen / n / "scan_results.jsonl") for n in ("no_subhalo", "multipole_m4_a3", "test_fixed60")}
     for kind, R in (("joint", J), ("frozen_same_lenses", F)):
         res = {}
@@ -77,6 +90,26 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--joint-root", default="results/baseline_a_joint_c15"); ap.add_argument("--tag", default="")
     args = ap.parse_args()
     results = {"c15": evaluate(args.joint_root, "results/baseline_a", f"joint vs frozen, c=15, first 100 lenses of the seed-0 subsamples ({args.joint_root})")}
+    # round 4: the macro-basin control. `delta_chi2` in the round-4 runs is already basin-corrected; score the raw form too.
+    probe = ROOT / args.joint_root / "no_subhalo" / "scan_results.jsonl"
+    first = json.loads(open(probe).readline()) if probe.exists() else {}
+    if "basin_gain" in first:
+        results["c15_raw_statistic"] = evaluate(args.joint_root, "results/baseline_a", "same runs, scored with the uncorrected smooth chi2 (round-3 form)", stat_key="delta_chi2_vs_unpolished_smooth")
+        bc = {}
+        for pop in ("no_subhalo", "multipole_m4_a3", "test_fixed60"):
+            R = load(ROOT / args.joint_root / pop / "scan_results.jsonl")
+            if not R:
+                continue
+            rel = [r for r in R.values() if r["reliable_fit"]]
+            g = np.array([r["basin_gain"] for r in rel]); gb = np.array([r["basin_gain_from_best_cell"] for r in rel])
+            dj = np.array([r["delta_chi2_vs_unpolished_smooth"] for r in rel])
+            bc[pop] = {"n_reliable": len(rel), "n_truncated": int(sum(r["truncated"] for r in R.values())),
+                       "basin_gain_median": float(np.median(g)), "basin_gain_p90": float(np.quantile(g, 0.9)), "basin_gain_max": float(g.max()),
+                       "frac_gain_gt_1": float((g > 1).mean()), "frac_gain_gt_20": float((g > 20).mean()), "frac_gain_gt_100": float((g > 100).mean()),
+                       "frac_gain_over_half_of_raw_dchi2": float((g > 0.5 * np.clip(dj, 1e-9, None)).mean()),
+                       "best_cell_gain_median": float(np.median(gb)), "best_cell_gain_max": float(gb.max()),
+                       "polish_gain_max": float(max(r["chi2_polish_gain"] for r in rel))}
+        results["basin_control"] = bc
     # null-control fields, if the joint run carries them
     jr = ROOT / args.joint_root / "multipole_m4_a3" / "scan_results.jsonl"
     if jr.exists():

@@ -1455,3 +1455,91 @@ population method works; instrument transfer to Euclid/Rubin resolution; scaling
 - `\titlerunning{Assumptions under stress: a common-suite test of substructure detectors}` and
   `\authorrunning{R. Ramteke}` added (without them 9.4 prints a request into the body text).
 - Build: 17 pages, 0 errors, 0 undefined, 0 overfull, 0 class warnings.
+
+## 2026-09-12 (night): round 10 — fourth external report (7/10, "minor bordering on moderate")
+
+Report's two gating points, both about the newest material, plus defects the revision introduced.
+
+### Signal variable (point 2) — recomputed on the FULL 1 000-lens populations, three variables
+`scripts/completeness_vs_signal.py` now records, per subhalo lens, log10 M_proj(<0.1"), log10 M_proj(<0.2")
+and the perturbation S/N (sqrt Σ((I_full − I_no_sub)/σ)² from the noiseless twins + lenstronomy's noise
+model), with detections from `results/baseline_a_full`, `results/baseline_b_full/fitted` and the U-Net (every
+lens). Bins need ≥20 lenses of each population. Output `results/completeness_vs_signal.json`,
+`paper/tables/signal_variables.tex`, Fig. `fig13_signal` (2×3: S/N top, M_proj(<0.2") bottom).
+
+The referee was right about 0.1": at equal aperture mass the c=15 population is detected MORE often
+(A +16 pts mean, z=6.7 in 8.0–8.5; B +5, z=2.6) — most of a diffuse perturber's deflection sits outside 0.1".
+The honest picture (c15 − c60 at equal signal, mean over bins / largest |z|):
+
+| family | M_proj(<0.1") | M_proj(<0.2") | S/N_pert |
+|---|---|---|---|
+| A scan | +16 / 6.7 | +6 / 4.0 | −3 / 2.0 (10 bins) |
+| B pot. corr. | +5 / 2.6 | −5 / 1.8 (4 bins) | −15 / 5.2 |
+| C U-Net | −2 / 2.7 | −5 / 6.5 | −14 / 7.2 |
+
+So: A's curves coincide against total perturbation S/N (its statistic is a total χ²); B's coincide against the
+compact projected mass within 0.2" but NOT against S/N (its statistic is a δκ peak, i.e. compact mass); the
+U-Net's coincide against neither (53% vs 8% at log S/N 2.75–3.0). The round-9 wording "the two physical
+methods coincide at equal M_proj(<0.1")" was wrong in detail and read off 300-lens subsamples; replaced in
+abstract, Sect. 4.1, Fig. 13 caption, Table tab:signal, Conclusion 1, Sect. 5.1.
+
+### Macro-basin control (point 1) — `run_baseline_a_joint.py` rewritten
+The round-3 "polish" control (continue the converged smooth fit) only tests local convergence. New control:
+every one of the 24 cells' joint macro solutions is taken, the perturber removed, and the 13 macro parameters
+re-optimised from there (max_nfev 40×14). `delta_chi2` is now min(smooth χ² over all starts) − min_cell χ²_joint;
+the raw form is kept as `delta_chi2_vs_unpolished_smooth`, every cell's solution in `cells`. Runs on the same
+first-100 lenses (seeds 1/3/0; index 32 of the multipole population skipped as before; 900 s per-lens wall-clock
+guard) → `results/baseline_a_joint_basin_c15/`. Evaluator `evaluate_joint_vs_frozen.py --joint-root ...` adds
+`c15_raw_statistic` and a `basin_control` block. Results appended below when the runs finish.
+
+### m=4 fix caveat — `fit.py` generalised to several multipole orders
+`MULTIPOLE_ORDERS` / `set_multipole_orders()`, layout inferred from the vector length (13 + 5 n_ll + 2 n_mp,
+all nine combinations distinct). `run_baseline_a.py --macro-multipole --macro-multipole-orders 3,4`.
+New population `data/multipole_m3_a3` (n=1000, generation seed 2 = same macro-lenses and sources as
+`multipole_m4_a3`). Runs (300-lens seed-matched subsamples): bare EPL on m3 (`results/baseline_a_m3truth`),
+EPL+m4 on m3 (`results/baseline_a_mpmacro/multipole_m3_a3`), EPL+m3+m4 on clean / m4 a1 / m4 a3 / m3 a3 / c60
+(`results/baseline_a_mp34`). `scripts/evaluate_multipole_orders.py` → `paper/tables/mpmacro.tex` (Table
+tab:mpmacro is now generated; includes the gate-rejection row the referee asked for: clean 5 → 10 of 300 with
+the m=4 term). Results appended below when the runs finish.
+
+### Defects fixed
+Fig. 11 (summary grid) B/Tier-1 cell was still "not run" (the earlier edit had hit a different string) → "281/300
+gated; null ×20, chance". Fig. 3 subtitles shortened ("full populations, n = 1 000") so neighbouring panels no
+longer overprint; caption's "n=3" for A and B replaced. Sect. 5.1 duplicated sentence merged. Sect. 4.2 paragraph
+2 (~750 words) split into four. Page-1 running-head request and the natbib warnings were already gone with aa.cls
+9.4; abstract is counted by the class (≤300). Tsang+2024 is still arXiv-only (Crossref has no DOI other than the
+arXiv one; checked again tonight) — the bib entry is correct as an e-print.
+
+### Multipole-order results (runs finished 22:50)
+`results/multipole_orders_summary.json`, Table tab:mpmacro (generated). Same 300-lens seed-matched subsamples; each
+column's 10%-FPR threshold from its own clean scan (bare −10.6, +m4 −12.0, +m3+4 −11.4).
+
+| | bare EPL | +m=4 | +m=3+4 |
+|---|---|---|---|
+| χ²/dof median, m=4 truth a=0.03 | 2.20 | 0.99 | 0.99 |
+| χ²/dof median, m=3 truth a=0.03 | 3.35 | 2.91 | 0.99 |
+| FPR m=4 a=0.01, cal / >20 | 30.7 / 11.7% | 8.5 / 1.1% | 8.5 / 0.7% |
+| FPR m=4 a=0.03, cal / >20 | 75.0 / 57.6% | 9.7 / 0.0% | 8.6 / 0.0% |
+| **FPR m=3 a=0.03, cal / >20** | **86.1 / 75.8%** | **82.7 / 68.4%** | **8.5 / 0.0%** |
+| fits rejected: clean / m4 / m3 | 5 / 36 / 69 | 10 / 23 / 63 | 10 / 20 / 16 |
+| compl. c=60: 9–9.5 / 9.5–10 / 10–10.5 / 10.5–11 | 38 / 71 / 85 / 85% | 32 / 76 / 78 / 86% | 27 / 51 / 68 / 82% |
+| localized ≤2 px | 14% | 14% | 13% |
+
+Reading: the m=4 fix is form-specific (matched truth and template) — it does nothing against an m=3 truth (83% vs
+86%). General azimuthal freedom (m=3+m=4) removes both confounders (8.5–8.6%, 0% at >20) but costs 11–20 points
+of c=60 completeness between 10^9 and 10^10.5 (a free m=3 term absorbs part of the subhalo's asymmetric signature)
+and doubles clean-lens gate rejections (5 → 10 of 300, same as m=4 alone). Written into Sect. 4.2 ¶1, abstract,
+Conclusion 2. The round-9 sentence "removes the false positives entirely at no cost in completeness" is now
+qualified accordingly.
+
+### Macro-basin control results (joint runs finished 23:00; `results/baseline_a_joint_basin_c15/`, 1489–2938 s per population at 3 workers)
+Reliable fits: 97 clean, 92 multipole, 86 c=60 (3 lenses hit the 900 s per-lens guard with incomplete cell scans; their Δχ² is a lower bound).
+The referee's scenario does occur, rarely: a joint solution leads to a BETTER smooth optimum in 1/97 clean, 1/92 multipole and
+3/86 c=60 lenses, with gains of 1.3–2.5×10⁴ in χ² (the original smooth fit was stuck). Every other lens returns to its
+original optimum to within 10⁻⁴. The round-3 "polish" control (continue the smooth fit from its own solution) caught only
+one of these five — the referee was right that it tested only local convergence.
+Basin-corrected statistic (min smooth χ² over 25 starts − best joint χ²): threshold +7.1 (was +7.2); multipole FPR 100 / 97.8 /
+90.2 % at 10% cal / >20 / >100 (unchanged); median Δχ² 725 (was 737); clean FPR at >20 0 % (raw 1 %: the one clean basin lens
+was the false positive); c=60 detected 61/75 (raw 62/75), localized 15 % (9), mass error of localized +0.5 dex (0/9 low).
+Paired joint − frozen Δχ² on the multipole lenses: median +652, positive for 87/87. Table tab:joint, Sect. 4.2 ¶3, the
+summary-grid cell and the abstract clause ("raises the scan's rate to 100 %") stand, now with the proper control behind them.

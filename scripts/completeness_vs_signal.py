@@ -1,14 +1,20 @@
-"""Referee round 3, point 6: is the concentration collapse a property of the SIGNAL?
+"""Is the concentration collapse a property of the SIGNAL? (referee rounds 3 and 4)
 
-For every subhalo in the matched c=60 / c=15 test populations compute a concentration-independent
-signal proxy -- the TNFW projected mass inside a fixed aperture (default 0.1") around the subhalo
--- and plot completeness against it for both populations and all three families. If the two
-concentrations collapse onto one curve, completeness is a function of the projected signal and
-the c=60 vs c=15 comparison is a statement about how much signal a diffuse perturber puts inside
-the resolution element, not about two arbitrary c values.
+For every subhalo in the matched c=60 / c=15 test populations compute three concentration-independent
+signal variables and record whether each family detected it at the common 10%-FPR threshold:
 
-    python scripts/completeness_vs_signal.py [--a-root results/baseline_a] [--b-root results/baseline_b/fitted]
--> results/completeness_vs_signal.json (+ the paper figure is drawn by make_paper_figures.py::fig13_signal)
+  * log10 M_proj(<0.1")  -- TNFW projected mass inside 0.1" of the subhalo (round-3 variable)
+  * log10 M_proj(<0.2")  -- the same inside 0.2"
+  * log10 S/N_pert       -- the perturbation signal-to-noise a detector actually sees:
+                            sqrt( sum_pixels [(I_full - I_no_subhalo) / sigma]^2 ) from the population's own
+                            noiseless twin images and lenstronomy's per-pixel noise model.
+
+If c=60 and c=15 fall on one curve against a variable, completeness is a function of that signal and the
+concentration comparison is a statement about how much signal a diffuse perturber delivers.
+
+    python scripts/completeness_vs_signal.py            # full 1 000-lens populations for A and B; U-Net scores every lens
+-> results/completeness_vs_signal.json, paper/tables/signal_variables.tex
+   (the paper figure is drawn by make_paper_figures.py::fig13_signal)
 """
 import argparse, json, sys
 from pathlib import Path
@@ -20,19 +26,33 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo  # noqa: E402
 from lenstronomy.LensModel.Profiles.tnfw import TNFW  # noqa: E402
+from lenstronomy.SimulationAPI.sim_api import SimAPI  # noqa: E402
 from detector.dataset import LensPatchDataset  # noqa: E402
 from detector.unet import UNet  # noqa: E402
 
 LC = LensCosmo(z_lens=0.5, z_source=1.0)
 PROF = TNFW()
+VARIABLES = {"log10_Mproj_0p1": r"$\log_{10} M_{\rm proj}(<0.1'')$", "log10_Mproj_0p2": r"$\log_{10} M_{\rm proj}(<0.2'')$", "log10_snr": r"$\log_{10}$ S/N$_{\rm pert}$"}
+BIN_WIDTH = {"log10_Mproj_0p1": 0.5, "log10_Mproj_0p2": 0.5, "log10_snr": 0.25}
+MIN_N = 20
 
 
 def projected_mass_msun(sub, R_arcsec):
-    """TNFW projected mass inside R (arcsec) in solar masses, from the population's own conversion."""
     Rs, alpha_Rs = LC.nfw_physical2angle(M=10 ** sub["log10_M200"], c=sub["concentration"])
     rho0 = PROF.alpha2rho0(alpha_Rs=alpha_Rs, Rs=Rs)
-    m2d_angular = PROF.mass_2d(R_arcsec, Rs, rho0, sub["tau"] * Rs)      # in units of Sigma_crit * arcsec^2
-    return float(m2d_angular * LC.sigma_crit_angle)                       # M_sun
+    return float(PROF.mass_2d(R_arcsec, Rs, rho0, sub["tau"] * Rs) * LC.sigma_crit_angle)
+
+
+def perturbation_snr(pop_dir):
+    """Per-lens perturbation S/N from the noiseless full and no-subhalo twins (NaN for lenses without a subhalo)."""
+    man = json.loads((pop_dir / "manifest.json").read_text())
+    full = np.load(pop_dir / "images_full_noiseless.npy", mmap_mode="r"); ctrl = np.load(pop_dir / "images_control_noiseless.npy", mmap_mode="r")
+    sim = SimAPI(num_pix=man["image_shape"][0], kwargs_single_band=man["kwargs_band"], kwargs_model={"lens_model_list": ["EPL"], "source_light_model_list": ["SERSIC_ELLIPSE"]})
+    out = np.full(len(full), np.nan)
+    for i in range(len(full)):
+        f = np.asarray(full[i]); sigma = sim.estimate_noise(f)
+        out[i] = np.sqrt(np.sum(((f - np.asarray(ctrl[i])) / sigma) ** 2))
+    return out
 
 
 def family_a_like(root, pop):
@@ -58,35 +78,80 @@ def unet_detections(pop, ckpt=ROOT / "checkpoints/unet_v0/model_best.pt", result
     return out
 
 
+def wilson(k, n, z=1.0):
+    if n == 0:
+        return np.nan, np.nan, np.nan
+    p = k / n; d = 1 + z * z / n; c = (p + z * z / (2 * n)) / d; h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return c, c - h, c + h
+
+
+def binned(x, det, width):
+    lo0 = np.floor(np.nanmin(x) / width) * width; hi0 = np.ceil(np.nanmax(x) / width) * width
+    edges = np.arange(lo0, hi0 + width / 2, width)
+    rows = []
+    for a, b in zip(edges[:-1], edges[1:]):
+        sel = (x >= a) & (x < b)
+        rows.append({"lo": float(a), "hi": float(b), "n": int(sel.sum()), "k": int(det[sel].sum())})
+    return rows
+
+
+def compare(d, var):
+    """Per-bin c15 - c60 completeness at equal signal, with a two-proportion z, over bins holding >= MIN_N lenses in both."""
+    x60, k60 = np.array(d["c60"][var]), np.array(d["c60"]["detected"]); x15, k15 = np.array(d["c15"][var]), np.array(d["c15"]["detected"])
+    w = BIN_WIDTH[var]
+    lo0 = np.floor(min(np.nanmin(x60), np.nanmin(x15)) / w) * w; hi0 = np.ceil(max(np.nanmax(x60), np.nanmax(x15)) / w) * w
+    rows = []
+    for a in np.arange(lo0, hi0, w):
+        s60 = (x60 >= a) & (x60 < a + w); s15 = (x15 >= a) & (x15 < a + w)
+        if s60.sum() < MIN_N or s15.sum() < MIN_N:
+            continue
+        p60, p15 = k60[s60].mean(), k15[s15].mean()
+        se = np.sqrt(p60 * (1 - p60) / s60.sum() + p15 * (1 - p15) / s15.sum())
+        rows.append({"lo": float(a), "hi": float(a + w), "n60": int(s60.sum()), "n15": int(s15.sum()), "p60": float(p60), "p15": float(p15), "diff": float(p15 - p60), "z": float((p15 - p60) / se) if se > 0 else 0.0})
+    return rows
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--a-root", default="results/baseline_a"); ap.add_argument("--b-root", default="results/baseline_b/fitted")
-    ap.add_argument("--aperture", type=float, default=0.1)
-    ap.add_argument("--out", default="results/completeness_vs_signal.json")
+    ap.add_argument("--a-root", default="results/baseline_a_full"); ap.add_argument("--b-root", default="results/baseline_b_full/fitted")
+    ap.add_argument("--out", default="results/completeness_vs_signal.json"); ap.add_argument("--table", default="paper/tables/signal_variables.tex")
     args = ap.parse_args()
-    res = {"aperture_arcsec": args.aperture, "families": {}}
     truths = {c: [json.loads(l) for l in open(ROOT / f"data/test_fixed{c}/truth.jsonl")] for c in (60, 15)}
+    snr = {c: perturbation_snr(ROOT / f"data/test_fixed{c}") for c in (60, 15)}
+    res = {"variables": VARIABLES, "bin_width": BIN_WIDTH, "min_n_per_bin": MIN_N, "roots": {"A": args.a_root, "B": args.b_root, "C": "results/detector_v0_best (single seed, every lens)"}, "families": {}}
     for fam, getter in (("A", lambda pop: family_a_like(args.a_root, pop)), ("B", lambda pop: family_a_like(args.b_root, pop)), ("C", unet_detections)):
         res["families"][fam] = {}
         for c in (60, 15):
             det = getter(f"test_fixed{c}")
             if det is None:
                 continue
-            rows = [(projected_mass_msun(truths[c][i]["subhalo"], args.aperture), truths[c][i]["subhalo"]["log10_M200"], bool(d)) for i, d in det.items()]
-            res["families"][fam][f"c{c}"] = {"log10_Mproj": [float(np.log10(m)) for m, _, _ in rows], "log10_M200": [x for _, x, _ in rows], "detected": [d for _, _, d in rows]}
+            idx = sorted(det)
+            subs = [truths[c][i]["subhalo"] for i in idx]
+            res["families"][fam][f"c{c}"] = {
+                "index": idx, "log10_M200": [s["log10_M200"] for s in subs],
+                "log10_Mproj_0p1": [float(np.log10(projected_mass_msun(s, 0.1))) for s in subs],
+                "log10_Mproj_0p2": [float(np.log10(projected_mass_msun(s, 0.2))) for s in subs],
+                "log10_snr": [float(np.log10(snr[c][i])) for i in idx],
+                "detected": [bool(det[i]) for i in idx]}
+    res["comparison"] = {fam: {var: compare(d, var) for var in VARIABLES} for fam, d in res["families"].items() if "c60" in d and "c15" in d}
     (ROOT / args.out).write_text(json.dumps(res))
-    # quick text summary: completeness in bins of log10 M_proj, both concentrations
-    edges = np.arange(7.0, 10.01, 0.5)
-    for fam, d in res["families"].items():
+
+    # ---- text summary + LaTeX table: c15 - c60 at equal signal, per family and variable
+    lines = [r"\begin{tabular}{@{}llrrl@{}}", r"\toprule", r"family & signal variable & bins & mean $\Delta$ & largest $|z|$ \\", r"\midrule"]
+    names = {"A": "A scan", "B": "B pot.\\ corr.", "C": "C U-Net"}
+    for fam, byvar in res["comparison"].items():
         print(f"== Family {fam}")
-        for c in ("c60", "c15"):
-            if c not in d: continue
-            mp = np.array(d[c]["log10_Mproj"]); det = np.array(d[c]["detected"])
-            cells = []
-            for lo, hi in zip(edges[:-1], edges[1:]):
-                sel = (mp >= lo) & (mp < hi)
-                cells.append(f"{lo:.1f}-{hi:.1f}: {100*det[sel].mean():.0f}% (n={sel.sum()})" if sel.sum() else f"{lo:.1f}-{hi:.1f}: --")
-            print(f"  {c}: " + " | ".join(cells))
+        for k, (var, rows) in enumerate(byvar.items()):
+            if not rows:
+                continue
+            diffs = np.array([r["diff"] for r in rows]); zs = np.array([r["z"] for r in rows]); j = int(np.argmax(np.abs(zs)))
+            print(f"  {var:16s} " + " | ".join(f"{r['lo']:.2f}-{r['hi']:.2f}: {100*r['p60']:.0f} vs {100*r['p15']:.0f}% (n {r['n60']}/{r['n15']}, z {r['z']:+.1f})" for r in rows))
+            sign = "+" if diffs.mean() >= 0 else "$-$"
+            lines.append(f"{names[fam] if k == 0 else ''} & {VARIABLES[var]} & {len(rows)} & {sign}{abs(100*diffs.mean()):.0f} & {abs(zs[j]):.1f} ({'$c{=}15$' if zs[j] > 0 else '$c{=}60$'} higher) \\\\")
+        lines.append(r"\addlinespace[2pt]")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    (ROOT / args.table).write_text("\n".join(lines) + "\n")
+    print("wrote", args.out, "and", args.table)
 
 
 if __name__ == "__main__":

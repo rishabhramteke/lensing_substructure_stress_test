@@ -23,7 +23,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from baseline_a.fit import fit_smooth, scan_subhalo, lens_light_image
+from baseline_a.fit import fit_smooth, scan_subhalo, lens_light_image, set_multipole_orders
 
 # A smooth-only fit at chi2/dof above this is flagged unreliable (optimizer
 # didn't converge) rather than silently trusted -- see first_results.md.
@@ -46,7 +46,8 @@ def main():
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--seed", type=int, default=0, help="which images to sample (indices), not the fit itself")
     p.add_argument("--lens-light-components", type=int, default=1, choices=[1, 2], help="Sersic components fitted for lens light when the population has it (1 = usual single Sersic, 2 = correctly specified)")
-    p.add_argument("--macro-multipole", action="store_true", help="include an m=4 multipole (a_m, phi_m free) in the smooth macro-model, as post-Lange+2024 pipelines do")
+    p.add_argument("--macro-multipole", action="store_true", help="include multipole terms (a_m, phi_m free per order) in the smooth macro-model, as post-Lange+2024 pipelines do")
+    p.add_argument("--macro-multipole-orders", default="4", help="comma-separated orders carried by --macro-multipole (default 4; '3,4' tests the cost of the extra freedom)")
     p.add_argument("--blind", action="store_true", help="initialize the smooth fit from the data alone (no truth), see fit._blind_init_vec")
     p.add_argument("--maxiter", type=int, default=60, help="least-squares max_nfev multiplier (60 = the value used throughout)")
     p.add_argument("--concentration", type=str, default="15",
@@ -56,6 +57,9 @@ def main():
                    help="flag a smooth fit unreliable above this chi2/dof (default: Tier-0 value; pass a much larger number for Tier-1, see module comment)")
     args = p.parse_args()
     CHI2_DOF_UNRELIABLE = args.chi2_dof_unreliable
+    mp_orders = tuple(int(m) for m in args.macro_multipole_orders.split(",")) if args.macro_multipole else False
+    if mp_orders:
+        set_multipole_orders(mp_orders)
     if args.concentration.lower() in ("cm", "dm14", "dutton"):
         from lensing.concentration import concentration_dutton_maccio14
         conc = lambda logm: float(concentration_dutton_maccio14(np.array(logm), rng=None, z=0.5, scatter_dex=0.0))
@@ -87,7 +91,7 @@ def main():
             truth = truths[i]
             theta_E = truth["lens_macro"]["theta_E"]
             t1 = time.time()
-            vec, chi2_smooth, image_model, noise_std = fit_smooth(images[i], truth, kwargs_band, num_pix, rng=rng_fit, maxiter=args.maxiter, blind=args.blind, lens_light_components=args.lens_light_components, macro_multipole=args.macro_multipole)
+            vec, chi2_smooth, image_model, noise_std = fit_smooth(images[i], truth, kwargs_band, num_pix, rng=rng_fit, maxiter=args.maxiter, blind=args.blind, lens_light_components=args.lens_light_components, macro_multipole=mp_orders)
             t_fit = time.time() - t1
             if has_ll:
                 subtracted[k] = images[i] - lens_light_image(vec, kwargs_band, num_pix)
@@ -115,7 +119,7 @@ def main():
 
     manifest_out = {
         "population": args.population, "n": n, "seed": args.seed, "concentration_assumed": conc_label,
-        "blind_initialization": args.blind, "lens_light_components": args.lens_light_components, "macro_multipole": args.macro_multipole, "maxiter": args.maxiter, "chi2_dof_unreliable_threshold": CHI2_DOF_UNRELIABLE,
+        "blind_initialization": args.blind, "lens_light_components": args.lens_light_components, "macro_multipole": args.macro_multipole, "macro_multipole_orders": list(mp_orders) if mp_orders else None, "maxiter": args.maxiter, "chi2_dof_unreliable_threshold": CHI2_DOF_UNRELIABLE,
         "n_unreliable_fits": n_unreliable, "elapsed_s": time.time() - t0,
         "source_manifest": manifest,
     }

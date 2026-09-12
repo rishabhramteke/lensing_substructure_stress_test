@@ -1,0 +1,162 @@
+{
+  "bare": {
+    "label": "bare EPL",
+    "roots": {
+      "default": "results/baseline_a",
+      "multipole_m3_a3": "results/baseline_a_m3truth"
+    },
+    "n": {
+      "no_subhalo": 300,
+      "multipole_m4_a1": 300,
+      "multipole_m4_a3": 300,
+      "multipole_m3_a3": 300,
+      "test_fixed60": 300
+    },
+    "rejected": {
+      "no_subhalo": 5,
+      "multipole_m4_a1": 17,
+      "multipole_m4_a3": 36,
+      "multipole_m3_a3": 69,
+      "test_fixed60": 43
+    },
+    "threshold_10pct_fpr": -10.628952986416875,
+    "multipole_m4_a1": {
+      "chi2_dof_median": 1.120829347510477,
+      "fpr_10pct": 0.30742049469964666,
+      "fpr_20": 0.1166077738515901,
+      "fpr_100": 0.028268551236749116,
+      "n_reliable": 283
+    },
+    "multipole_m4_a3": {
+      "chi2_dof_median": 2.2007702999724197,
+      "fpr_10pct": 0.75,
+      "fpr_20": 0.5757575757575758,
+      "fpr_100": 0.32954545454545453,
+      "n_reliable": 264
+    },
+    "multipole_m3_a3": {
+      "chi2_dof_median": 3.350448300887158,
+      "fpr_10pct": 0.8614718614718615,
+      "fpr_20": 0.7575757575757576,
+      "fpr_100": 0.5454545454545454,
+      "n_reliable": 231
+    },
+    "c60": {
+      "completeness": {
+        "9.0-9.5": 0.375,
+        "9.5-10.0": 0.7142857142857143,
+        "10.0-10.5": 0.8541666666666666,
+        "10.5-11.0": 0.8461538461538461
+      },
+      "n_detected": 108,
+      "frac_localized": 0.1388888888888889,
+      "clean_fpr_20": 0.006779661016949152
+    }
+  },
+  "mp4": {
+    "label": "$+\\,m{=}4$",
+    "roots": {
+      "default": "results/baseline_a_mpmacro"
+    },
+    "n": {
+      "no_subhalo": 300,
+      "multipole_m4_a1": 300,
+      "multipole_m4_a3": 300,
+      "multipole_m3_a3": 300,
+      "test_fixed60": 300
+    },
+    "rejected": {
+      "no_subhalo": 10,
+      "multipole_m4_a1": 16,
+      "multipole_m4_a3": 23,
+      "multipole_m3_a3": 63,
+      "test_fixed60": 44
+    },
+    "threshold_10pct_fpr": -11.95981240406212,
+    "multipole_m4_a1": {
+      "chi2_dof_median": 0.9876905315977531,
+      "fpr_10pct": 0.08450704225352113,
+      "fpr_20": 0.01056338028169014,
+      "fpr_100": 0.007042253521126761,
+      "n_reliable": 284
+    },
+    "multipole_m4_a3": {
+      "chi2_dof_median": 0.9889541741963352,
+      "fpr_10pct": 0.09747292418772563,
+      "fpr_20": 0.0,
+      "fpr_100": 0.0,
+      "n_reliable": 277
+    },
+    "multipole_m3_a3": {
+      "chi2_dof_median": 2.905524707622482,
+      "fpr_10pct": 0.8270042194092827,
+      "fpr_20": 0.6835443037974683,
+      "fpr_100": 0.4767932489451477,
+      "n_reliable": 237
+    },
+    "c60": {
+      "completeness": {
+        "9.0-9.5": 0.3225806451612903,
+        "9.5-10.0": 0.7560975609756098,
+        "10.0-10.5": 0.78,
+        "10.5-11.0": 0.8571428571428571
+      },
+      "n_detected": 106,
+      "frac_localized": 0.14150943396226415,
+      "clean_fpr_20": 0.0
+    }
+  },
+  "mp34": {
+    "label": "$+\\,m{=}3{+}4$",
+    "roots": {
+      "default": "results/baseline_a_mp34"
+    },
+    "n": {
+      "no_subhalo": 300,
+      "multipole_m4_a1": 300,
+      "multipole_m4_a3": 300,
+      "multipole_m3_a3": 300,
+      "test_fixed60": 300
+    },
+    "rejected": {
+      "no_subhalo": 10,
+      "multipole_m4_a1": 16,
+      "multipole_m4_a3": 20,
+      "multipole_m3_a3": 16,
+      "test_fixed60": 38
+    },
+    "threshold_10pct_fpr": -11.438277245366265,
+    "multipole_m4_a1": {
+      "chi2_dof_median": 0.9868283590355885,
+      "fpr_10pct": 0.08450704225352113,
+      "fpr_20": 0.007042253521126761,
+      "fpr_100": 0.007042253521126761,
+      "n_reliable": 284
+    },
+    "multipole_m4_a3": {
+      "chi2_dof_median": 0.9884905634318858,
+      "fpr_10pct": 0.08571428571428572,
+      "fpr_20": 0.0,
+      "fpr_100": 0.0,
+      "n_reliable": 280
+    },
+    "multipole_m3_a3": {
+      "chi2_dof_median": 0.9880046625101528,
+      "fpr_10pct": 0.08450704225352113,
+      "fpr_20": 0.0,
+      "fpr_100": 0.0,
+      "n_reliable": 284
+    },
+    "c60": {
+      "completeness": {
+        "9.0-9.5": 0.26666666666666666,
+        "9.5-10.0": 0.5121951219512195,
+        "10.0-10.5": 0.6792452830188679,
+        "10.5-11.0": 0.8235294117647058
+      },
+      "n_detected": 91,
+      "frac_localized": 0.13186813186813187,
+      "clean_fpr_20": 0.0
+    }
+  }
+}
