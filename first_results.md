@@ -1543,3 +1543,8 @@ Basin-corrected statistic (min smooth χ² over 25 starts − best joint χ²): 
 was the false positive); c=60 detected 61/75 (raw 62/75), localized 15 % (9), mass error of localized +0.5 dex (0/9 low).
 Paired joint − frozen Δχ² on the multipole lenses: median +652, positive for 87/87. Table tab:joint, Sect. 4.2 ¶3, the
 summary-grid cell and the abstract clause ("raises the scan's rate to 100 %") stand, now with the proper control behind them.
+Gate observation from the same control: of the 24 lenses the three joint runs reject for χ²/dof ≥ 10, five have a joint
+solution whose smooth re-optimisation lands at χ²/dof 1.0–2.1 (clean 278: 40.7 → 0.97; multipole 60: 103 → 2.05; c=60 56: 55 → 1.07,
+227: 29.7 → 1.07, 347: 150 → 1.48). Part of what the paper counts as "macro-fit failure" is optimiser failure that a wider search
+rescues — one more reason the conservative completeness (Sect. metric) counts gate-rejected lenses as misses. Sentence added to
+Sect. 4.2 ¶3. Bound for "all other lenses" is ≤10⁻³ (multipole population max 1.0e-3), not 10⁻⁴.
