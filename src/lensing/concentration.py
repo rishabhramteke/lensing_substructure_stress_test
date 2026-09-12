@@ -45,6 +45,14 @@ def concentration_dutton_maccio14(
 
 MODES = {
     "fixed60": lambda logm, rng: concentration_fixed(logm, 60.0),
+    # c=30: an intermediate, tidally-plausible value. Dutton & Maccio (2014) describe
+    # *isolated* field halos; surviving subhalos are tidally stripped and are denser at
+    # fixed M200 than field halos of the same mass -- by factors of ~2-3 near the host
+    # centre (Moline et al. 2017, MNRAS 466, 4974). c=30 is therefore the boosted
+    # counterpart of the c~10-15 the field relation gives over this mass range, and the
+    # honest middle point between the literature's c=60 and its c=15 ablation.
+    # (Line-of-sight halos, which are field halos, keep the unboosted relation.)
+    "fixed30": lambda logm, rng: concentration_fixed(logm, 30.0),
     "fixed15": lambda logm, rng: concentration_fixed(logm, 15.0),
     "cdm": concentration_dutton_maccio14,
 }

@@ -1564,3 +1564,89 @@ Full-history secret scan clean (token patterns, private keys, e-mails, "tomtom"/
 `gh repo edit --visibility public` on rishabhramteke/lensing_substructure_stress_test. Paper's Data availability now gives the
 URL alone. The 13-word subtitle was removed at the user's request (the abstract carries its content); title unchanged.
 Margin line numbers are aa.cls 9.4's referee mode (`\linenumbers` set by the class), removed in the typeset article.
+
+## 2026-09-13: round 12 — sixth external report (6.5/10, moderate-to-major, one round)
+
+### Point 1 (gating): the scan statistic had no null floor
+Family A's grid holds 72 hypotheses, all containing a subhalo, so Δχ² can be negative and the 10%-FPR
+threshold sits below zero. Adding a **zero-mass hypothesis** is exact and needs no refitting: a zero-mass
+TNFW *is* the smooth model, so the floored statistic is max(Δχ², 0). `scripts/evaluate_null_floor.py`
+→ `results/null_floor.json`, `paper/tables/null_floor.tex`, Table tab:nullfloor, new paragraph in Sect. 4.3.
+
+Full 1000-lens populations, floored vs raw:
+
+| | 72 hypotheses | + zero-mass |
+|---|---|---|
+| threshold at 10% FPR | −13.4 | **does not exist** (99.6% of clean lenses sit at exactly 0) |
+| clean lenses flagged | 10% (by construction) | 0.42% |
+| detections with Δχ²<0 | 75/351 | 0 |
+| compl. c=60, 4 bins >10⁹ | 36/69/89/81% | 28/64/84/68% |
+| compl. c=15, same | 25/59/78/84% | 12/48/74/76% |
+| paired flip lost:gained | 63:8 | **71:1** |
+| FPR multipole a=0.01 / 0.03 | 31% / 77% | 15% / **69%** |
+| localized ≤2 px | 13% | 16% |
+
+Three consequences, written into the paper: (i) the 10%-FPR operating point ceases to exist; (ii) the
+completeness reported in the two LOWEST mass bins (17%, 18% at 10⁸–10⁹) was almost entirely threshold
+artefact → 1%, 3%; (iii) **every stressed conclusion survives or strengthens** — the multipole ratio goes
+from 7.7:1 (77%/10%) to **165:1** (69.5%/0.42%). The common 10%-FPR calibration is kept as the cross-family
+axis (it is Tsang+2024's convention and B/C have non-negative statistics), with Family A's sub-10^9.5
+numbers to be read from the floored column.
+
+### Point 2: c=15 is not "the ΛCDM value for a subhalo"
+Dutton & Maccio is a FIELD-halo relation; subhalos are tidally stripped and denser at fixed M200 by ~2–3×
+near the host centre (Moliné+2017, MNRAS 466, 4974 — added to the bib, Crossref-verified). Added
+`fixed30` concentration mode + `data/test_fixed30` (n=1000, **seed 101 = matched lens-by-lens to
+test_fixed60/test_fixed15**, verified 1000/1000). `scripts/evaluate_intermediate_concentration.py`
+→ `results/intermediate_concentration.json`, `paper/tables/c30.tex`, Table tab:c30.
+
+| bin (log10 M200) | A: c60/c30/c15 | U-Net (4 seeds): c60/c30/c15 |
+|---|---|---|
+| 9.0–9.5 | 38 / 32 / 25% | 15 / 11 / 13% |
+| 9.5–10.0 | 71 / 67 / 56% | 29 / 12 / 11% |
+| 10.0–10.5 | 85 / 77 / 75% | 51 / 28 / 15% |
+| 10.5–11.0 | 85 / 96 / 91% | 63 / 43 / 13% |
+| paired flip vs c60 | 9:2 / 21:4 | 130:29 / 199:30 |
+
+**The U-Net has already lost half its total c60→c15 loss by c=30** — the collapse does not depend on the
+extreme value. This strengthens the paper against the objection. Language softened everywhere
+("ΛCDM-motivated c=15" → "the literature's low-concentration ablation").
+
+### Point 3: confounder FPR conditional on a goodness-of-fit gate
+`evaluate_null_floor.py::gate_analysis` → `paper/tables/gate_fpr.tex`, Table tab:gate. Both the confounder
+population AND the clean calibration set are restricted to fits passing the gate; threshold recalibrated on
+the survivors. At χ²/dof<1.2, 93% of clean lenses pass but only 11% of a=0.03 lenses do — and **77% of those
+survivors are still flagged** (47% floored, 17% at Δχ²>20). At <2.0: 45% pass, 80%/67%/49%. For the joint
+re-fit, 15 of 100 pass and **100%** are flagged (87% at Δχ²>20). A gate thins the sample; it does not protect
+what it keeps.
+
+### Points 4–8 and minors
+- Abstract: scoped ("fixed-source variant", "on 100 lenses at 3% amplitude"), results paragraph cut ~a third,
+  now ≤300 by the class count.
+- Sect. 2: exposure 5400 s, zero point 25.96, sky 22.3 mag/arcsec², read noise 4e⁻, gain 2.5, PSF FWHM 0.08″,
+  lenstronomy noise model, **arc S/N median 1.6×10³ (10–90% 0.6–3.0×10³), peak pixel ~250σ**, source AB mag
+  19.5–24.7 (median 21.4). Multipole written as eq. (1) with κ_m = a_m cos[m(φ−φ_m)]/(2r), so a_m/θ_E is
+  exactly the fractional convergence perturbation at θ_E; cited to Xu+2015 MNRAS 447, 3189 (lenstronomy's
+  docstring labels it by the 2013 preprint year — added to bib).
+- **Population sharing stated truthfully**: the referee assumed the clean control and multipole populations
+  share lenses. They do NOT (seeds 1, 2, 3 — verified 0/1000 macro matches). Only c60/c30/c15 (seed 101) and
+  m4_a3/m3_a3 (seed 2) are matched. Text now says so and quotes the ±1.5 pt sampling term at n≈900.
+- Exclusion rate reconciled: Sect. 2.3 "2–15%" was wrong → **6–19%** (6% clean, 8% c=15, 19% c=60).
+- Table tab:fullpop now carries reported / conservative / Δχ²>0 row blocks (conservative bound was prose only).
+- Fig. 6b DID omit Family B — the committed PDF was a **stale render** predating the Family B rows; regenerated,
+  and the label wrapping fixed so the six row labels no longer collide with panel (a).
+- Localization wording no longer conflates the 21.5% grid ceiling with the 13% achieved.
+- Conclusion 1 reworded (the 6–20 pts is for the c=60 template held fixed on both populations).
+- max|z| null expectation (~2 for ten bins) stated in the Table 1 caption.
+- "near-maximal confidence" defined (score >0.99, sigmoid saturated).
+- B1938+666 line-of-sight reading attributed to Şengül+2022 as their reanalysis, not settled.
+- Top mass bin flagged as a companion galaxy halo rather than a dark subhalo.
+- Family B's single seed set in the lens-light table explained (~40 s/lens vs ~1 s).
+- Zenodo DOI promised at acceptance in Data availability.
+- Sect. 4.5 (Tier 1) compressed 2155→1620 chars; the c–M training paragraph cut to one sentence with the
+  speculation dropped.
+- Length: macro-basin control block + Table tab:mass_mechanism moved to new **Appendix A** (`app:controls`);
+  duplicated basin prose in Sect. 4.2 cut 1643→383 chars. Two unused figure PDFs deleted; their generators
+  marked SUPPLEMENTARY. Three stray blank-line runs collapsed. Tables tab:conc and tab:c30 moved beside their
+  discussion (they had drifted 5 pages).
+- Build: 19 pages, 0 errors / 0 overfull / 0 undefined / 0 class warnings.

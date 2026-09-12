@@ -32,6 +32,7 @@ from lensing.simulate import LensRenderer, sample_truth
 
 CONFIGS = {
     "tsang_fixed60": lambda: tier0_tsang("fixed60"),
+    "tsang_fixed30": lambda: tier0_tsang("fixed30"),
     "tsang_fixed15": lambda: tier0_tsang("fixed15"),
     "tsang_cdm": lambda: tier0_tsang("cdm"),
     "no_subhalo": tier0_no_subhalo,

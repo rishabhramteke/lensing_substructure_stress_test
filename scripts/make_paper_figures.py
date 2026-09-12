@@ -254,6 +254,8 @@ def fig3_confounders():
 # Fig 9 -- scale-up: U-Net at 8k vs 30k training images (drawn only once the 30k aggregate exists)
 # ======================================================================
 def fig9_scaleup():
+    """SUPPLEMENTARY, not included in the manuscript: the 30k scale-up result is reported in the text only.
+    Kept because it regenerates from released results and may be wanted by a reader."""
     if not (ROOT / "results/aggregate_30k/summary.json").exists():
         print("  (fig9_scaleup skipped: results/aggregate_30k/summary.json not present yet)")
         return
@@ -517,7 +519,13 @@ def fig6_mass_function():
 
     ax = axes[1]
     rows = d["results"]
-    labels = [r["label"].replace("(Family C), ", "\n").replace("Family A, ", "Family A\n") for r in rows]
+    # one label per row, family on the first line and concentration on the second, so long
+    # names (Family B was added after the first draft) cannot collide with the left-hand panel
+    def _lab(t):
+        fam, _, conc = t.partition(",")
+        fam = fam.replace("U-Net (Family C)", "U-Net").strip()
+        return f"{fam}\n{conc.strip()}" if conc else fam
+    labels = [_lab(r["label"]) for r in rows]
     naive = [100 * r["naive_unweighted"] for r in rows]; wtd = [100 * r["cdm_mass_function_weighted"] for r in rows]
     y = np.arange(len(rows))
     for yi, n_, w_ in zip(y, naive, wtd):
@@ -539,6 +547,8 @@ def fig6_mass_function():
 # Fig 7 -- Tier 1: the U-Net retrained on real sources
 # ======================================================================
 def fig7_tier1():
+    """SUPPLEMENTARY, not included in the manuscript: the Tier-1 U-Net result is reported in the text only.
+    Kept because it regenerates from released results and may be wanted by a reader."""
     u0 = load("results/aggregate/summary.json"); u1 = load("results/aggregate_tier1/summary.json")
     fig, axes = plt.subplots(1, 2, figsize=(DBL_W, 2.6), gridspec_kw={"width_ratios": [0.8, 1.3]})
     ax = axes[0]
