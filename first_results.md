@@ -1105,6 +1105,38 @@ followed up, not discarded. The paper states both bounds (Sect. 2.3, 4.1); figur
 reported bound; cross-family comparisons are unaffected (A and B share the exclusion on the same
 lenses; the U-Net has none).
 
+## Round 5 (2026-09-12): the last "not run" cells filled
+
+**Family B on the non-physical decoys** (`scripts/make_decoy_populations.py` materialises the
+bit-identical decoys of `noise_decoy_control.py` as `data/decoy_{gaussian,dipole}_s42_a{3,6,10}`;
+`run_family_b.py` fitted variant; `scripts/evaluate_decoy_family_b.py` →
+`results/noise_decoy_control_familyB/results.json`, threshold 0.0919 = B's own 10%-FPR value):
+
+| decoy amplitude | 3σ | 6σ | 10σ |
+|---|---|---|---|
+| Gaussian bump — B FPR | 12.5% | 28% | **67%** |
+| dipole — B FPR | 17% | 49% | **76%** |
+| (U-Net, same decoys) | 10–11% | 13–16% | 19–21% |
+| (Family A, same decoys) | 3% | 2–3% | 2–4% |
+
+B is the family most fooled by a non-physical feature: a free-form δψ times the source gradient
+reproduces an additive blob wherever the arc has a gradient. **Correction to the paper's earlier
+framing:** what ignores a non-physical feature is not "a physical statistic" but a *parametric*
+one — only the rigid TNFW template has no way to represent a blob. Sect. 4.2, 5.1, Fig. 4b (green
+curves), Fig. 11 cell, Conclusions (2) updated.
+
+**Family B with the double-Sérsic (correctly specified) lens-light fit** (`run_family_b.py
+--lens-light-components 2`, `results/baseline_b_lenslight2/`): gate rejects 21/300 clean; threshold
+back to 0.094 (0.93 single); completeness 9/5/49/72/94/97% (none: 14/18/75/88/94/100; single:
+15/18/12/8/6/0); multipole FPR 69% (86% none). Recovered like A and C. Table 5 "double" column filled.
+
+**Second lens-light seed set** (`data/lenslight_*_s8`, seed 8; `results/baseline_a_lenslight_s8/`,
+`results/lens_light_experiment_s8.json`): single Sérsic — gate 148/300 clean (141), median χ²/N 9.9
+(9.4), threshold +99 (+86), clean FPR @20/100 26/10% (25/9), multipole 57/33% (53/25), completeness
+10/35/64/60% (12/42/53/25; n=10–20 per bin), U-Net raw AUC 0.49 (0.53), subtracted 0.52 (0.55),
+clean FPR at Tier-0 threshold 83% (86%). Reproduces seed 7 within the small-n scatter; the paper
+quotes seed-set ranges. **Double-Sérsic seed 8** (`results/baseline_a_lenslight2_s8/`): gate 12/300 clean (21 at seed 7), threshold −9.3 (−7.5), clean FPR @20/100 0.3/0% (0/0), multipole 49/26% (47/23), completeness 25/55/89/81% (37/56/79/83), U-Net AUC 0.63 (0.67), completeness 17/28/51/56% (13/18/46/66). Both seed sets agree: the correctly specified light model recovers A and C to within ~10 points of Tier 0.
+
 ## Reference audit (2026-09-12)
 
 `paper/fetch_refs.py` downloaded every cited arXiv paper into `paper/refs/` and `paper/refs/README.md`

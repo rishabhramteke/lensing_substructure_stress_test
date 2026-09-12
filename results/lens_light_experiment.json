@@ -419,5 +419,91 @@
       "10.5-11.0": 0.0
     }
   },
+  "family_b_double_sersic": {
+    "threshold_10pct_fpr": 0.0942067642974678,
+    "n_unreliable": {
+      "no_subhalo": 21,
+      "multipole_m4_a3": 26,
+      "fixed60": 44
+    },
+    "median_chi2_per_dof_clean": 0.9962817286863872,
+    "fpr_clean_abs": {
+      "20": 0.0,
+      "100": 0.0
+    },
+    "fpr_multipole_a3": {
+      "10pct": 0.6861313868613139,
+      "20": 0.0,
+      "100": 0.0
+    },
+    "gate_lifted": {
+      "threshold_10pct_fpr": 0.1009876763251585,
+      "fpr_multipole_a3": {
+        "10pct": 0.6566666666666666,
+        "20": 0.0,
+        "100": 0.0
+      },
+      "fpr_clean_abs": {
+        "20": 0.0,
+        "100": 0.0
+      },
+      "completeness_c60": {
+        "8.0-8.5": {
+          "n": 38,
+          "completeness": 0.10526315789473684
+        },
+        "8.5-9.0": {
+          "n": 42,
+          "completeness": 0.07142857142857142
+        },
+        "9.0-9.5": {
+          "n": 38,
+          "completeness": 0.39473684210526316
+        },
+        "9.5-10.0": {
+          "n": 38,
+          "completeness": 0.7368421052631579
+        },
+        "10.0-10.5": {
+          "n": 54,
+          "completeness": 0.8888888888888888
+        },
+        "10.5-11.0": {
+          "n": 53,
+          "completeness": 0.9811320754716981
+        }
+      }
+    },
+    "completeness_c60": {
+      "8.0-8.5": {
+        "n": 35,
+        "completeness": 0.08571428571428572
+      },
+      "8.5-9.0": {
+        "n": 41,
+        "completeness": 0.04878048780487805
+      },
+      "9.0-9.5": {
+        "n": 35,
+        "completeness": 0.4857142857142857
+      },
+      "9.5-10.0": {
+        "n": 32,
+        "completeness": 0.71875
+      },
+      "10.0-10.5": {
+        "n": 47,
+        "completeness": 0.9361702127659575
+      },
+      "10.5-11.0": {
+        "n": 29,
+        "completeness": 0.9655172413793104
+      }
+    },
+    "completeness_c60_conservative_top2": {
+      "10.0-10.5": 0.8148148148148148,
+      "10.5-11.0": 0.5283018867924528
+    }
+  },
   "note": "True lens light is two-component (bulge n=3-5 + n=1 envelope); Family A fits ONE Sersic jointly with the mass model; 'subtracted' = data minus that fitted light. U-Net v0 was trained on Tier-0 images without lens light."
 }

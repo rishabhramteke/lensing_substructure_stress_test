@@ -1,0 +1,337 @@
+{
+  "family_a": {
+    "threshold_10pct_fpr": 99.30472046980577,
+    "n_unreliable": {
+      "no_subhalo": 148,
+      "multipole_m4_a3": 180,
+      "fixed60": 168
+    },
+    "median_chi2_per_dof_clean": 9.910247571491588,
+    "fpr_clean_abs": {
+      "20": 0.2631578947368421,
+      "100": 0.09868421052631579
+    },
+    "fpr_multipole_a3": {
+      "10pct": 0.325,
+      "20": 0.5666666666666667,
+      "100": 0.325
+    },
+    "gate_lifted": {
+      "threshold_10pct_fpr": 129.157053706074,
+      "fpr_multipole_a3": {
+        "10pct": 0.3566666666666667,
+        "20": 0.59,
+        "100": 0.4
+      },
+      "fpr_clean_abs": {
+        "20": 0.31666666666666665,
+        "100": 0.13666666666666666
+      },
+      "completeness_c60": {
+        "8.0-8.5": {
+          "n": 43,
+          "completeness": 0.046511627906976744
+        },
+        "8.5-9.0": {
+          "n": 39,
+          "completeness": 0.15384615384615385
+        },
+        "9.0-9.5": {
+          "n": 46,
+          "completeness": 0.08695652173913043
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.37209302325581395
+        },
+        "10.0-10.5": {
+          "n": 51,
+          "completeness": 0.5686274509803921
+        },
+        "10.5-11.0": {
+          "n": 39,
+          "completeness": 0.7948717948717948
+        }
+      }
+    },
+    "completeness_c60": {
+      "8.0-8.5": {
+        "n": 23,
+        "completeness": 0.08695652173913043
+      },
+      "8.5-9.0": {
+        "n": 21,
+        "completeness": 0.14285714285714285
+      },
+      "9.0-9.5": {
+        "n": 20,
+        "completeness": 0.1
+      },
+      "9.5-10.0": {
+        "n": 20,
+        "completeness": 0.35
+      },
+      "10.0-10.5": {
+        "n": 14,
+        "completeness": 0.6428571428571429
+      },
+      "10.5-11.0": {
+        "n": 10,
+        "completeness": 0.6
+      }
+    },
+    "completeness_c60_conservative_top2": {
+      "10.0-10.5": 0.17647058823529413,
+      "10.5-11.0": 0.15384615384615385
+    }
+  },
+  "unet_v0": {
+    "original_threshold": 0.957659900188446,
+    "raw_at_original_threshold": {
+      "fpr_clean": 0.8033333333333333,
+      "fpr_multipole_a3": 0.8933333333333333,
+      "completeness_c60": {
+        "8.0-8.5": {
+          "n": 43,
+          "completeness": 0.8372093023255814
+        },
+        "8.5-9.0": {
+          "n": 39,
+          "completeness": 0.7692307692307693
+        },
+        "9.0-9.5": {
+          "n": 46,
+          "completeness": 0.6086956521739131
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.813953488372093
+        },
+        "10.0-10.5": {
+          "n": 51,
+          "completeness": 0.9019607843137255
+        },
+        "10.5-11.0": {
+          "n": 39,
+          "completeness": 0.9230769230769231
+        }
+      }
+    },
+    "raw_recalibrated": {
+      "threshold": 0.9997135400772095,
+      "fpr_multipole_a3": 0.1,
+      "completeness_c60": {
+        "8.0-8.5": {
+          "n": 43,
+          "completeness": 0.11627906976744186
+        },
+        "8.5-9.0": {
+          "n": 39,
+          "completeness": 0.0
+        },
+        "9.0-9.5": {
+          "n": 46,
+          "completeness": 0.021739130434782608
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.09302325581395349
+        },
+        "10.0-10.5": {
+          "n": 51,
+          "completeness": 0.13725490196078433
+        },
+        "10.5-11.0": {
+          "n": 39,
+          "completeness": 0.1282051282051282
+        }
+      },
+      "auc_c60_vs_clean": 0.486264367816092
+    },
+    "subtracted_at_original_threshold": {
+      "fpr_clean": 0.8333333333333334,
+      "fpr_multipole_a3": 0.85,
+      "completeness_c60": {
+        "8.0-8.5": {
+          "n": 43,
+          "completeness": 0.8837209302325582
+        },
+        "8.5-9.0": {
+          "n": 39,
+          "completeness": 0.6410256410256411
+        },
+        "9.0-9.5": {
+          "n": 46,
+          "completeness": 0.8043478260869565
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.8604651162790697
+        },
+        "10.0-10.5": {
+          "n": 51,
+          "completeness": 0.9215686274509803
+        },
+        "10.5-11.0": {
+          "n": 39,
+          "completeness": 0.9230769230769231
+        }
+      }
+    },
+    "subtracted_recalibrated": {
+      "threshold": 0.9983497858047485,
+      "n": {
+        "lenslight_no_subhalo": 300,
+        "lenslight_fixed60": 300,
+        "lenslight_multipole_m4_a3": 300
+      },
+      "fpr_multipole_a3": 0.12666666666666668,
+      "completeness_c60": {
+        "8.0-8.5": {
+          "n": 43,
+          "completeness": 0.09302325581395349
+        },
+        "8.5-9.0": {
+          "n": 39,
+          "completeness": 0.02564102564102564
+        },
+        "9.0-9.5": {
+          "n": 46,
+          "completeness": 0.043478260869565216
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.13953488372093023
+        },
+        "10.0-10.5": {
+          "n": 51,
+          "completeness": 0.21568627450980393
+        },
+        "10.5-11.0": {
+          "n": 39,
+          "completeness": 0.3333333333333333
+        }
+      },
+      "auc_c60_vs_clean": 0.5190868454661559
+    },
+    "double_sersic_subtracted": {
+      "fpr_clean_at_original_threshold": 0.18666666666666668,
+      "recalibrated_threshold": 0.970945417881012,
+      "fpr_multipole_a3_recalibrated": 0.15,
+      "completeness_c60_recalibrated": {
+        "8.0-8.5": {
+          "n": 43,
+          "completeness": 0.11627906976744186
+        },
+        "8.5-9.0": {
+          "n": 39,
+          "completeness": 0.10256410256410256
+        },
+        "9.0-9.5": {
+          "n": 46,
+          "completeness": 0.17391304347826086
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.27906976744186046
+        },
+        "10.0-10.5": {
+          "n": 51,
+          "completeness": 0.5098039215686274
+        },
+        "10.5-11.0": {
+          "n": 39,
+          "completeness": 0.5641025641025641
+        }
+      },
+      "auc_c60_vs_clean": 0.6331162196679438
+    }
+  },
+  "family_a_double_sersic": {
+    "threshold_10pct_fpr": -9.282847496729572,
+    "n_unreliable": {
+      "no_subhalo": 12,
+      "multipole_m4_a3": 18,
+      "fixed60": 40
+    },
+    "median_chi2_per_dof_clean": 0.99949933758101,
+    "fpr_clean_abs": {
+      "20": 0.003472222222222222,
+      "100": 0.0
+    },
+    "fpr_multipole_a3": {
+      "10pct": 0.6595744680851063,
+      "20": 0.4858156028368794,
+      "100": 0.2553191489361702
+    },
+    "gate_lifted": {
+      "threshold_10pct_fpr": -8.88845600736676,
+      "fpr_multipole_a3": {
+        "10pct": 0.6566666666666666,
+        "20": 0.49666666666666665,
+        "100": 0.27666666666666667
+      },
+      "fpr_clean_abs": {
+        "20": 0.016666666666666666,
+        "100": 0.006666666666666667
+      },
+      "completeness_c60": {
+        "8.0-8.5": {
+          "n": 43,
+          "completeness": 0.11627906976744186
+        },
+        "8.5-9.0": {
+          "n": 39,
+          "completeness": 0.05128205128205128
+        },
+        "9.0-9.5": {
+          "n": 46,
+          "completeness": 0.2391304347826087
+        },
+        "9.5-10.0": {
+          "n": 43,
+          "completeness": 0.5581395348837209
+        },
+        "10.0-10.5": {
+          "n": 51,
+          "completeness": 0.9019607843137255
+        },
+        "10.5-11.0": {
+          "n": 39,
+          "completeness": 0.8205128205128205
+        }
+      }
+    },
+    "completeness_c60": {
+      "8.0-8.5": {
+        "n": 41,
+        "completeness": 0.12195121951219512
+      },
+      "8.5-9.0": {
+        "n": 38,
+        "completeness": 0.07894736842105263
+      },
+      "9.0-9.5": {
+        "n": 44,
+        "completeness": 0.25
+      },
+      "9.5-10.0": {
+        "n": 40,
+        "completeness": 0.55
+      },
+      "10.0-10.5": {
+        "n": 38,
+        "completeness": 0.8947368421052632
+      },
+      "10.5-11.0": {
+        "n": 21,
+        "completeness": 0.8095238095238095
+      }
+    },
+    "completeness_c60_conservative_top2": {
+      "10.0-10.5": 0.6666666666666666,
+      "10.5-11.0": 0.4358974358974359
+    }
+  },
+  "note": "True lens light is two-component (bulge n=3-5 + n=1 envelope); Family A fits ONE Sersic jointly with the mass model; 'subtracted' = data minus that fitted light. U-Net v0 was trained on Tier-0 images without lens light."
+}

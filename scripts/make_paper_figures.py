@@ -190,12 +190,19 @@ def fig3_confounders():
         amps_ref = amps_ref or amps
         ax.plot(amps, [100 * d[str(a_)]["unet_fpr"] for a_ in amps], marker=mk, ls=ls, color=C_UNET, ms=3.5, label=f"U-Net — {lab}")
         ax.plot(amps, [100 * d[str(a_)]["a_fpr"] for a_ in amps], marker=mk, ls=ls, color=C_A, ms=3.5, label=f"Family A — {lab}")
+    fb = ROOT / "results/noise_decoy_control_familyB/results.json"
+    if fb.exists():   # Family B on the identical decoys (round-5 addition)
+        d = json.loads(fb.read_text())
+        for shape, mk, ls, lab in (("gaussian", "o", "-", "Gaussian, seed 42"), ("dipole", "^", "--", "dipole (asymmetric), seed 42")):
+            if shape in d:
+                amps = sorted(float(k) for k in d[shape])
+                ax.plot(amps, [100 * d[shape][str(a_)]["b_fpr"] for a_ in amps], marker=mk, ls=ls, color=C_B, ms=3.5, label=f"Family B — {lab}")
     ax.axhline(10, color=BLACK, ls=":", lw=0.7, label="clean-image baseline (10%)")
     ax.set_xlabel(r"decoy amplitude  [$\sigma$ of local noise]")
     ax.set_ylabel("flagged as detection  [%]")
-    ax.set_ylim(0, 30); ax.set_xticks(amps_ref or [3, 6, 10])
+    ax.set_ylim(0, 88); ax.set_xticks(amps_ref or [3, 6, 10])
     ax.set_title("(b) non-physical decoys (no lensing signature)")
-    ax.legend(loc="upper left", ncol=1, fontsize=5.8)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2, fontsize=5.6, frameon=False)
     save(fig, "fig3_confounders")
 
 
@@ -383,13 +390,13 @@ def fig12_summary():
         ("lens-shape multipole, $a_4=3\\%\\,\\theta_E$\n(false positives, subhalo-free)",
          [("77%\n(100% joint re-fit)", RED), ("86%", RED), ("11%\nunmoved", GREEN)]),
         ("non-physical decoy, 10$\\sigma$ bump\n(false positives)",
-         [("2--4%\nignores it", GREEN), ("not run", GREY), ("19--21%\nfires", AMBER)]),
+         [("2--4%\nignores it", GREEN), ("67--76%\nfooled most", RED), ("19--21%\nfires", AMBER)]),
         ("real COSMOS source (Tier 1)",
          [("fits misspecified\n($\\chi^2$/dof 58--79)", AMBER), ("not run", GREY), ("AUC 0.62 $\\to$ 0.48\nchance", RED)]),
         ("lens light, single-S\u00e9rsic subtraction\n(clean FPR at $\\Delta\\chi^2>20$ / completeness)",
          [("0.2 $\\to$ 25%;\ncompleteness halves", RED), ("null $\\times$10;\nchance", RED), ("AUC 0.55;\nchance", RED)]),
         ("lens light, double-S\u00e9rsic subtraction",
-         [("0%; completeness\nwithin 10 pts", GREEN), ("not run", GREY), ("AUC 0.67\nrecovered", GREEN)]),
+         [("0%; completeness\nwithin 10 pts", GREEN), ("completeness 94%\nrecovered", GREEN), ("AUC 0.67\nrecovered", GREEN)]),
         ("localization $\\leq 2$ px\n(of nominal detections)",
          [("13%", RED), ("55%", AMBER), ("57%", AMBER)]),
         ("mass estimate\n(localized detections)",

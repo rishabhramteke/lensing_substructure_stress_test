@@ -26,12 +26,13 @@ from detector.unet import UNet  # noqa: E402
 
 BINS = [(8.0, 8.5), (8.5, 9.0), (9.0, 9.5), (9.5, 10.0), (10.0, 10.5), (10.5, 11.0)]
 A_ROOT = ROOT / "results/baseline_a_lenslight"
+SUFFIX = ""          # population suffix, e.g. "_s8" for the second lens-light seed set (set from the CLI)
 CKPT = ROOT / "checkpoints/unet_v0/model_best.pt"
 ORIG_THR = json.loads((ROOT / "results/detector_v0_best/results.json").read_text())["threshold_at_10pct_fpr"]
 
 
 def truths(pop):
-    return [json.loads(l) for l in open(ROOT / "data" / pop / "truth.jsonl")]
+    return [json.loads(l) for l in open(ROOT / "data" / (pop + SUFFIX) / "truth.jsonl")]
 
 
 def comp_by_bin(scores, trs, thr):
@@ -45,7 +46,7 @@ def comp_by_bin(scores, trs, thr):
 def family_a(root=None):
     root = Path(root) if root is not None else A_ROOT
     def load(pop):
-        p = root / pop / "scan_results.jsonl"
+        p = root / (pop + SUFFIX) / "scan_results.jsonl"
         return [json.loads(l) for l in open(p)] if p.exists() else None
     ns, t60, mp = load("lenslight_no_subhalo"), load("lenslight_fixed60"), load("lenslight_multipole_m4_a3")
     if not ns:
@@ -95,7 +96,7 @@ def unet_scores(images):
 def unet():
     out = {"original_threshold": ORIG_THR}
     # (a) raw lens-light images, full populations
-    raw = {pop: unet_scores(np.load(ROOT / "data" / pop / "images_full_noisy.npy")) for pop in ("lenslight_no_subhalo", "lenslight_fixed60", "lenslight_multipole_m4_a3")}
+    raw = {pop: unet_scores(np.load(ROOT / "data" / (pop + SUFFIX) / "images_full_noisy.npy")) for pop in ("lenslight_no_subhalo", "lenslight_fixed60", "lenslight_multipole_m4_a3")}
     tr = {pop: truths(pop) for pop in raw}
     out["raw_at_original_threshold"] = {"fpr_clean": float(np.mean(raw["lenslight_no_subhalo"] >= ORIG_THR)),
                                         "fpr_multipole_a3": float(np.mean(raw["lenslight_multipole_m4_a3"] >= ORIG_THR)),
@@ -107,9 +108,9 @@ def unet():
     # (b) subtracted images (Family A's fitted single-Sersic light removed), subsample of the same populations
     sub, subtr = {}, {}
     for pop in raw:
-        p = A_ROOT / pop / "lens_light_subtracted.npy"
+        p = A_ROOT / (pop + SUFFIX) / "lens_light_subtracted.npy"
         if p.exists():
-            idx = np.load(A_ROOT / pop / "subsample_indices.npy")
+            idx = np.load(A_ROOT / (pop + SUFFIX) / "subsample_indices.npy")
             sub[pop] = unet_scores(np.load(p)); subtr[pop] = [tr[pop][i] for i in idx]
     if "lenslight_no_subhalo" in sub:
         s = sub
@@ -124,13 +125,13 @@ def unet():
             out["subtracted_recalibrated"]["completeness_c60"] = comp_by_bin(s["lenslight_fixed60"], subtr["lenslight_fixed60"], thr_sub)
             out["subtracted_recalibrated"]["auc_c60_vs_clean"] = auc(s["lenslight_fixed60"], subtr["lenslight_fixed60"], s["lenslight_no_subhalo"])
     # (c) the same with the correctly specified double-Sersic subtraction, if that run exists
-    A2 = ROOT / "results/baseline_a_lenslight2"
-    if (A2 / "lenslight_no_subhalo" / "lens_light_subtracted.npy").exists():
+    A2 = ROOT / ("results/baseline_a_lenslight2" + SUFFIX)
+    if (A2 / ("lenslight_no_subhalo" + SUFFIX) / "lens_light_subtracted.npy").exists():
         s2, t2 = {}, {}
         for pop in raw:
-            p = A2 / pop / "lens_light_subtracted.npy"
+            p = A2 / (pop + SUFFIX) / "lens_light_subtracted.npy"
             if p.exists():
-                idx = np.load(A2 / pop / "subsample_indices.npy"); s2[pop] = unet_scores(np.load(p)); t2[pop] = [tr[pop][i] for i in idx]
+                idx = np.load(A2 / (pop + SUFFIX) / "subsample_indices.npy"); s2[pop] = unet_scores(np.load(p)); t2[pop] = [tr[pop][i] for i in idx]
         thr2 = float(np.quantile(s2["lenslight_no_subhalo"], 0.90))
         out["double_sersic_subtracted"] = {"fpr_clean_at_original_threshold": float(np.mean(s2["lenslight_no_subhalo"] >= ORIG_THR)),
                                            "recalibrated_threshold": thr2,
@@ -150,14 +151,18 @@ def main():
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip-unet", action="store_true")
+    ap.add_argument("--suffix", default="", help="population suffix for a second seed set, e.g. _s8 (roots get the same suffix)")
     args = ap.parse_args()
+    global SUFFIX, A_ROOT
+    SUFFIX = args.suffix
+    A_ROOT = ROOT / ("results/baseline_a_lenslight" + SUFFIX)
     extra = {}
-    for key, rel in (("family_a_double_sersic", "results/baseline_a_lenslight2"), ("family_b_single_sersic", "results/baseline_b_lenslight/fitted")):
-        if (ROOT / rel / "lenslight_no_subhalo" / "scan_results.jsonl").exists():
+    for key, rel in (("family_a_double_sersic", "results/baseline_a_lenslight2" + SUFFIX), ("family_b_single_sersic", "results/baseline_b_lenslight" + SUFFIX + "/fitted"), ("family_b_double_sersic", "results/baseline_b_lenslight2" + SUFFIX + "/fitted")):
+        if (ROOT / rel / ("lenslight_no_subhalo" + SUFFIX) / "scan_results.jsonl").exists():
             extra[key] = family_a(ROOT / rel)
     res = {"family_a": family_a(), "unet_v0": (None if args.skip_unet else unet()), **extra,
            "note": "True lens light is two-component (bulge n=3-5 + n=1 envelope); Family A fits ONE Sersic jointly with the mass model; 'subtracted' = data minus that fitted light. U-Net v0 was trained on Tier-0 images without lens light."}
-    (ROOT / "results/lens_light_experiment.json").write_text(json.dumps(res, indent=2))
+    (ROOT / ("results/lens_light_experiment" + SUFFIX + ".json")).write_text(json.dumps(res, indent=2))
     print(json.dumps(res, indent=1))
 
 

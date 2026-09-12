@@ -1,0 +1,47 @@
+{
+  "config": {
+    "threshold_peak_abs_dkappa_lam1e5": 0.09186965656016045,
+    "source": "results/baseline_b_decoy/fitted",
+    "note": "same decoys as noise_decoy_control.py (seed 42)"
+  },
+  "gaussian": {
+    "3.0": {
+      "b_fpr": 0.125,
+      "n_reliable": 96,
+      "n": 100,
+      "median_peak": 0.0773982814738571
+    },
+    "6.0": {
+      "b_fpr": 0.28125,
+      "n_reliable": 96,
+      "n": 100,
+      "median_peak": 0.08201873937593285
+    },
+    "10.0": {
+      "b_fpr": 0.6666666666666666,
+      "n_reliable": 96,
+      "n": 100,
+      "median_peak": 0.11736701859594104
+    }
+  },
+  "dipole": {
+    "3.0": {
+      "b_fpr": 0.16842105263157894,
+      "n_reliable": 95,
+      "n": 100,
+      "median_peak": 0.07551952803421819
+    },
+    "6.0": {
+      "b_fpr": 0.4895833333333333,
+      "n_reliable": 96,
+      "n": 100,
+      "median_peak": 0.09043132393574796
+    },
+    "10.0": {
+      "b_fpr": 0.7604166666666666,
+      "n_reliable": 96,
+      "n": 100,
+      "median_peak": 0.13706214910696926
+    }
+  }
+}
