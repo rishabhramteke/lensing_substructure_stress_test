@@ -121,7 +121,7 @@ def offset_hist(ax, tp, color):
     d = np.array([np.hypot(t[2] - t[0], t[3] - t[1]) for t in tp])
     ax.hist(d, bins=np.linspace(0, 1.2, 25), color=color, alpha=0.85)
     ax.axvline(LOCALIZED_ARCSEC, color="#2ca02c", lw=1.2)
-    ax.text(0.97, 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", transform=ax.transAxes, ha="right", va="top", fontsize=6.8, color="#2ca02c")
+    ax.text(0.97, 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", transform=ax.transAxes, ha="right", va="top", fontsize=9.0, color="#2ca02c")
     ax.set_xlabel("offset from true subhalo (arcsec)"); ax.set_ylabel("correct finds")
 
 
@@ -131,7 +131,7 @@ def shared_legend(fig):
     handles = [Line2D([], [], marker="o", color="#2ca02c", ls="none", ms=5, label=f"correct find, localized (≤{LOCALIZED_PX:.0f} px of truth)"),
                Line2D([], [], marker="o", color="#ff7f0e", ls="none", ms=5, label="correct find, mislocalized (right call, wrong spot)"),
                Line2D([], [], marker="*", color="#d62728", ls="none", ms=7, mew=0, alpha=0.6, label="false alarm (no subhalo present; multipole population)")]
-    fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=7, frameon=False, bbox_to_anchor=(0.5, -0.01))
+    fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=9, frameon=False, bbox_to_anchor=(0.5, -0.01))
 
 
 def main():

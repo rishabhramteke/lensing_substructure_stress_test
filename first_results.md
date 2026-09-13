@@ -2002,3 +2002,16 @@ The real tells were structural, not lexical:
 **Deliverable renamed** `Ramteke_2026_substructure_stress_test.pdf` (DRAFT suffix dropped; underscores
 per the project naming rule). The old filename is deleted, not kept alongside — single deliverable,
 updated in place.
+
+### Font audit (2026-09-13)
+Checked the submission PDF with PyMuPDF:
+- **21 fonts, all embedded, zero Type 3 (bitmap) fonts** — the usual journal rejection trigger is absent.
+- Body/math is txfonts over NimbusRomNo9L (URW Times); figures are STIXGeneral + Nimbus Sans. STIX is
+  designed as a Times match, so the two sit together; left as is rather than forcing `usetex`.
+- Rendered size sweep found 867 characters below 5.5 pt. **Most were false alarms**: the referee line
+  numbers (set to 5 pt deliberately, to fix the overprinting, and removed in the typeset version) and
+  math sub/superscripts ("200" in M_200, "proj"/"pert"/"perm"), which are correctly small.
+- **One genuine problem**: the localization figure carried six annotations at 4.9–5.0 pt ("14% within
+  2 px", the three legend entries). The figure is wider than the column so everything shrinks ~30% on
+  inclusion. Raised those two elements from 6.8/7 to 9 pt in `plot_localization_accuracy.py`;
+  they now land above 6.5 pt on the page. **Undersized annotations remaining: 0.**
