@@ -191,6 +191,56 @@ def aperture_scan(res, fam, apertures=(0.05, 0.075, 0.1, 0.15, 0.2, 0.3, 0.4)):
     return out
 
 
+def paired_permutation(res, fam, var, n_perm=4000, seed=0):
+    """A permutation test that respects the matched-pairs design (referee round 9, M6).
+
+    The c=60 and c=15 populations are the SAME lenses, so the two detection outcomes being
+    differenced are correlated (phi ~ 0.35-0.80 here) and the two-proportion variance used by
+    the pooled chi^2 is overstated -- which makes a failure to reject anti-conservative, in the
+    direction the "curves coincide" reading needs. Under the null that concentration does not
+    matter at equal signal, a lens's two (signal, outcome) pairs are exchangeable between arms.
+    We therefore recompute the binned chi^2 many times with each *paired* lens's two arms
+    swapped at random (unpaired lenses are assigned to an arm at random) and quote the fraction
+    of permutations reaching the observed chi^2. This keeps the per-lens correlation intact.
+    """
+    F = res["families"][fam]
+    if "c60" not in F or "c15" not in F:
+        return None
+    w = BIN_WIDTH[var]
+    a = {i: (x, d) for i, x, d in zip(F["c60"]["index"], F["c60"][var], F["c60"]["detected"])}
+    b = {i: (x, d) for i, x, d in zip(F["c15"]["index"], F["c15"][var], F["c15"]["detected"])}
+    paired = sorted(set(a) & set(b))
+    only_a = sorted(set(a) - set(b)); only_b = sorted(set(b) - set(a))
+
+    def chi2_of(arm_a, arm_b):
+        d = {"c60": {var: [x for x, _ in arm_a], "detected": [d_ for _, d_ in arm_a]},
+             "c15": {var: [x for x, _ in arm_b], "detected": [d_ for _, d_ in arm_b]}}
+        rows = compare(d, var)
+        J = joint_chi2(rows)
+        return (J["chi2"], J["dof"]) if J else (np.nan, 0)
+
+    obs_chi2, dof = chi2_of([a[i] for i in paired] + [a[i] for i in only_a],
+                            [b[i] for i in paired] + [b[i] for i in only_b])
+    rng = np.random.default_rng(seed)
+    ge = 0
+    for _ in range(n_perm):
+        flip = rng.random(len(paired)) < 0.5
+        A = [(b[i] if f else a[i]) for i, f in zip(paired, flip)]
+        B = [(a[i] if f else b[i]) for i, f in zip(paired, flip)]
+        fa = rng.random(len(only_a)) < 0.5
+        fb = rng.random(len(only_b)) < 0.5
+        A += [a[i] for i, f in zip(only_a, fa) if f] + [b[i] for i, f in zip(only_b, fb) if f]
+        B += [a[i] for i, f in zip(only_a, fa) if not f] + [b[i] for i, f in zip(only_b, fb) if not f]
+        c, _ = chi2_of(A, B)
+        if not np.isnan(c) and c >= obs_chi2:
+            ge += 1
+    # correlation of the paired outcomes, for the record
+    pa = np.array([a[i][1] for i in paired], float); pb = np.array([b[i][1] for i in paired], float)
+    phi = float(np.corrcoef(pa, pb)[0, 1]) if pa.std() > 0 and pb.std() > 0 else None
+    return {"observed_chi2": float(obs_chi2), "dof": int(dof), "n_perm": n_perm,
+            "p_permutation": (ge + 1) / (n_perm + 1), "n_paired": len(paired), "phi_paired": phi}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--a-root", default="results/baseline_a_full"); ap.add_argument("--b-root", default="results/baseline_b_full/fitted")
@@ -217,11 +267,14 @@ def main():
     res["joint"] = {fam: {var: joint_chi2(rows) for var, rows in byvar.items()} for fam, byvar in res["comparison"].items()}
     res["power"] = {fam: {var: min_detectable_difference(rows) for var, rows in byvar.items()} for fam, byvar in res["comparison"].items()}
     res["aperture_scan"] = {fam: aperture_scan(res, fam) for fam in ("A", "B", "C")}
+    res["permutation"] = {fam: {var: paired_permutation(res, fam, var) for var in ("log10_snr", "log10_Mproj_0p2")}
+                          for fam in ("A", "B", "C")}
     (ROOT / args.out).write_text(json.dumps(res))
 
     # ---- text summary + LaTeX table: c15 - c60 at equal signal, per family and variable
-    lines = [r"\begin{tabular}{@{}llrrr@{}}", r"\toprule", r"family & signal variable & bins & mean $\Delta$ & $\chi^2$/dof ($p$) \\", r"\midrule"]
-    names = {"A": "A scan", "B": "B pot.\\ corr.", "C": "C U-Net"}
+    lines = [r"\begin{tabular}{@{}llrrrrr@{}}", r"\toprule",
+             r"family & signal variable & bins & mean $\Delta$ & $\chi^2$/dof & $p$ & $p_{\rm perm}$ \\", r"\midrule"]
+    names = {"A": "A scan", "B": "B linear $\\delta\\psi$", "C": "C U-Net"}
     for fam, byvar in res["comparison"].items():
         print(f"== Family {fam}")
         for k, (var, rows) in enumerate(byvar.items()):
@@ -231,8 +284,10 @@ def main():
             print(f"  {var:16s} " + " | ".join(f"{r['lo']:.2f}-{r['hi']:.2f}: {100*r['p60']:.0f} vs {100*r['p15']:.0f}% (n {r['n60']}/{r['n15']}, z {r['z']:+.1f})" for r in rows))
             sign = "+" if diffs.mean() >= 0 else "$-$"
             J = res["joint"][fam][var]
-            pv = "--" if J["p_value"] is None else (f"{J['p_value']:.3f}" if J["p_value"] >= 0.001 else "$<0.001$")
-            lines.append(f"{names[fam] if k == 0 else ''} & {VARIABLES[var]} & {len(rows)} & {sign}{abs(100*diffs.mean()):.0f} & {J['chi2_per_dof']:.1f} ({pv}) \\\\")
+            P = (res.get("permutation", {}).get(fam, {}) or {}).get(var)
+            def _fmt(x):
+                return "--" if x is None else (f"{x:.3f}" if x >= 0.001 else "$<0.001$")
+            lines.append(f"{names[fam] if k == 0 else ''} & {VARIABLES[var]} & {len(rows)} & {sign}{abs(100*diffs.mean()):.0f} & {J['chi2_per_dof']:.1f} & {_fmt(J['p_value'])} & {_fmt(P['p_permutation']) if P else '--'} \\\\")
         lines.append(r"\addlinespace[2pt]")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / args.table).write_text("\n".join(lines) + "\n")
@@ -240,6 +295,10 @@ def main():
     for fam, byvar in res["power"].items():
         for var, d in byvar.items():
             if d: print(f"   {fam} {var:18s} {d['min_detectable_diff_pts']:5.1f} pts   (median bin s.e. {d['median_bin_se_pts']:.1f} pts)")
+    print("\n== paired permutation test (respects the matched-pairs correlation):")
+    for fam, byvar in res["permutation"].items():
+        for var, d in byvar.items():
+            if d: print(f"   {fam} {var:18s} chi2={d['observed_chi2']:7.1f} dof={d['dof']}  p_perm={d['p_permutation']:.4f}  (phi={d['phi_paired']:+.2f}, {d['n_paired']} pairs)")
     print("\n== p-value vs aperture:")
     for fam, rows in res["aperture_scan"].items():
         print(f"   {fam}: " + " | ".join(f"{r['aperture']:.3f}\": p={r['p_value']:.3f}" for r in rows if r["p_value"] is not None))

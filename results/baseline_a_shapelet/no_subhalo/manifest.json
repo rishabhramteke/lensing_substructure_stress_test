@@ -1,0 +1,14 @@
+{
+  "population": "no_subhalo",
+  "n": 120,
+  "seed": 1,
+  "source_model": "SHAPELETS",
+  "n_max": 6,
+  "n_source_coefficients": 28,
+  "maxiter": 150,
+  "concentration_assumed": 15.0,
+  "linear_source_solve": true,
+  "n_unreliable_fits": 82,
+  "elapsed_s": 567.031909942627,
+  "workers": 3
+}

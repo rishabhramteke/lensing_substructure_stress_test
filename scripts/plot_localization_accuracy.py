@@ -167,7 +167,7 @@ def main():
     panel(axes[0], a_tp, a_fp, args.a_label,
           f"localized ≤{LOCALIZED_PX:.0f} px: {100*a_loc.mean():.0f}% of {len(a_tp)} correct finds · median offset {np.median(a_d):.2f}″")
     if b_tp is not None:
-        panel(axes[1], b_tp, b_fp, "Family B (potential correction)",
+        panel(axes[1], b_tp, b_fp, "Family B (linear $\delta\psi$)",
               f"localized ≤{LOCALIZED_PX:.0f} px: {100*(b_d<LOCALIZED_ARCSEC).mean():.0f}% of {len(b_tp)} correct finds · median offset {np.median(b_d):.2f}″")
     panel(axes[-1], c_tp, c_fp, "Family C (U-Net)",
           f"localized ≤{LOCALIZED_PX:.0f} px: {100*(c_d<LOCALIZED_ARCSEC).mean():.0f}% of {len(c_tp)} correct finds · median offset {np.median(c_d):.2f}″")

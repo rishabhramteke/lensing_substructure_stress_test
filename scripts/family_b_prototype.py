@@ -1,4 +1,4 @@
-"""Family B prototype -- pixelized potential correction ("gravitational imaging")
+"""Family B prototype -- pixelized linear delta-psi residual detector ("gravitational imaging")
 on ONE of our Tier-0 lenses at a time, using PyAutoLens's own implementation of
 the method (`autolens.potential_correction`, the port of Cao et al. 2025's
 package; the technique is Koopmans 2005 / Vegetti & Koopmans 2009). This is the

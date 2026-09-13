@@ -1773,3 +1773,72 @@ survives: A vs S/N χ²/dof 1.5, p=0.12 (was 0.9, p=0.57); B vs M_proj(<0.2″) 
   not found stated elsewhere.
 - Data availability now pins PyAutoLens 2026.9.8.1 and lenstronomy 1.12.2 and points at requirements.txt
   and the manifests.
+
+## 2026-09-13: round 15 — seventh external report (7.0/10, reconsider after major revision)
+
+Two of the referee's diagnoses changed conclusions. Both go against the paper.
+
+### M6 — the coincidence tests ignored the matched-pairs correlation (referee right; a claim retracted)
+The c=60/c=15 arms are the SAME lenses, so the two detection outcomes are correlated
+(paired φ = +0.80 A, +0.50 B, +0.35 C; 40–61% of lenses land in the same signal bin in both arms).
+The two-proportion χ² therefore overstates the variance and is anti-conservative exactly where the
+"curves coincide" reading needs it. Added a **paired permutation test** (swap each paired lens's two
+arms, rebin, 4000 draws) in `completeness_vs_signal.py`.
+
+| | χ² | p (unpaired) | **p_perm** |
+|---|---|---|---|
+| A vs S/N | 15.5/10 | 0.115 | **0.008** |
+| A vs M_proj(<0.2″) | 17.6/4 | 0.001 | 0.003 |
+| B vs M_proj(<0.2″) | 5.7/4 | 0.223 | **0.331** |
+| B vs S/N | 87.7/10 | <0.001 | <0.001 |
+| C vs both | 136/44 | <0.001 | <0.001 |
+
+**Family B's coincidence survives; Family A's does not.** The claim "each physical method's curves
+coincide against the signal its own statistic measures" is retracted for A and replaced by the
+weaker, defensible statement: A's residual dependence at equal S/N is the smallest of any
+family–variable pair (mean 4 pts) but is resolved. Abstract, Sect 4.1 and Conclusion 1 rewritten.
+
+### M2 — extending the joint re-fit removed a Family-A result
+Ran the joint re-fit on multipole a1 and on test_fixed15 (100 lenses each). Results:
+- multipole a=0.01: frozen 33% → **joint 98%** (matches the a=0.03 pattern 77% → 100%).
+- **Concentration**: joint completeness is 86/100/100/88% at c=60 and 88/100/100/100% at c=15 —
+  the 4–13 point gap **closes almost completely**. So the scan's concentration loss is a property of
+  our frozen-macro implementation, NOT of the parametric method class. Stated plainly in Sect 4.2,
+  Conclusion 1 and the abstract; the concentration result that transfers is the one from the other
+  two families and the signal variables.
+  The joint scan trades specificity for sensitivity: it flags 98–100% of multipole lenses.
+
+### M4 — flexible source attempted, failed, reported as such
+`scripts/run_baseline_a_shapelet.py`: shapelet source (n_max=6, 28 coefficients solved linearly via
+`ImageLinearFit.image_linear_solve`, 9 non-linear params, scale multi-started from 0.06/0.12/0.25).
+**Does not converge**: 38/120 clean fits below χ²/dof 10 (Sérsic: 295/300), median 18.6 (Sérsic 0.99),
+and on converged fits 95% of CLEAN lenses are flagged at Δχ²>0 — a free source plus a free perturber
+absorb noise. Tried n_max 4/5/6/8/10, maxiter 40–150, and a beta pre-scan (which made it worse
+because it picks the scale at a jittered macro). Reported in Sect 4.2 as a failed experiment whose
+failure is informative: **an unregularized flexible source is not a drop-in improvement, and the
+source regularization published pipelines impose is load-bearing**. The multipole rates stay upper
+limits of unknown tightness. This is the referee's highest-value ask and it was NOT delivered.
+
+### M7 — bound mass, and it favours the paper
+At fixed M200 and τ=20 the bound mass within r_t is a LARGER fraction of M200 at low c
+(0.13 / 0.29 / 0.60 at c=60/30/15). So the c=15 perturber carries 4.6× more bound mass and is still
+detected less: the loss cannot be "a lighter object". On the tidal track the fractions are nearly
+equal (0.13/0.16/0.20) and the loss persists. Rows added to Table tab:tidal.
+
+### M1, M3, M5, M8 and minors
+- **M1**: abstract now carries the proxy caveat (frozen macro-model, fixed source, few per cent of
+  training scale, "transfer is argued from mechanism"). Abstract rewritten mechanism-first, ≤300 words.
+- **M3**: the Family B rename was NOT carried through — fig4 and four generated tables still said
+  "potential correction". Fixed in six scripts, all tables and the figure; verified 0 remaining.
+- **M5a**: "4–13 points" traced. It is the floored loss with the **c=60 template** (from
+  `results/baseline_a_c60`), not the c=15-template step the referee computed. tab:conc is now
+  **generated** (`evaluate_concentration_templates.py`) with all four bins and both statistics, so
+  every quoted range is a row.
+- **M5b**: "at no cost in completeness" → "little measured cost", with the 4-point binomial σ quoted.
+- **M5c**: Conclusion 2 no longer mixes operating points in one clause.
+- **M8**: added the survey implication (10% FPR = 10³–10⁴ false detections on 10⁴–10⁵ lenses) and
+  that the clean-control calibration needs truth and so is a simulation-only metric.
+- Minors: garbled Sect 2.3 parenthetical repaired; clean-FPR samples labelled; "standard since 2025"
+  reattributed to Lange; decoy seed spread stated; the 0.2″ panel sign explained; PSF choice
+  justified; AI-policy wording flagged as checked at submission.
+- Build: 24 pages, 0 errors / overfull / undefined / class warnings, 0 line-number overprints.

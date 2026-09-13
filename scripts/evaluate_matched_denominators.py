@@ -153,7 +153,7 @@ def main():
         return f"{100*d['p']:.0f}$^{{+{100*(d['hi']-d['p']):.0f}}}_{{-{100*(d['p']-d['lo']):.0f}}}$"
     lines = [r"\begin{tabular}{@{}ll" + "c" * 6 + "@{}}", r"\toprule",
              "family & population & " + " & ".join(f"{lo}--{hi}" for lo, hi in BINS) + r" \\", r"\midrule"]
-    for fam, label in (("A", "A scan"), ("A_floor", r"A scan, $\dchi>0$"), ("B", r"B pot.\ corr."), ("C", "C U-Net")):
+    for fam, label in (("A", "A scan"), ("A_floor", r"A scan, $\dchi>0$"), ("B", r"B linear $\delta\psi$"), ("C", "C U-Net")):
         first = True
         for pop, cl in (("test_fixed60", "$c{=}60$"), ("test_fixed15", "$c{=}15$")):
             row = res["families"][fam][pop]["matched"]
@@ -165,7 +165,7 @@ def main():
 
     # ---- second table: how the three accountings order the families, per bin
     rows2 = [r"\begin{tabular}{@{}llccc@{}}", r"\toprule",
-             r"bin ($\log_{10}M_{200}$) & accounting & A scan & B pot.\ corr. & C U-Net \\", r"\midrule"]
+             r"bin ($\log_{10}M_{200}$) & accounting & A scan & B linear $\delta\psi$ & C U-Net \\", r"\midrule"]
     for lo, hi in BINS[2:]:
         k = f"{lo}-{hi}"
         first = True

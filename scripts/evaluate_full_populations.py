@@ -80,7 +80,7 @@ def main():
     rows = []
     blocks = [("A", "A scan", [("completeness", "reported"), ("conservative", "conservative"), (None, None)]),
               ("A_floored", "A scan, $\\dchi>0$", [("completeness", "reported"), ("conservative", "conservative"), (None, None)]),
-              ("B", "B pot.\\ corr.", [("completeness", "reported"), ("conservative", "conservative")])]
+              ("B", "B linear $\\delta\\psi$", [("completeness", "reported"), ("conservative", "conservative")])]
     for fam, label, crits in blocks:
         d = res.get(fam)
         if d is None:

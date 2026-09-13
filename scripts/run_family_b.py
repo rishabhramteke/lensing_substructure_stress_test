@@ -1,4 +1,4 @@
-"""Family B population runs -- pixelized potential correction ("gravitational
+"""Family B population runs -- pixelized linear delta-psi residual detector ("gravitational
 imaging", Koopmans 2005; Vegetti & Koopmans 2009) with PyAutoLens's own
 `autolens.potential_correction` (linear dpsi inversion), on the SAME 300-image
 subsamples Family A was run on, writing Family A's file format so
@@ -250,7 +250,7 @@ def main():
                 el = time.time() - t0
                 print(f"  {args.population}/{args.variant}  {k+1}/{n}  ({el/(k+1):.2f}s/lens avg, {el:.0f}s elapsed, {n_unreliable} unreliable, {n_err} errors)", flush=True)
 
-    manifest_out = {"family": "B (potential correction, PyAutoLens autolens.potential_correction, linear dpsi inversion)",
+    manifest_out = {"family": "B (linear delta-psi residual detector, PyAutoLens autolens.potential_correction, linear dpsi inversion)",
                     "population": args.population, "variant": args.variant, "n": n, "seed": args.seed,
                     "lams": args.lams, "lam_primary": args.lam_primary, "mesh_factor": args.factor,
                     "statistic": "max|dkappa| at lam_primary, written also as delta_chi2 (alias)",

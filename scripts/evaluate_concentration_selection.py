@@ -114,6 +114,28 @@ def main():
     res["selection"] = sel
     (ROOT / "results/concentration_selection.json").write_text(json.dumps(res, indent=2))
 
+    # ---- bound mass within r_t, so the reader can see whether "fixed M200" compares like with like
+    import sys as _sys
+    _sys.path.insert(0, str(ROOT / "src"))
+    from lenstronomy.Cosmo.lens_cosmo import LensCosmo
+    from lenstronomy.LensModel.Profiles.tnfw import TNFW
+    _LC, _P = LensCosmo(z_lens=0.5, z_source=1.0), TNFW()
+
+    def _bound(sub):
+        Rs, aRs = _LC.nfw_physical2angle(M=10 ** sub["log10_M200"], c=sub["concentration"])
+        rho0 = _P.alpha2rho0(alpha_Rs=aRs, Rs=Rs); rt = sub["tau"] * Rs
+        return float(_P.mass_3d(rt, Rs, rho0, rt) * _LC.sigma_crit_angle)
+
+    res["bound_mass"] = {}
+    for pop in ("test_fixed60", "test_fixed30", "test_fixed15", "test_tidal_c30", "test_tidal_c15"):
+        f = ROOT / "data" / pop / "truth.jsonl"
+        if not f.exists(): continue
+        subs = [json.loads(l)["subhalo"] for l in open(f) if json.loads(l)["subhalo"]]
+        mb = np.array([_bound(x) for x in subs]); m200 = np.array([10 ** x["log10_M200"] for x in subs])
+        res["bound_mass"][pop] = {"c": subs[0]["concentration"], "tau": subs[0]["tau"],
+                                  "median_log10_Mbound": float(np.median(np.log10(mb))),
+                                  "median_Mbound_over_M200": float(np.median(mb / m200))}
+
     # ---- table: tidal track vs fixed tau
     lines = [r"\begin{tabular}{@{}lccc@{}}", r"\toprule",
              r"completeness at $\dchi>0$ & $c{=}60$ & $c{=}30$ & $c{=}15$ \\", r"\midrule",
@@ -130,6 +152,11 @@ def main():
                      f"{100*res['completeness'][60]['floor'][k]['p']:.0f}\\% & " +
                      f"{100*res['tidal'][30]['floor'][k]['p']:.0f}\\% & " +
                      f"{100*res['tidal'][15]['floor'][k]['p']:.0f}\\%" + r" \\")
+    B = res["bound_mass"]
+    lines.append(r"\addlinespace[2pt]")
+    lines.append(r"\multicolumn{4}{@{}l}{median bound mass within $r_{\rm t}$, as a fraction of $M_{200}$} \\")
+    lines.append(r"\quad $\tau=20$ fixed & " + " & ".join(f"{B[p]['median_Mbound_over_M200']:.2f}" for p in ("test_fixed60", "test_fixed30", "test_fixed15")) + r" \\")
+    lines.append(r"\quad tidal track & " + f"{B['test_fixed60']['median_Mbound_over_M200']:.2f} & {B['test_tidal_c30']['median_Mbound_over_M200']:.2f} & {B['test_tidal_c15']['median_Mbound_over_M200']:.2f}" + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / "paper/tables/tidal.tex").write_text("\n".join(lines) + "\n")
 
