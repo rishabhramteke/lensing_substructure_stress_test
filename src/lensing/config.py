@@ -142,7 +142,33 @@ class InstrumentConfig:
     psf_type: str = "GAUSSIAN"
     pixel_scale: float | None = 0.08  # None -> use the survey preset's own value
     num_pix: int = 64
+    # None -> the preset's own exposure (5400 s). Set it to render the SAME lenses at a
+    # different depth: the referee point that every result here is at arc S/N ~1.6e3,
+    # while a survey visit delivers far less (2026-09-13).
+    exposure_time: float | None = None
     note: str = "HST/F160W/Gaussian/0.08\" is Tsang+2024's coarsest grid; 0.02\" reproduces their finest"
+
+
+@dataclass
+class LOSHaloConfig:
+    """A line-of-sight halo on its own lens plane (referee round 7, point M7).
+
+    Sengul et al. (2022) reanalysed the field's first "dark perturber" (in JVAS B1938+666)
+    as a line-of-sight halo rather than a subhalo, and Gilman et al. (2020) show the
+    line-of-sight population dominates the perturbation signal in some configurations.
+    A halo at z != z_lens is a *field* halo, so it keeps the unboosted concentration-mass
+    relation (see concentration.py); a detector that assumes the perturber sits at the
+    lens redshift will still flag it, but will infer the wrong mass.
+    """
+
+    enabled: bool = False
+    z_halo: float = 0.25                       # foreground by default; 0.75 is the background case
+    log10_mass_range: tuple = (8.0, 11.0)
+    concentration_mode: str = "cdm"            # field halo: the unboosted Dutton & Maccio relation
+    tau: float = 20.0
+    placement_annulus_frac_thetaE: tuple = (0.6, 1.3)
+    presence_prob: float = 1.0
+    note: str = "line-of-sight halo on a second lens plane; Sengul+2022, Gilman+2020"
 
 
 @dataclass
@@ -152,6 +178,7 @@ class SimConfig:
     source: SourceConfig = field(default_factory=SourceConfig)
     subhalo: SubhaloConfig = field(default_factory=SubhaloConfig)
     multipole: MultipoleConfig = field(default_factory=MultipoleConfig)
+    los_halo: LOSHaloConfig = field(default_factory=LOSHaloConfig)
     lens_light: LensLightConfig = field(default_factory=LensLightConfig)
     instrument: InstrumentConfig = field(default_factory=InstrumentConfig)
     tier: str = "tier0"
@@ -165,6 +192,37 @@ def tier0_tsang(concentration_mode: str = "fixed60") -> SimConfig:
     cfg = SimConfig()
     cfg.subhalo.concentration_mode = concentration_mode
     cfg.tier = f"tier0_tsang_{concentration_mode}"
+    return cfg
+
+
+def tier0_shallow(concentration_mode: str = "fixed60", exposure_time: float = 135.0, no_subhalo: bool = False, am_over_thetaE: float = 0.0, m: int = 4) -> SimConfig:
+    """Tier 0 at survey-like depth: the identical priors and (given the same seed) the
+    identical lenses, sources and subhalos, with only the exposure time reduced. 135 s
+    against the preset's 5400 s takes the median arc signal-to-noise from ~1.3e3 to ~2e2
+    and the peak pixel from ~240 sigma to ~37 sigma."""
+    cfg = tier0_tsang(concentration_mode)
+    cfg.instrument.exposure_time = exposure_time
+    if no_subhalo:
+        cfg.subhalo.enabled = False
+        cfg.subhalo.presence_prob = 0.0
+    if am_over_thetaE:
+        cfg.multipole.enabled = True
+        cfg.multipole.am_over_thetaE = am_over_thetaE
+        cfg.multipole.m = m
+    cfg.tier = f"tier0_shallow{int(exposure_time)}s_{'no_subhalo' if no_subhalo else concentration_mode}" + (f"_m{m}a{am_over_thetaE}" if am_over_thetaE else "")
+    return cfg
+
+
+def tier0_los_halo(z_halo: float = 0.25) -> SimConfig:
+    """Tier 0 with NO subhalo at the lens plane and one line-of-sight halo at `z_halo`,
+    drawn from the same mass range and the same annulus in projection. The detectors are
+    unchanged: they assume any perturber sits at the lens redshift."""
+    cfg = tier0_tsang()
+    cfg.subhalo.enabled = False
+    cfg.subhalo.presence_prob = 0.0
+    cfg.los_halo.enabled = True
+    cfg.los_halo.z_halo = z_halo
+    cfg.tier = f"tier0_los_halo_z{z_halo}"
     return cfg
 
 

@@ -33,6 +33,8 @@ def _survey_kwargs(cfg) -> dict:
     kw = obs.kwargs_single_band()
     if cfg.pixel_scale is not None:
         kw["pixel_scale"] = cfg.pixel_scale
+    if getattr(cfg, "exposure_time", None) is not None:
+        kw["exposure_time"] = float(cfg.exposure_time)
     return kw
 
 
@@ -40,6 +42,7 @@ def sample_truth(cfg: SimConfig, rng: np.random.Generator) -> dict:
     """Draw one lens system's parameters. Returns a JSON-serialisable dict —
     the hidden truth — with every quantity a metric or a figure will need."""
     L, S, H, M = cfg.lens, cfg.source, cfg.subhalo, cfg.multipole
+    LOS = getattr(cfg, "los_halo", None)
 
     theta_E = rng.uniform(*L.theta_E_range)
     gamma = rng.uniform(*L.gamma_range)
@@ -103,6 +106,16 @@ def sample_truth(cfg: SimConfig, rng: np.random.Generator) -> dict:
         phi_m = np.radians(rng.uniform(*M.phi_m_range_deg))
         truth["multipole"] = {"m": M.m, "a_m": a_m, "am_over_thetaE": M.am_over_thetaE, "phi_m_deg": np.degrees(phi_m)}
 
+    if LOS is not None and LOS.enabled and rng.uniform() < LOS.presence_prob:
+        log10_m = rng.uniform(*LOS.log10_mass_range)
+        c = float(sample_concentration(np.array(log10_m), LOS.concentration_mode, rng))
+        r = rng.uniform(*LOS.placement_annulus_frac_thetaE) * theta_E
+        ang = rng.uniform(0, 2 * np.pi)
+        truth["los_halo"] = {"log10_M200": log10_m, "concentration": c, "concentration_mode": LOS.concentration_mode,
+                              "tau": LOS.tau, "z_halo": LOS.z_halo, "x": r * np.cos(ang), "y": r * np.sin(ang), "r_from_center": r}
+    else:
+        truth["los_halo"] = None
+
     truth["lens_light"] = None
     LL = getattr(cfg, "lens_light", None)
     if LL is not None and LL.enabled and S.source_type != "cosmos":
@@ -130,15 +143,19 @@ class LensRenderer:
         self.kwargs_band = _survey_kwargs(cfg.instrument)
         self.num_pix = cfg.instrument.num_pix
 
-    def _sim_api(self, model_list: list[str], n_lens_light: int = 0) -> SimAPI:
+    def _sim_api(self, model_list: list[str], n_lens_light: int = 0, z_list: list[float] | None = None) -> SimAPI:
         source_model = ["INTERPOL"] if self.cfg.source.source_type == "cosmos" else ["SERSIC_ELLIPSE"]
         kwargs_model = {"lens_model_list": model_list, "source_light_model_list": source_model}
+        if z_list is not None:
+            # a redshift list switches lenstronomy to multi-plane ray tracing (LOS halo)
+            kwargs_model["lens_redshift_list"] = z_list
+            kwargs_model["z_source"] = self.cfg.cosmology.z_source
         if n_lens_light:
             kwargs_model["lens_light_model_list"] = ["SERSIC_ELLIPSE"] * n_lens_light
         return SimAPI(num_pix=self.num_pix, kwargs_single_band=self.kwargs_band, kwargs_model=kwargs_model)
 
     @staticmethod
-    def _kwargs_lens(truth: dict, include_subhalo: bool, include_multipole: bool) -> list[dict]:
+    def _kwargs_lens(truth: dict, include_subhalo: bool, include_multipole: bool, include_los: bool = True) -> list[dict]:
         lm = truth["lens_macro"]
         kw = [
             {"theta_E": lm["theta_E"], "gamma": lm["gamma"], "e1": lm["e1"], "e2": lm["e2"], "center_x": 0.0, "center_y": 0.0},
@@ -152,16 +169,30 @@ class LensRenderer:
             lc = LensCosmo(z_lens=truth["cosmology"]["z_lens"], z_source=truth["cosmology"]["z_source"])
             Rs_angle, alpha_Rs = lc.nfw_physical2angle(M=10 ** sh["log10_M200"], c=sh["concentration"])
             kw.append({"Rs": Rs_angle, "alpha_Rs": alpha_Rs, "r_trunc": sh["tau"] * Rs_angle, "center_x": sh["x"], "center_y": sh["y"]})
+        if include_los and truth.get("los_halo"):
+            lh = truth["los_halo"]
+            lc = LensCosmo(z_lens=lh["z_halo"], z_source=truth["cosmology"]["z_source"])
+            Rs_angle, alpha_Rs = lc.nfw_physical2angle(M=10 ** lh["log10_M200"], c=lh["concentration"])
+            kw.append({"Rs": Rs_angle, "alpha_Rs": alpha_Rs, "r_trunc": lh["tau"] * Rs_angle, "center_x": lh["x"], "center_y": lh["y"]})
         return kw
 
     @staticmethod
-    def _model_list(include_subhalo: bool, include_multipole: bool) -> list[str]:
+    def _model_list(include_subhalo: bool, include_multipole: bool, include_los: bool = False) -> list[str]:
         m = ["EPL", "SHEAR"]
         if include_multipole:
             m.append("MULTIPOLE")
         if include_subhalo:
             m.append("TNFW")
+        if include_los:
+            m.append("TNFW")
         return m
+
+    def _z_list(self, truth: dict, model_list: list[str], include_los: bool) -> list[float] | None:
+        """Per-profile redshifts, or None when every profile is at the lens plane (single-plane)."""
+        if not (include_los and truth.get("los_halo")):
+            return None
+        zl = truth["cosmology"]["z_lens"]
+        return [zl] * (len(model_list) - 1) + [truth["los_halo"]["z_halo"]]
 
     def _kwargs_source(self, truth: dict) -> list[dict]:
         s = truth["source"]
@@ -187,12 +218,19 @@ class LensRenderer:
         kwargs_source = self._kwargs_source(truth)
         kwargs_lens_light = truth.get("lens_light") or None   # list of Sersic dicts, or None (added 2026-09-11)
 
-        variants = {"smooth": (False, False), "no_subhalo": (False, has_mp), "no_multipole": (has_sub, False), "full": (has_sub, has_mp)}
+        has_los = truth.get("los_halo") is not None
+        # (include_subhalo, include_multipole, include_los)
+        variants = {"smooth": (False, False, False), "no_subhalo": (False, has_mp, has_los),
+                    "no_multipole": (has_sub, False, has_los), "full": (has_sub, has_mp, has_los)}
+        if has_los:
+            variants["no_los"] = (has_sub, has_mp, False)
         noiseless, sim_full = {}, None
-        for name, (inc_sub, inc_mp) in variants.items():
-            sim = self._sim_api(self._model_list(inc_sub, inc_mp), n_lens_light=len(kwargs_lens_light) if kwargs_lens_light else 0)
+        for name, (inc_sub, inc_mp, inc_los) in variants.items():
+            model_list = self._model_list(inc_sub, inc_mp, inc_los)
+            sim = self._sim_api(model_list, n_lens_light=len(kwargs_lens_light) if kwargs_lens_light else 0,
+                                 z_list=self._z_list(truth, model_list, inc_los))
             im = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
-            kwargs_lens = self._kwargs_lens(truth, inc_sub, inc_mp)
+            kwargs_lens = self._kwargs_lens(truth, inc_sub, inc_mp, inc_los)
             noiseless[name] = im.image(kwargs_lens=kwargs_lens, kwargs_source=kwargs_source, kwargs_lens_light=kwargs_lens_light)
             if name == "full":
                 sim_full = sim

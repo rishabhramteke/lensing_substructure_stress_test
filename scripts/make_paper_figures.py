@@ -432,7 +432,7 @@ def fig12_summary():
     # (row label, [(cell text, colour) for A, B, C])
     rows = [
         ("concentration $c=60\\to15$\n(completeness, $10^{10}$--$10^{10.5}\\,M_\\odot$)",
-         [("89 $\\to$ 78%\nno collapse", GREEN), ("94 $\\to$ 77%;\n65 $\\to$ 17% below $10^{9.5}$", AMBER), ("51 $\\to$ 15%\ncollapse to chance", RED)]),
+         [("84 $\\to$ 74%\nno collapse", GREEN), ("94 $\\to$ 77%;\n65 $\\to$ 17% below $10^{9.5}$", AMBER), ("51 $\\to$ 15%\ncollapse to chance", RED)]),
         ("lens-shape multipole, $a_4=3\\%\\,\\theta_E$\n(false positives, subhalo-free)",
          [("77% (100% joint re-fit);\n$m{=}4$ term: 10%, but 83% on $m{=}3$", AMBER), ("86%", RED), ("11%\nunmoved", GREEN)]),
         ("non-physical decoy, 10$\\sigma$ bump\n(false positives)",
@@ -444,9 +444,13 @@ def fig12_summary():
         ("lens light, double-S\u00e9rsic subtraction",
          [("0%; completeness\nwithin 10 pts", GREEN), ("completeness 94%\nrecovered", GREEN), ("AUC 0.67\nrecovered", GREEN)]),
         ("localization $\\leq 2$ px\n(of nominal detections)",
-         [("13%", RED), ("55%", AMBER), ("57%", AMBER)]),
+         [("16%", RED), ("55%", AMBER), ("57%", AMBER)]),
         ("mass estimate\n(localized detections)",
          [("$-1.1$ dex, 44/44 low\n(frozen macro-model)", RED), ("$-0.65$ dex\n(aperture, calibratable)", AMBER), ("not attempted", GREY)]),
+        ("line-of-sight halo, foreground\n(flagged; no subhalo present)",
+         [("20%; 5% localized,\nmass $-2$ dex", AMBER), ("not run", GREY), ("12%\nat baseline", GREEN)]),
+        ("survey depth (arc S/N $\\div 6$)\n(what still works)",
+         [("null floor fails\n(clean 0.7 $\\to$ 23%)", RED), ("not run", GREY), ("fires on 72%\nof clean; chance", RED)]),
         ("CDM mass-function weighting\n(population completeness, $c=60$)",
          [("53 $\\to$ 21%", AMBER), ("63 $\\to$ 22%", AMBER), ("30 $\\to$ 12%", AMBER)]),
     ]

@@ -1650,3 +1650,68 @@ what it keeps.
   marked SUPPLEMENTARY. Three stray blank-line runs collapsed. Tables tab:conc and tab:c30 moved beside their
   discussion (they had drifted 5 pages).
 - Build: 19 pages, 0 errors / 0 overfull / 0 undefined / 0 class warnings.
+
+## 2026-09-13: round 13 — sixth external report (6.5/10, major revision)
+
+Two new experiments, both of which changed the paper.
+
+### M6 — survey depth (`data/test_shallow_*`, `scripts/evaluate_depth.py` → `results/depth.json`)
+Same lenses, sources and subhalos re-rendered with exposure 5400 s → 135 s (new
+`InstrumentConfig.exposure_time`, `tier0_shallow`). Verified 1000/1000 identical truths.
+Arc S/N median 1329 → 242, peak pixel 237σ → 41σ. Each family recalibrated on its own arm's clean control.
+
+| | deep | shallow |
+|---|---|---|
+| A clean FPR at Δχ²>0 | 0.68% | **23%** |
+| A macro fits rejected (c=60) | 43/300 | **0/300** |
+| A compl. c=60 @ matched 0.68% FPR | 28/69/81/85% | 9/44/68/80% |
+| A multipole FPR (Δχ²>0) | 67% | **68%** |
+| U-Net clean FPR at its deep threshold | 10% | **72%** |
+| U-Net compl. c=60, recalibrated to 10% | 15/29/51/63% | **11/10/16/22%** (chance) |
+
+Three things break (null floor, reliability gate, U-Net transfer), one does not (the multipole
+confounder). The result the paper most wants to transfer is the one least sensitive to depth,
+while the reliability machinery behind the deep numbers is the part that does not survive.
+
+### M7 — line-of-sight halos (`data/los_halo_z0{25,75}`, `scripts/evaluate_los.py`)
+Multi-plane ray tracing via `lens_redshift_list` in ModelAPI (note: `multi_plane` is NOT a
+ModelAPI kwarg; supplying the redshift list is what switches it on). New `LOSHaloConfig`,
+`tier0_los_halo`, `no_los` ablation control. No subhalo at the lens plane; one field halo
+(Dutton–Macciò c, unboosted) at z=0.25 or 0.75, same annulus and mass range.
+
+Foreground z=0.25: flagged 20% (vs 0.68% clean), 65% in the top mass bin; localized ≤2 px only
+**5%** (median offset 1.59″ vs 0.30″ for subhalos); inferred mass **−2.0 dex**. Background z=0.75:
+4% flagged. U-Net: 11.9±1.5% and 11.0±1.3% — at its baseline, blind to them. Caveat written into
+the text: ~1 dex of the mass error is the known frozen-macro-model bias and some is the low field
+concentration, so it is not a clean measurement of the redshift error alone.
+
+### M2 — matched denominators (`scripts/evaluate_matched_denominators.py`)
+A and B exclude macro-fit failures; the U-Net did not. Intersecting the lenses A and B both retain
+(944/826/922 of 1000) and scoring all three there: the U-Net's c=60 top-bin completeness falls
+63% → **36%**, and 51% → 45% in the bin below; everything else moves ≤1 point. The family ordering
+B > A > C is then **stable under all three accountings in every bin below 10^10.5**; only the top bin
+(companion galaxy halos, 0.36% of a CDM population) reverses, so it is kept out of headline statements.
+
+### M3 — null floor made primary for Family A
+Defined in Sect 2.3; abstract, conclusions, localization (13% → 16%) and multipole (32–77% → 15–69%
+against 0.4% clean) now quote the floored statistic. Bootstrapping the clean control shows the
+calibrated threshold carries a realized-FPR range of 9.1–11.1% (full) / 8.5–11.9% (300-lens), moving
+completeness by 2 and 5 points — a third argument for the floor, which has no threshold to estimate.
+
+### Other
+- Signal test now uses a pooled χ² = Σz² (one dof per bin) instead of max|z|, whose null expectation
+  grows with bin count. A coincides ONLY against S/N (χ²/dof 0.9, p=0.57), B only against M_proj(<0.2″)
+  (1.4, p=0.22), C against none (p≤0.03). This also explains the |z|=4.0 the referee flagged.
+- U-Net saturation checked: threshold 0.958, clean median 0.897, only 1.0% of clean above 0.99 — the
+  percentile is not on a saturated tail.
+- Bibliography: 10 entries gained volume/pages. **The OVER dict had duplicate keys** — my new entries were
+  silently shadowed by older, less complete ones later in the same dict literal. Removed 10 duplicates.
+  Only 5 entries remain without volume/pages and all 5 are genuine preprints (verified).
+- Tier 1 demoted to Appendix B with a short pointer in the results; Limitations rewritten into four
+  paragraphs, now saying plainly that three training runs did not converge so all U-Net claims rest on
+  one working configuration.
+- Fig 12 promoted to the head of Results (p6, was p15) with two new rows (LOS, depth); two stale cells
+  fixed to the floored values. Title cut 116 → 103 chars. τ=20 caveat, COSMOS cuts, λ band, and the
+  Table 7/8 clean-FPR difference all stated.
+- Build: 23 pages (was 18), 0 errors / overfull / undefined / class warnings. Growth is the three new
+  tables the referee asked for plus two new experiments.

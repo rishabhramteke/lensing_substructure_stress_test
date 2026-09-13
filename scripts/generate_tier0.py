@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from lensing.config import (
     SimConfig, tier0_tsang, tier0_no_subhalo, tier1_cosmos, tier1_cosmos_no_subhalo,
     tier1_cosmos_multipole_confounder, tier2_multipole_confounder,
-    tier2_lens_light, tier2_lens_light_no_subhalo, tier2_lens_light_multipole,
+    tier2_lens_light, tier2_lens_light_no_subhalo, tier2_lens_light_multipole, tier0_shallow, tier0_los_halo,
 )
 from lensing.simulate import LensRenderer, sample_truth
 
@@ -36,6 +36,12 @@ CONFIGS = {
     "tsang_fixed15": lambda: tier0_tsang("fixed15"),
     "tsang_cdm": lambda: tier0_tsang("cdm"),
     "no_subhalo": tier0_no_subhalo,
+    "los_halo_z025": lambda: tier0_los_halo(0.25),
+    "los_halo_z075": lambda: tier0_los_halo(0.75),
+    "shallow_fixed60": lambda: tier0_shallow("fixed60"),
+    "shallow_fixed15": lambda: tier0_shallow("fixed15"),
+    "shallow_no_subhalo": lambda: tier0_shallow(no_subhalo=True),
+    "shallow_multipole_m4_a3": lambda: tier0_shallow(no_subhalo=True, am_over_thetaE=0.03, m=4),
     "multipole_m4_a1": lambda: tier2_multipole_confounder(am_over_thetaE=0.01, m=4),
     "multipole_m4_a3": lambda: tier2_multipole_confounder(am_over_thetaE=0.03, m=4),
     "multipole_m3_a3": lambda: tier2_multipole_confounder(am_over_thetaE=0.03, m=3),
@@ -79,7 +85,8 @@ def main():
     for i in range(args.n):
         truth = sample_truth(cfg, rng)
         out = renderer.render(truth, noiseless_only=args.noiseless_only, seed=int(rng.integers(0, 2**31 - 1)))
-        control_key = "no_subhalo" if truth.get("subhalo") else ("no_multipole" if truth.get("multipole") else "smooth")
+        control_key = ("no_los" if truth.get("los_halo") else
+                       ("no_subhalo" if truth.get("subhalo") else ("no_multipole" if truth.get("multipole") else "smooth")))
         full_noiseless[i] = out["noiseless"]["full"]
         control_noiseless[i] = out["noiseless"][control_key]
         if not args.noiseless_only:

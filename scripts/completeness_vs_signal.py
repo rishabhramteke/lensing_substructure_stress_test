@@ -111,6 +111,25 @@ def compare(d, var):
     return rows
 
 
+def joint_chi2(rows):
+    """A pooled test over bins, so that variables binned differently can be compared.
+
+    The per-bin two-proportion z are independent (disjoint lenses), so sum z^2 is chi^2 with
+    one degree of freedom per bin under the null that the two concentrations have the same
+    completeness at equal signal. This replaces the max|z| of the first version, whose null
+    expectation grows with the number of bins (referee round 7, technical point 1)."""
+    if not rows:
+        return None
+    z = np.array([r["z"] for r in rows]); chi2 = float((z ** 2).sum()); k = len(rows)
+    try:
+        from scipy.stats import chi2 as chi2_dist
+        p = float(chi2_dist.sf(chi2, k))
+    except Exception:
+        p = None
+    return {"chi2": chi2, "dof": k, "chi2_per_dof": chi2 / k, "p_value": p,
+            "max_abs_z": float(np.abs(z).max())}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--a-root", default="results/baseline_a_full"); ap.add_argument("--b-root", default="results/baseline_b_full/fitted")
@@ -134,10 +153,11 @@ def main():
                 "log10_snr": [float(np.log10(snr[c][i])) for i in idx],
                 "detected": [bool(det[i]) for i in idx]}
     res["comparison"] = {fam: {var: compare(d, var) for var in VARIABLES} for fam, d in res["families"].items() if "c60" in d and "c15" in d}
+    res["joint"] = {fam: {var: joint_chi2(rows) for var, rows in byvar.items()} for fam, byvar in res["comparison"].items()}
     (ROOT / args.out).write_text(json.dumps(res))
 
     # ---- text summary + LaTeX table: c15 - c60 at equal signal, per family and variable
-    lines = [r"\begin{tabular}{@{}llrrl@{}}", r"\toprule", r"family & signal variable & bins & mean $\Delta$ & largest $|z|$ \\", r"\midrule"]
+    lines = [r"\begin{tabular}{@{}llrrr@{}}", r"\toprule", r"family & signal variable & bins & mean $\Delta$ & $\chi^2$/dof ($p$) \\", r"\midrule"]
     names = {"A": "A scan", "B": "B pot.\\ corr.", "C": "C U-Net"}
     for fam, byvar in res["comparison"].items():
         print(f"== Family {fam}")
@@ -147,7 +167,9 @@ def main():
             diffs = np.array([r["diff"] for r in rows]); zs = np.array([r["z"] for r in rows]); j = int(np.argmax(np.abs(zs)))
             print(f"  {var:16s} " + " | ".join(f"{r['lo']:.2f}-{r['hi']:.2f}: {100*r['p60']:.0f} vs {100*r['p15']:.0f}% (n {r['n60']}/{r['n15']}, z {r['z']:+.1f})" for r in rows))
             sign = "+" if diffs.mean() >= 0 else "$-$"
-            lines.append(f"{names[fam] if k == 0 else ''} & {VARIABLES[var]} & {len(rows)} & {sign}{abs(100*diffs.mean()):.0f} & {abs(zs[j]):.1f} ({'$c{=}15$' if zs[j] > 0 else '$c{=}60$'} higher) \\\\")
+            J = res["joint"][fam][var]
+            pv = "--" if J["p_value"] is None else (f"{J['p_value']:.3f}" if J["p_value"] >= 0.001 else "$<0.001$")
+            lines.append(f"{names[fam] if k == 0 else ''} & {VARIABLES[var]} & {len(rows)} & {sign}{abs(100*diffs.mean()):.0f} & {J['chi2_per_dof']:.1f} ({pv}) \\\\")
         lines.append(r"\addlinespace[2pt]")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / args.table).write_text("\n".join(lines) + "\n")
