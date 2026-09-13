@@ -1982,3 +1982,23 @@ this paper's favour", "A fair objection is that", and four more).
 
 **Result: 19 → 16 tables, 26 → 25 pages, body 16 379 → 15 750 words, nothing dropped.**
 Remaining bulk is real content: 11 figures and 16 tables covering 13 distinct experiments.
+
+### Language pass and rename (2026-09-13)
+Scanned the manuscript for LLM-tell vocabulary (50 words: delve, leverage, pivotal, showcase, realm,
+underscore, compelling, myriad, testament, furthermore, moreover, notably, ...). **Only two hits**, both
+defensible in context; both removed anyway. Second-tier scan (30 more phrases: "serves as", "paves the
+way", "at its core", "cannot be overstated", ...): **zero hits**.
+
+The real tells were structural, not lexical:
+- **11 filler intensifiers** ("actually", "genuinely", "truly", "really") — all cut where they carried
+  no meaning ("the quantity a detector actually sees" → "the quantity a detector sees").
+- **7 repeated "Two/Three things" openers** — a structural tic. Varied: "Two things are true of this
+  literature at once" → "This literature is in an odd position"; "Two things are clearer this way" →
+  "Ranking makes two points clearer than any calibrated number does"; etc.
+- **Dash density**: 162 " -- " pairs in the body over 506 sentences, 53 sentences carrying two or more.
+  Converted the worst clusters to commas and colons; now 153 pairs and 48 such sentences. Not pushed
+  further because A&A house style uses them and the remaining ones are single asides.
+
+**Deliverable renamed** `Ramteke_2026_substructure_stress_test.pdf` (DRAFT suffix dropped; underscores
+per the project naming rule). The old filename is deleted, not kept alongside — single deliverable,
+updated in place.
