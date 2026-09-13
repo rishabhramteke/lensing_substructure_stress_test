@@ -100,8 +100,8 @@ def fig1_examples():
         full, nosub = r["noisy"]["full"], r["noisy"]["no_subhalo"]
         resid = r["noiseless"]["full"] - r["noiseless"]["no_subhalo"]
         vmax = full.max()
-        for j, (img, title) in enumerate([(full, "observed image (with subhalo)"), (nosub, "same system, no subhalo"),
-                                          (resid, "difference: the subhalo's signature")]):
+        for j, (img, title) in enumerate([(full, "observed"), (nosub, "subhalo removed"),
+                                          (resid, "difference")]):
             ax = axes[i, j]
             if j < 2:
                 ax.imshow(np.arcsinh(img / vmax * 10), cmap="inferno", origin="lower")
@@ -110,7 +110,7 @@ def fig1_examples():
                 ax.imshow(resid, cmap="RdBu_r", vmin=-m, vmax=m, origin="lower")
             ax.set_xticks([]); ax.set_yticks([])
             if i == 0:
-                ax.set_title(title)
+                ax.set_title(title, fontsize=7.2, pad=3)
         axes[i, 0].set_ylabel(label, fontsize=7.2)
     # 1" scale bar on the first panel (0.08"/px -> 12.5 px)
     axes[0, 0].plot([4, 4 + 12.5], [4, 4], color="white", lw=1.2)

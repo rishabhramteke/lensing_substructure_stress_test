@@ -30,14 +30,26 @@ def load(root, pop):
     return [json.loads(l) for l in open(p)]
 
 
+def pct_str(v):
+    """One precision rule for every percentage in this table, so the columns can be compared.
+
+    Sub-percent rates are the ones the text quotes and the ones a reader checks against the
+    null floor, so they carry two decimals; 1--10% carries one; above that, none.
+    """
+    if v is None:
+        return "--"
+    x = 100 * v
+    return f"{x:.2f}" if x < 1 else (f"{x:.1f}" if x < 10 else f"{x:.0f}")
+
+
 def fmt(x, pct=True, nd=0):
-    return "--" if x is None else (f"{100*x:.{nd}f}\\%" if pct else f"{x:.{nd}f}")
+    if x is None:
+        return "--"
+    return pct_str(x) + "\\%" if pct else f"{x:.{nd}f}"
 
 
 def pair(a, b):
-    """'a / b%' with one decimal only below 10% (keeps the table inside the column)."""
-    f = lambda v: "--" if v is None else (f"{100*v:.1f}" if 100 * v < 10 else f"{100*v:.0f}")
-    return f"{f(a)} / {f(b)}\\%"
+    return f"{pct_str(a)} / {pct_str(b)}\\%"
 
 
 def main():
@@ -83,7 +95,7 @@ def main():
         ("FPR, $m{=}4$ truth: cal.\\ / ${>}20$", lambda d: pair(d["multipole_m4_a3"]["fpr_10pct"], d["multipole_m4_a3"]["fpr_20"])),
         ("FPR, $m{=}3$ truth: cal.\\ / ${>}20$", lambda d: pair(d["multipole_m3_a3"]["fpr_10pct"], d["multipole_m3_a3"]["fpr_20"])),
         ("fits rejected (of 300): clean / $m{=}4$ / $m{=}3$", lambda d: " / ".join("--" if d["rejected"][k] is None else str(d["rejected"][k]) for k in ("no_subhalo", "multipole_m4_a3", "multipole_m3_a3"))),
-        ("FPR, clean, ${>}20$", lambda d: fmt(d["c60"]["clean_fpr_20"], nd=1)),
+        ("FPR, clean, ${>}20$", lambda d: fmt(d["c60"]["clean_fpr_20"])),
         ("compl.\\ $c{=}60$: 9--9.5 / 9.5--10 / 10--10.5", lambda d: " / ".join(f"{100*d['c60']['completeness'][k]:.0f}" for k in ("9.0-9.5", "9.5-10.0", "10.0-10.5")) + "\\%"),
         ("localized ($\\le2$ px)", lambda d: fmt(d["c60"]["frac_localized"])),
     ]

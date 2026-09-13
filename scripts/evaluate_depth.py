@@ -150,7 +150,7 @@ def main():
     lines = [r"\begin{tabular}{@{}lcc@{}}", r"\toprule",
              r" & deep & shallow \\", r"median arc S/N & $1.3\times10^{3}$ & $2.4\times10^{2}$ \\", r"\midrule",
              r"\multicolumn{3}{@{}l}{Family A, parametric scan} \\",
-             f"\\quad clean false positives at $\\dchi>0$ & {100*D['A']['clean_fpr_floor']:.1f}\\% & {100*S['A']['clean_fpr_floor']:.0f}\\% \\\\",
+             f"\\quad clean false positives at $\\dchi>0$ & {100*D['A']['clean_fpr_floor']:.2f}\\% & {100*S['A']['clean_fpr_floor']:.0f}\\% \\\\",
              f"\\quad macro fits rejected, $c{{=}}60$ & {D['A']['excluded']['c60'][0]}/{D['A']['excluded']['c60'][1]} & {S['A']['excluded']['c60'][0]}/{S['A']['excluded']['c60'][1]} \\\\",
              r"\quad \emph{at a matched 0.68\% false-positive rate:} \\"]
     for lo, hi in BINS:

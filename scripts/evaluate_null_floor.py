@@ -202,7 +202,7 @@ def main():
     lines = [r"\begin{tabular}{@{}lcc@{}}", r"\toprule",
              r" & 72 hypotheses & $+$ zero-mass \\", r"\midrule",
              f"threshold at 10\\% FPR & ${f['raw']['threshold']:.1f}$ & none exists \\\\",
-             f"clean lenses above threshold & 10\\% & {100*f['floored']['fpr_clean']:.1f}\\% \\\\",
+             f"clean lenses above threshold & 10\\% & {100*f['floored']['fpr_clean']:.2f}\\% \\\\",
              f"of which $\\dchi<0$ & {f['raw']['c60_detections']['n_negative_dchi2']}/{f['raw']['c60_detections']['n']} & 0 \\\\",
              r"\addlinespace[2pt]",
              f"compl.\\ $c{{=}}60$, 4 bins $>10^{{9}}\\Msun$ & {pc(f['raw'],'completeness_test_fixed60')}\\% & {pc(f['floored'],'completeness_test_fixed60')}\\% \\\\",

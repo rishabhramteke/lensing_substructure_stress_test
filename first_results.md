@@ -2073,3 +2073,49 @@ dollar.
 
 **Result: 1324 → 1026 numbers in prose, a 23% cut, with no number lost — every one is in a table.**
 Body prose 13 990 → 13 463 words. Still 24 pages, build clean.
+
+## Number audit of the manuscript
+
+Cross-checked every number in the paper against the results files it comes from. Sixteen headline
+numbers and all twelve generated tables matched. Seven real errors were in the three tables written
+by hand rather than generated, plus two rounding inconsistencies in generators.
+
+**Rounding, two generators.** `evaluate_depth.py` printed the shallow-survey clean rate to one
+decimal (0.7%) where the text quoted 0.68%, and `evaluate_null_floor.py` did the same for the
+floored clean rate (0.4% vs. 0.42%). Both now print two decimals. `evaluate_multipole_orders.py`
+had two different precisions in one table; it now applies one rule to every percentage it prints
+(two decimals below 1%, one below 10%, none above), so the columns can be compared.
+
+**Lens-light table, baseline column.** Read 0.2% for the scan's clean false-positive rate at
+Δχ²>20 without lens light. No run produces that. The column is `results/baseline_a` — identified
+by its other two entries, 5 rejected fits and a −10.6 threshold, which match exactly — and its
+value is 0.68%. Corrected in the table, in the section prose and in the conclusions. The
+double-Sérsic bound in the same section read ≤0.3%; the two seed sets give 0.00% and 0.35%, so the
+bound is ≤0.35%.
+
+**Two tables had a stray comma where a cell belonged.** In the lens-light table the comma stood for
+the seed set Family B was not run on, and is now an em-dash; the same row still carried the old
+"pot. corr." name for a family renamed to the linear δψ residual detector everywhere else. In the
+mass-mechanism table the missing cell is the count within 0.25 dex for the coarse mass grid at the
+true position: 9 of 121, recomputed with the same selection rule the summary uses.
+
+**Decoy table, scan rows.** The Gaussian row's 6σ and 10σ cells were wrong and the 10σ pair was
+reversed: the seeds give (3, 3) and (2, 4), not (3, 2) and (4, 2). The dipole row's 10σ cell was 2%
+and should be 3%. With the numbers right, the claim that the scan's rate "never rises with
+amplitude" is false — it falls across the three amplitudes in one run, rises in another, is flat in
+the third. Reworded to what the data support: a 2–4% band with no systematic trend, below its own
+10% calibration baseline, over a spread comparable to the 1.8-point binomial σ at n≈95.
+
+**U-Net completeness was a single seed.** The reproduction ledger, the ledger's discussion and the
+proxy caveat all quoted 11.8% at 10⁹–10⁹·⁵ M⊙ for the 8k-image training run. That is seed v0 alone;
+the four seeds give 11.8, 11.8, 19.9, 15.4, i.e. 14.7 ± 3.8%, which is what the paper says it
+reports throughout and what its own completeness table already showed as 15%. Corrected in all
+three places. The 30k figure, 20.6 ± 0.0%, was already right.
+
+**Line numbers.** The earlier overprint fix treated the symptom. The cause is that `linenoaa`/
+`lineno` put the left column's numbers *after* its text in this two-column layout, on top of the
+last word, and on three lines they also landed on the right column's own number in the gutter.
+`\leftlinenumbers*` puts every number in its column's left margin instead. Verified geometrically
+from the PDF word boxes: 0 overprints and 0 collisions over all 204 numbers on 24 pages.
+
+Build clean: 0 errors, 0 overfull boxes, 0 undefined references, 0 class warnings, 24 pages.
