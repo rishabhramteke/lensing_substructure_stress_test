@@ -1842,3 +1842,37 @@ equal (0.13/0.16/0.20) and the loss persists. Rows added to Table tab:tidal.
   reattributed to Lange; decoy seed spread stated; the 0.2″ panel sign explained; PSF choice
   justified; AI-policy wording flagged as checked at submission.
 - Build: 24 pages, 0 errors / overfull / undefined / class warnings, 0 line-number overprints.
+
+## 2026-09-13: option 1 (finalize) + option 2 (pixelized source) started in parallel
+
+**Option 1 — reframing for submission.** The paper's durable contribution is the suite, the single
+metric and the mechanism results, not the Family-A magnitudes (several of which this paper's own
+controls showed to be artefacts). Title changed from "Assumptions under stress: a common-suite test of
+reimplemented substructure detectors for strong lensing" to **"A common-suite stress test for
+strong-lensing substructure detectors: how three method families fail, and on what"** — it promises
+the mechanism, which is what survives every round. Conclusions now OPEN with the disjoint-failure /
+parametric-vs-free-form result (the last referee called it the best thing in the paper and said they
+had not seen it stated elsewhere) instead of with a concentration magnitude.
+
+**Option 2 — regularized pixelized source (`scripts/run_baseline_a_pixsource.py`).** The shapelet
+attempt failed because it was unregularized. This version uses PyAutoLens properly: EPL+shear macro
+from the Sérsic fit, source = rectangular pixel mesh with `aa.reg.Constant`, statistic = Δ log
+Bayesian evidence over the same 72-cell grid. API notes: `al.Convolver.from_gaussian` (not
+`al.Kernel2D`), `al.mesh.RectangularUniform`, NFW is parameterised by `kappa_s = alpha_Rs/(4 Rs)`,
+and `reliable_fit` must be cast to a Python bool or json refuses it.
+
+Regularization tuning on clean lenses (Δ log Z should be small and finite, not degenerate):
+
+| mesh | reg | clean Δ log Z median | verdict |
+|---|---|---|---|
+| 10 | 1e2 | 4369 | degenerate — source absorbs everything |
+| 20 | 1e2 | 4522 | degenerate |
+| 20 | 1e4 | — | inversions fail |
+| 20 | 1e6 | 0.0 | over-regularized — source frozen, no perturber helps |
+| **30** | **1e4** | **19.9 (max 63)** | **usable regime** |
+
+A sweep over mesh 30–40 × reg 5e3–3e4 on 12 clean + 12 multipole lenses is running in the background
+(`results/pixsource_tuning/`). Criterion: a tight clean Δ log Z distribution to calibrate on, then
+measure the multipole FPR. If it separates, it converts the paper's multipole "upper limits" into a
+measurement and gets added; if not, the honest failure account already in Sect 4.2 stands.
+Cost is ~7 s/lens for the 72-cell scan, so a 300-lens population is ~35 min at 3 workers.
