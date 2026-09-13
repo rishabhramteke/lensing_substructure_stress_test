@@ -1936,3 +1936,23 @@ how weak all three are as rankers (U-Net 0.57). The abstract now leads with this
 - Minor contradictions fixed: Fig 13 caption vs text, the 14:2 flip not in Table 3, the 13.9/13.3/16%
   localization numbers, "no released code".
 - Build: 26 pages, 0 errors / overfull / undefined / class warnings, 0 line-number overprints.
+
+## 2026-09-13: length pass and framing of the flexible-source attempts
+
+**Flexible source: kept, compressed, reframed.** Rishabh asked whether to cut it entirely ("the paper
+has to be like a resume"). Kept, because the paper itself claims the multipole rates are upper limits
+*because* a flexible source would absorb part of the residual — a hedge the author introduced, so a
+referee will ask whether it was tested, and the previous referee explicitly told us to run it. Silent
+omission would mean answering "we tried, it didn't work" in a response letter, which is weaker than
+having it on record. Reduced from 290 words in Sect 4.2 to three lines plus Appendix D, and reframed:
+title is now "Why the source model cannot be swapped in isolation", and the text presents it as a
+structural property (flexibility and regularization are one coupled ingredient) rather than as our
+failure. No claim changed.
+
+**Length.** Body measured at 16.4k words before the pass; the two largest results subsections were
+concentration (3310 w) and lens shape (2005 w). Moved to appendices, as the last referee asked: the
+selection estimate, the tidal track and the bound-mass check (now Appendix C), plus the gate, tidal
+and null-floor tables. Conclusions cut 9 -> 7 items: **items 1 and 5 were near-duplicates** (both
+"fail on nearly disjoint inputs"; item 5 also still carried the retracted "most sensitive and
+best-localizing" claim for Family B) and the failed-training item was already stated in Limitations.
+Still 26 pages with 11 figures and 19 tables — the tables are the remaining bulk.
