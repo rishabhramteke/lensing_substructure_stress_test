@@ -162,7 +162,7 @@ def fig2_completeness():
     fig, axes = plt.subplots(1, 3, figsize=(DBL_W, 2.6), sharey=True)
     panels = [(axes[0], u, None, "Family C — U-Net", C_UNET, f"n = {u['n_seeds']} seeds"),
               (axes[1], a, a_full, "Family A — parametric scan", C_A, "full populations, n = 1 000" if a_full else f"n = {a['n_seeds']} seeds"),
-              (axes[2], b, b_full, "Family B — potential correction", C_B, "full populations, n = 1 000" if b_full else f"n = {nb} seed sets")]
+              (axes[2], b, b_full, "Family B — linear $\\delta\\psi$", C_B, "full populations, n = 1 000" if b_full else f"n = {nb} seed sets")]
     for ax, d, full, name, col, sub in panels:
         for key, ls, mk, lab, c in [("completeness_c60", "-", "o", "c = 60 (literature fiducial)", col), ("completeness_c15", "--", "s", "c = 15 (Tsang+2024's low-c ablation)", GRAY)]:
             if full is not None:
@@ -454,7 +454,7 @@ def fig12_summary():
         ("CDM mass-function weighting\n(population completeness, $c=60$)",
          [("53 $\\to$ 21%", AMBER), ("63 $\\to$ 22%", AMBER), ("30 $\\to$ 12%", AMBER)]),
     ]
-    cols = ["A  parametric scan", "B  potential correction\n(fixed-source variant)", "C  U-Net"]
+    cols = ["A  parametric scan", "B  linear $\\delta\\psi$\n(fixed-source residual)", "C  U-Net"]
     fig, ax = plt.subplots(figsize=(DBL_W, 0.42 * len(rows) + 0.7))
     ax.set_xlim(0, 3.9); ax.set_ylim(0, len(rows)); ax.axis("off")
     for j, c in enumerate(cols):
@@ -481,7 +481,7 @@ def fig13_signal():
     rows = [("log10_snr", r"$\log_{10}$ S/N$_{\rm pert}$", 0.25),
             ("log10_Mproj_0p2", r"$\log_{10} M_{\rm proj}(<0.2'')\,[M_\odot]$", 0.5)]
     fig, axes = plt.subplots(2, 3, figsize=(DBL_W, 5.1), sharey=True, sharex="row", gridspec_kw={"hspace": 0.55})
-    fams = (("A", "Family A — parametric scan", C_A), ("B", "Family B — potential correction", C_B), ("C", "Family C — U-Net", C_UNET))
+    fams = (("A", "Family A — parametric scan", C_A), ("B", "Family B — linear $\\delta\\psi$", C_B), ("C", "Family C — U-Net", C_UNET))
     for (var, xlab, w), axrow in zip(rows, axes):
         for ax, (fam, name, col) in zip(axrow, fams):
             for c, ls, mk, lab, colr in (("c60", "-", "o", "$c=60$ population", col), ("c15", "--", "s", "$c=15$ population", GRAY)):

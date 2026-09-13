@@ -226,6 +226,23 @@ def tier0_los_halo(z_halo: float = 0.25) -> SimConfig:
     return cfg
 
 
+def tier0_tidal_track(concentration: float = 15.0, c_ref: float = 60.0, tau_ref: float = 20.0) -> SimConfig:
+    """Tier 0 with concentration AND truncation varied together along a tidal track.
+
+    The rest of this paper holds tau = r_t/r_s fixed at 20 while varying c, which is the
+    literature's convention but is unphysical in a specific direction (referee round 8):
+    at fixed M200 a lower c means a larger r_s, so a fixed tau makes the *truncation radius*
+    grow too, and the low-c perturber ends up both more diffuse and more extended. Tidal
+    truncation is set by the host's tidal field, so r_t is roughly fixed in physical units
+    and tau should scale with c. This factory sets tau = tau_ref * (c / c_ref), i.e. tau = 5
+    at c = 15 against tau = 20 at c = 60, so the low-c subhalo is more severely stripped as a
+    real one near theta_E would be."""
+    cfg = tier0_tsang("fixed15" if concentration == 15.0 else ("fixed30" if concentration == 30.0 else "fixed60"))
+    cfg.subhalo.tau = float(tau_ref * concentration / c_ref)
+    cfg.tier = f"tier0_tidal_c{concentration:g}_tau{cfg.subhalo.tau:g}"
+    return cfg
+
+
 def tier0_no_subhalo() -> SimConfig:
     """Tier 0 with the subhalo switched off entirely — the zero-subhalo
     control population used for confounder false-positive-rate measurements

@@ -55,13 +55,19 @@ def perturbation_snr(pop_dir):
     return out
 
 
-def family_a_like(root, pop):
+def family_a_like(root, pop, floor=False):
+    """Detections per lens. `floor=True` uses the null-floored statistic max(Delta chi^2, 0)
+    of Sect. 4.3, which is Family A's primary operating point: at the 10%-FPR calibration the
+    threshold is negative, and the lowest-signal bin is then "detected" 37% of the time purely
+    because a lens with no perturbation has the clean statistic's distribution (referee round 8,
+    point M6). Family B's statistic, max|delta kappa|, is already non-negative."""
     p = ROOT / root / pop / "scan_results.jsonl"
     if not p.exists():
         return None
     ns = [json.loads(l) for l in open(ROOT / root / "no_subhalo" / "scan_results.jsonl")]
     thr = float(np.quantile([r["delta_chi2"] for r in ns if r["reliable_fit"]], 0.90))
-    return {r["index"]: (r["delta_chi2"] >= thr) for r in (json.loads(l) for l in open(p)) if r["reliable_fit"] and r["has_subhalo"]}
+    hit = (lambda r: r["delta_chi2"] > 0) if floor else (lambda r: r["delta_chi2"] >= thr)
+    return {r["index"]: hit(r) for r in (json.loads(l) for l in open(p)) if r["reliable_fit"] and r["has_subhalo"]}
 
 
 def unet_detections(pop, ckpt=ROOT / "checkpoints/unet_v0/model_best.pt", results=ROOT / "results/detector_v0_best/results.json"):
@@ -130,6 +136,61 @@ def joint_chi2(rows):
             "max_abs_z": float(np.abs(z).max())}
 
 
+def min_detectable_difference(rows, alpha=0.05, power=0.95):
+    """The smallest constant per-bin completeness difference this test would reject the null for,
+    at the given power -- i.e. what "the curves coincide" is actually saying (referee round 8, M5).
+
+    Under a constant shift d, each bin's z has mean d/se_i, so the pooled chi^2 is non-central with
+    lambda = sum_i (d/se_i)^2. We solve for the d whose non-central chi^2 exceeds the critical value
+    with probability `power`."""
+    if not rows:
+        return None
+    try:
+        from scipy.stats import chi2 as chi2_dist, ncx2
+        from scipy.optimize import brentq
+    except Exception:
+        return None
+    ses = []
+    for r in rows:
+        p60, p15, n60, n15 = r["p60"], r["p15"], r["n60"], r["n15"]
+        pbar = (p60 * n60 + p15 * n15) / (n60 + n15)
+        # a bin where both rates are exactly 0 (or 1) has zero binomial variance and would
+        # otherwise carry infinite weight; floor the rate at one event in the pooled bin
+        pbar = min(max(pbar, 1.0 / (n60 + n15)), 1.0 - 1.0 / (n60 + n15))
+        ses.append(np.sqrt(pbar * (1 - pbar) * (1 / n60 + 1 / n15)))
+    ses = np.array(ses); k = len(rows)
+    crit = chi2_dist.ppf(1 - alpha, k)
+    f = lambda d: ncx2.sf(crit, k, (d / ses) ** 2 @ np.ones(k) if False else float(np.sum((d / ses) ** 2))) - power
+    try:
+        d = brentq(f, 1e-6, 0.999)
+    except ValueError:
+        return None
+    return {"min_detectable_diff_pts": float(100 * d), "alpha": alpha, "power": power,
+            "median_bin_se_pts": float(100 * np.median(ses))}
+
+
+def aperture_scan(res, fam, apertures=(0.05, 0.075, 0.1, 0.15, 0.2, 0.3, 0.4)):
+    """p-value of the coincidence test as a continuous function of aperture, so the reader can see
+    whether a family's agreement is a knife-edge at one tuned radius (referee round 8, M5)."""
+    truths = {c: [json.loads(l) for l in open(ROOT / f"data/test_fixed{c}/truth.jsonl")] for c in (60, 15)}
+    out = []
+    for R in apertures:
+        d = {}
+        for c in (60, 15):
+            key = f"c{c}"
+            if key not in res["families"][fam]:
+                return out
+            idx = res["families"][fam][key]["index"]; det = res["families"][fam][key]["detected"]
+            d[key] = {"log10_Mproj_ap": [float(np.log10(projected_mass_msun(truths[c][i]["subhalo"], R))) for i in idx],
+                      "detected": det}
+        BIN_WIDTH["log10_Mproj_ap"] = 0.5
+        rows = compare(d, "log10_Mproj_ap")
+        J = joint_chi2(rows)
+        out.append({"aperture": R, "bins": len(rows), "chi2_per_dof": J["chi2_per_dof"] if J else None,
+                    "p_value": J["p_value"] if J else None})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--a-root", default="results/baseline_a_full"); ap.add_argument("--b-root", default="results/baseline_b_full/fitted")
@@ -138,7 +199,7 @@ def main():
     truths = {c: [json.loads(l) for l in open(ROOT / f"data/test_fixed{c}/truth.jsonl")] for c in (60, 15)}
     snr = {c: perturbation_snr(ROOT / f"data/test_fixed{c}") for c in (60, 15)}
     res = {"variables": VARIABLES, "bin_width": BIN_WIDTH, "min_n_per_bin": MIN_N, "roots": {"A": args.a_root, "B": args.b_root, "C": "results/detector_v0_best (single seed, every lens)"}, "families": {}}
-    for fam, getter in (("A", lambda pop: family_a_like(args.a_root, pop)), ("B", lambda pop: family_a_like(args.b_root, pop)), ("C", unet_detections)):
+    for fam, getter in (("A", lambda pop: family_a_like(args.a_root, pop, floor=True)), ("B", lambda pop: family_a_like(args.b_root, pop)), ("C", unet_detections)):
         res["families"][fam] = {}
         for c in (60, 15):
             det = getter(f"test_fixed{c}")
@@ -154,6 +215,8 @@ def main():
                 "detected": [bool(det[i]) for i in idx]}
     res["comparison"] = {fam: {var: compare(d, var) for var in VARIABLES} for fam, d in res["families"].items() if "c60" in d and "c15" in d}
     res["joint"] = {fam: {var: joint_chi2(rows) for var, rows in byvar.items()} for fam, byvar in res["comparison"].items()}
+    res["power"] = {fam: {var: min_detectable_difference(rows) for var, rows in byvar.items()} for fam, byvar in res["comparison"].items()}
+    res["aperture_scan"] = {fam: aperture_scan(res, fam) for fam in ("A", "B", "C")}
     (ROOT / args.out).write_text(json.dumps(res))
 
     # ---- text summary + LaTeX table: c15 - c60 at equal signal, per family and variable
@@ -173,6 +236,13 @@ def main():
         lines.append(r"\addlinespace[2pt]")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / args.table).write_text("\n".join(lines) + "\n")
+    print("\n== power (smallest constant per-bin difference rejectable at 95% power):")
+    for fam, byvar in res["power"].items():
+        for var, d in byvar.items():
+            if d: print(f"   {fam} {var:18s} {d['min_detectable_diff_pts']:5.1f} pts   (median bin s.e. {d['median_bin_se_pts']:.1f} pts)")
+    print("\n== p-value vs aperture:")
+    for fam, rows in res["aperture_scan"].items():
+        print(f"   {fam}: " + " | ".join(f"{r['aperture']:.3f}\": p={r['p_value']:.3f}" for r in rows if r["p_value"] is not None))
     print("wrote", args.out, "and", args.table)
 
 

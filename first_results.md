@@ -1715,3 +1715,61 @@ completeness by 2 and 5 points — a third argument for the floor, which has no 
   Table 7/8 clean-FPR difference all stated.
 - Build: 23 pages (was 18), 0 errors / overfull / undefined / class warnings. Growth is the three new
   tables the referee asked for plus two new experiments.
+
+## 2026-09-13: round 14 — seventh external report (7/10, major revision)
+
+### M1 — Family B renamed to what it actually is
+"Potential correction" → **"linear δψ residual detector"** throughout (41 occurrences in the text,
+all three figures, the abstract, the conclusions). Sect 3.2 now opens with the rationale: gravitational
+imaging is defined by the JOINT pixelized-source + δψ inversion, and a free source would most plausibly
+absorb exactly the residuals that produce this family's two worst numbers (multipole FPR, decoy
+response). Conclusion 4's unqualified "failure set is the union of the other two" now says "in the
+restricted form we run … not about gravitational imaging as published."
+
+### M2 — "c=60 is unphysically dense" replaced by two measurements
+1. **Selection.** Interpolated P(detect|c,M) in log c over the three matched populations, input p(c|M) =
+   Dutton–Macciò × Moliné boost, CDM mass-function weighted. Detected median c = 26.9 vs input 27.3,
+   i.e. **−0.01 dex**. Even at an implausible 0.5 dex scatter the shift is only +0.04 dex. Concentration
+   selection is negligible, so it does not rescue c=60. (`scripts/evaluate_concentration_selection.py`)
+2. **Tidal track.** New `tier0_tidal_track`: τ scales with c (τ=20/10/5 at c=60/30/15) so r_t is fixed
+   physically, instead of the literature's fixed τ=20 which makes the low-c perturber MORE extended.
+   `data/test_tidal_c{15,30}`, matched 1000/1000 to test_fixed15/30. The correction makes the collapse
+   **worse**: c=15 completeness 16/47/73% → 9/44/66% at Δχ²>0. The fixed-τ convention is the conservative
+   one. Table tab:tidal.
+
+### M3 — lens-shape section reframed
+Abstract now leads with the m=4 fix (standard since Lange 2025) and the result that survives it: the
+m=4-augmented macro-model still flags 83% of an m=3 truth, and robustness to both orders costs 11–20
+completeness points. The pixelized-source caveat ("all upper limits") is now adjacent to the headline
+rather than buried.
+
+### M5 — the coincidence claim given power and an aperture scan
+- **Power**: the pooled χ² would reject a constant per-bin offset of 6.9 pts (A vs S/N) or 8.0 pts
+  (B vs M_proj<0.2″) at 95% power. "Curves coincide" now states this bound explicitly.
+- **Aperture scan**: B's p-value vs aperture is <0.001, 0.017, **0.34, 0.22**, 0.010, <0.001 at
+  0.05–0.4″. So the agreement holds only in a 0.15–0.2″ window — which **brackets the 0.16″ pixel of its
+  own 2×2-binned δψ mesh**. That turns an apparently tuned parameter into a mechanistic prediction.
+- A's S/N coincidence is flagged in the text as close to a consistency check by construction.
+
+### M6 — the non-monotonic lowest-S/N bin, diagnosed and removed
+Family A's completeness vs S/N read 37.5% in the lowest bin (n=40) then fell to 17.7%. Cause: the
+**10%-FPR threshold is negative**, so a lens with no detectable perturbation has the clean statistic's
+distribution and passes ~10%+ of the time. With the null floor the same bins read **0.0%, 1.6%, 10.8%,
+12.2%, 20.0%, 43.1%…** — monotonic, no spurious feature. The whole signal analysis (Fig 13, Table
+tab:signal, the χ² tests) is now computed with the floored statistic for Family A. The coincidence
+survives: A vs S/N χ²/dof 1.5, p=0.12 (was 0.9, p=0.57); B vs M_proj(<0.2″) 1.4, p=0.22; C none (p≤0.03).
+
+### Production fixes
+- **Line numbers overprinting text** (referee could not read "11.1%"): root cause was 4-digit numbers
+  past line 1000 in a gutter sized for 3 digits. Fixed with `\linenumbersep=1.5pt` + a 5pt sans number
+  font. Verified programmatically: **0 overprints** across all 23 pages (was 20 genuine ones).
+- Dangling `\paragraph{Where the mass bias comes from.}` in the appendix given body text.
+- Four numerical inconsistencies reconciled (arc S/N 1.6e3→1.3e3 and 250σ→240σ; rejection-rate
+  denominators labelled; the three concentration-cost ranges identified as the same quantity at
+  different operating points; Fig 6 caption labelled as seed-set means with the full-population values).
+- Chernoff (1954) ½δ₀+½χ²₁ boundary result connected to the null floor (bib entry added, Crossref-verified).
+- Four diagnostic tables moved to a new Appendix A "Supporting tables"; 18 tables rendered, 23 pages.
+- "What is new here" paragraph added at the end of the introduction, listing the four results we have
+  not found stated elsewhere.
+- Data availability now pins PyAutoLens 2026.9.8.1 and lenstronomy 1.12.2 and points at requirements.txt
+  and the manifests.

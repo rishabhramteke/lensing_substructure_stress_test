@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from lensing.config import (
     SimConfig, tier0_tsang, tier0_no_subhalo, tier1_cosmos, tier1_cosmos_no_subhalo,
     tier1_cosmos_multipole_confounder, tier2_multipole_confounder,
-    tier2_lens_light, tier2_lens_light_no_subhalo, tier2_lens_light_multipole, tier0_shallow, tier0_los_halo,
+    tier2_lens_light, tier2_lens_light_no_subhalo, tier2_lens_light_multipole, tier0_shallow, tier0_los_halo, tier0_tidal_track,
 )
 from lensing.simulate import LensRenderer, sample_truth
 
@@ -36,6 +36,8 @@ CONFIGS = {
     "tsang_fixed15": lambda: tier0_tsang("fixed15"),
     "tsang_cdm": lambda: tier0_tsang("cdm"),
     "no_subhalo": tier0_no_subhalo,
+    "tidal_c15": lambda: tier0_tidal_track(15.0),
+    "tidal_c30": lambda: tier0_tidal_track(30.0),
     "los_halo_z025": lambda: tier0_los_halo(0.25),
     "los_halo_z075": lambda: tier0_los_halo(0.75),
     "shallow_fixed60": lambda: tier0_shallow("fixed60"),
