@@ -1,0 +1,14 @@
+{
+  "population": "multipole_m4_a3",
+  "n": 12,
+  "seed": 3,
+  "source_model": "pixelized rectangular mesh with constant regularization",
+  "mesh": 30,
+  "reg_coefficient": 10000.0,
+  "mask_radius": 2.0,
+  "statistic": "Delta log Bayesian evidence",
+  "concentration_assumed": 15.0,
+  "n_failed_inversions": 0,
+  "elapsed_s": 93.35678791999817,
+  "workers": 3
+}

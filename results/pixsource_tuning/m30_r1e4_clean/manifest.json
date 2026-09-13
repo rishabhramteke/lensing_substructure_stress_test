@@ -1,0 +1,14 @@
+{
+  "population": "no_subhalo",
+  "n": 12,
+  "seed": 1,
+  "source_model": "pixelized rectangular mesh with constant regularization",
+  "mesh": 30,
+  "reg_coefficient": 10000.0,
+  "mask_radius": 2.0,
+  "statistic": "Delta log Bayesian evidence",
+  "concentration_assumed": 15.0,
+  "n_failed_inversions": 0,
+  "elapsed_s": 78.03658604621887,
+  "workers": 3
+}

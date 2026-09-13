@@ -1876,3 +1876,63 @@ A sweep over mesh 30–40 × reg 5e3–3e4 on 12 clean + 12 multipole lenses is 
 measure the multipole FPR. If it separates, it converts the paper's multipole "upper limits" into a
 measurement and gets added; if not, the honest failure account already in Sect 4.2 stands.
 Cost is ~7 s/lens for the 72-cell scan, so a 300-lens population is ~35 min at 3 workers.
+
+## 2026-09-13: round 16 — eighth external report (5.0/10, major revision). Hardest review yet.
+
+### Option 2 (pixelized source) — FAILED TWICE, in opposite directions
+1. **Unregularized shapelets** (`run_baseline_a_shapelet.py`): no null. 38/120 clean fits converge;
+   95% of clean lenses flagged at Δχ²>0 — free source + free perturber absorb noise.
+2. **Regularized pixel mesh** (`run_baseline_a_pixsource.py`, PyAutoLens `RectangularUniform` +
+   `aa.reg.Constant`, statistic = Δ log Bayesian evidence): no power. Regularization tuning on clean
+   lenses gave mesh=30/reg=3e4 as the only non-degenerate regime (clean Δ log Z median 3.6), but the
+   **power test on real c=60 subhalos gives AUC 0.49** — pure chance. The 0% multipole FPR was not
+   "the source absorbs the multipole", it was "the statistic detects nothing".
+
+Conclusion: the referee's "PyAutoLens already provides it and the author has it running" understates
+it. A working pixelized-source detector needs per-lens evidence-optimized regularization AND joint
+macro optimization — that IS gravitational imaging, not a source swap. Reported in Sect 4.2 as an
+attempted-and-failed experiment; the multipole rates stay upper limits.
+
+### The big win: ROC replaces the dual bookkeeping (referee point 3)
+`scripts/evaluate_roc.py` → `results/roc.json`, Table tab:roc, new Sect 4.2 "A threshold-free
+comparison". AUC on the common retained lenses:
+
+| | c=60 | c=15 | multipole |
+|---|---|---|---|
+| A scan | 0.707 | 0.697 | **0.876** |
+| B linear δψ | 0.772 | 0.715 | **0.936** |
+| C U-Net | 0.571 | 0.503 | 0.512 |
+
+**Both physical detectors rank a lens-shape error ABOVE a real subhalo.** That is the confounder
+result with no threshold at all, and it is stronger than the FPR framing it replaces. It also exposes
+how weak all three are as rankers (U-Net 0.57). The abstract now leads with this.
+
+### Other structural changes
+- **Point 2, Family B demoted**: no longer a headline family. Its "most sensitive" claim is now
+  labelled close to tautological (fixed correctly-specified analytic source ⇒ any residual IS the
+  perturber), it is removed from the hybrid-pipeline recommendation, and Sect 5 spells out everything
+  gravitational imaging does that this variant does not (joint inversion, evidence-selected
+  regularization, iterated linearization, parametric confirmation, Bayes factor).
+- **Point 4, literature**: added Minor+2017 (what a lens constrains is projected mass, degenerate
+  with c), Vegetti & Vogelsberger 2014, Despali+2018 (effective lens-plane mass of LOS halos), and
+  Amorisco+2022 now cited for concentration-dependent detectability. Sect 4.1 states the
+  signal-variable analysis is a rediscovery of the aperture-mass idea. All Crossref-verified; Li 2017
+  could NOT be resolved so it was dropped rather than cited.
+- **Point 5, sensitivity function**: Sect 2.3 now states that uniform placement in the annulus mixes
+  detectable and undetectable positions, unlike published sensitivity-map practice.
+- **Point 10, PSF**: measured. lenstronomy's HST/F160W preset is 0.08″ FWHM; the real instrument is
+  ~0.15″. Re-rendering at 0.15″ leaves arc S/N unchanged but drops median **perturbation** S/N from
+  120 to 103 (−14%). Stated, with the note that we cannot check which PSF the reproduced papers used.
+- **Point 10, depth**: section renamed "a signal-to-noise reduction", explicitly not Euclid/Rubin/Roman.
+- **Points 6/7/9**: localization claim dropped from the conclusions (grid-bound, published scans
+  refine continuously); mass bias restated as a shortcut warning; U-Net "learned component" softened
+  to match Sect 5.3, quoting AUC 0.57 and the 0.958-vs-0.897 calibration.
+- **Point 11**: "no ML code released" restricted to the per-lens convolutional detectors (Brehmer+2019
+  and Anau Montel+2022 and paltas are public).
+- **Point 8**: multipole phase is random and independent of the major axis — stated as a
+  simplification with the direction of the bias; the m=3 result flagged as unsurprising in sign.
+- **Point 12**: three more tables moved to the appendix (gate, tidal, null floor); five long
+  paragraphs split. Body is 14.6k words.
+- Minor contradictions fixed: Fig 13 caption vs text, the 14:2 flip not in Table 3, the 13.9/13.3/16%
+  localization numbers, "no released code".
+- Build: 26 pages, 0 errors / overfull / undefined / class warnings, 0 line-number overprints.

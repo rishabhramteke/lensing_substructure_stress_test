@@ -1,0 +1,14 @@
+{
+  "population": "test_fixed60",
+  "n": 24,
+  "seed": 0,
+  "source_model": "pixelized rectangular mesh with constant regularization",
+  "mesh": 30,
+  "reg_coefficient": 30000.0,
+  "mask_radius": 2.0,
+  "statistic": "Delta log Bayesian evidence",
+  "concentration_assumed": 15.0,
+  "n_failed_inversions": 0,
+  "elapsed_s": 329.043035030365,
+  "workers": 3
+}
