@@ -2045,3 +2045,31 @@ the false-positive rate below 10%, at a completeness cost within about one binom
 
 **Title** cut from 110 to 74 characters: "A common-suite stress test for strong-lensing substructure
 detectors". Build: 24 pages, clean.
+
+### Numbers out of prose, into tables (2026-09-13)
+Rishabh: "if we are adding table, maybe we dont need to write too much numerics in the text but just
+talk about results and findings". Same point the last referee made ("hundreds of numbers in prose").
+
+Baseline: 13 990 words of body prose carrying **1324 numbers**. Worked through every paragraph with
+a density above ~10% that cited a table or figure, and rewrote it to state the finding:
+
+- Concentration section: 9 sentences. e.g. "costs 16, 20, 14 and 6 points in the four bins above 10^9
+  (44→28, 83→63, 94→80, 100→94%), and the paired flip is 24 lost against 3 gained" became "still costs
+  6--20 points across the four bins above 10^9 and flips 24 paired detections one way against 3 the
+  other (Table 10)".
+- Metric section: 4 sentences. Localization per-seed recitals and the floored-vs-calibrated completeness
+  pairs now point at the operating-point table.
+- Lens-shape section: 3 sentences, including the joint-refit completeness recital and the gate rates.
+- Earlier pass: 3 more in the multipole and mass-bias paragraphs.
+
+**Simulator section rebuilt around a generated table.** It carried 132 numbers of running prose
+(priors, instrument settings) with no table at all, which is the hardest kind of text to check.
+`scripts/make_simulator_table.py` now emits `paper/tables/simulator.tex` **straight from the config
+dataclasses and lenstronomy's own instrument keywords**, so the table cannot drift from the runs. The
+prose keeps only the four things that need justification: the concentration switch, the multipole
+convention and its random phase, the COSMOS cuts, and the optimistic PSF. Bug fixed on the way: the
+range helper emitted `$0.8$--$1.2$''$`, unbalanced maths, from putting the unit outside the closing
+dollar.
+
+**Result: 1324 → 1026 numbers in prose, a 23% cut, with no number lost — every one is in a table.**
+Body prose 13 990 → 13 463 words. Still 24 pages, build clean.
