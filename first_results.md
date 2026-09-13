@@ -2015,3 +2015,33 @@ Checked the submission PDF with PyMuPDF:
   2 px", the three legend entries). The figure is wider than the column so everything shrinks ~30% on
   inclusion. Raised those two elements from 6.8/7 to 9 pt in `plot_localization_accuracy.py`;
   they now land above 6.5 pt on the page. **Undersized annotations remaining: 0.**
+
+## 2026-09-13: font match, dash purge, Family D removed, figures resized, title cut
+
+**Font.** Figures were drawn in STIXGeneral while the body is txfonts over URW Nimbus Roman. Registered
+**TeX Gyre Termes** (the OpenType form of the same Times design txfonts renders) with matplotlib and set
+`mathtext.fontset="custom"` pointing at it, in both figure scripts. Verified in the PDF: **STIX gone,
+TeXGyreTermes present**, so figure text and figure maths now match the page.
+
+**Dashes.** Rishabh: "please dont use --, thats very AI flavoured". Converted 153 interruptive dashes
+to commas, colons and parentheses (paired asides -> commas, or parentheses when the aside already had
+commas; single dashes -> colon before an independent clause, comma before a phrase). **Numeric ranges
+like 8.0--8.5 were kept** - those are required typography, not style. TikZ paths were protected, since
+`\draw (a) -- (b)` would have broken the pipeline figure. 14 left, all inside protected regions.
+
+**Family D removed.** The per-lens NPE stand-in was a dashed box in the pipeline figure, a 214-word
+appendix, a methods subsection and four cross-references, for a family the paper does not test. All
+removed; the population-inference family is now one sentence saying it answers a different question
+and is out of scope. The title says three families and now so does the paper.
+
+**Figures.** Fig. 2 ("what the detectors see") occupied **110% of a page**. Six square panels do not
+need full text width: redrawn at 0.66 width and 3.05 in tall. The lens-light figure went to 0.82 width.
+
+**Numbers in prose.** Body prose carried 1324 numbers in 14k words. Rewrote the three densest
+table-citing paragraphs to state findings instead of reading the table aloud (e.g. "brings the fit back
+to chi2/dof=0.99 and the FPR to 8.5% and 9.7% at the common threshold and 1.1% and 0% at dchi>20, while
+completeness stays at 32, 76, 78 and 86% against 38, 71, 85 and 85%" became "restores the fit and drops
+the false-positive rate below 10%, at a completeness cost within about one binomial sigma").
+
+**Title** cut from 110 to 74 characters: "A common-suite stress test for strong-lensing substructure
+detectors". Build: 24 pages, clean.

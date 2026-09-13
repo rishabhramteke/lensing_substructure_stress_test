@@ -35,8 +35,24 @@ COL_W, DBL_W = 3.46, 7.09  # inches: 88 mm, 180 mm
 # (Galan+2022, Biggio+2022) and residuals a diverging RdBu.
 BLUE, ORANGE, GREEN, VERM, PURPLE, GRAY, BLACK = "#1f77b4", "#ff7f0e", "#2ca02c", "#ff7f0e", "#9467bd", "#7f7f7f", "#222222"
 C_UNET, C_A, C_D, C_B = BLUE, VERM, PURPLE, GREEN
+# Figures are typeset in the same Times design as the body text. The manuscript uses txfonts,
+# which renders over URW Nimbus Roman; TeX Gyre Termes is that same design in OpenType form, so
+# registering it here makes figure text and figure maths match the page instead of falling back to
+# matplotlib's STIX. mathtext.fontset="custom" points the maths at the same family.
+import glob as _glob
+import matplotlib.font_manager as _fm
+for _f in _glob.glob("/usr/local/texlive/*/texmf-dist/fonts/opentype/public/tex-gyre/texgyretermes-*.otf"):
+    try:
+        _fm.fontManager.addfont(_f)
+    except Exception:
+        pass
+_SERIF = ["TeX Gyre Termes", "Times New Roman", "Nimbus Roman", "STIXGeneral", "DejaVu Serif"]
+_MATH = {"mathtext.fontset": "custom", "mathtext.rm": "TeX Gyre Termes",
+         "mathtext.it": "TeX Gyre Termes:italic", "mathtext.bf": "TeX Gyre Termes:bold",
+         "mathtext.default": "it"}
+
 plt.rcParams.update({
-    "font.family": "serif", "font.serif": ["STIXGeneral", "DejaVu Serif"], "mathtext.fontset": "stix",
+    "font.family": "serif", "font.serif": _SERIF, **_MATH,
     "font.size": 8, "axes.titlesize": 8.5, "axes.labelsize": 8, "legend.fontsize": 6.8,
     "xtick.labelsize": 7, "ytick.labelsize": 7, "axes.linewidth": 0.6, "lines.linewidth": 1.2,
     "legend.frameon": False, "figure.dpi": 150, "savefig.dpi": 300, "pdf.fonttype": 42,
@@ -77,7 +93,7 @@ def fig1_examples():
         return LensRenderer(cfg).render(truth, seed=1)
 
     r0, r1 = system(tier0_tsang, 7), system(tier1_cosmos, 3)
-    fig, axes = plt.subplots(2, 3, figsize=(DBL_W, 4.55))
+    fig, axes = plt.subplots(2, 3, figsize=(DBL_W * 0.66, 3.05))
     rows = [("Tier 0 — Sérsic source", r0),
             ("Tier 1 — COSMOS source", r1)]
     for i, (label, r) in enumerate(rows):

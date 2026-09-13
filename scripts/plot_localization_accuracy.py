@@ -38,7 +38,23 @@ sys.path.insert(0, str(ROOT / "src"))
 from detector.dataset import LensPatchDataset  # noqa: E402
 from detector.unet import UNet  # noqa: E402
 
-plt.rcParams.update({"font.family": "serif", "font.serif": ["STIXGeneral", "DejaVu Serif"], "mathtext.fontset": "stix",
+# Figures are typeset in the same Times design as the body text. The manuscript uses txfonts,
+# which renders over URW Nimbus Roman; TeX Gyre Termes is that same design in OpenType form, so
+# registering it here makes figure text and figure maths match the page instead of falling back to
+# matplotlib's STIX. mathtext.fontset="custom" points the maths at the same family.
+import glob as _glob
+import matplotlib.font_manager as _fm
+for _f in _glob.glob("/usr/local/texlive/*/texmf-dist/fonts/opentype/public/tex-gyre/texgyretermes-*.otf"):
+    try:
+        _fm.fontManager.addfont(_f)
+    except Exception:
+        pass
+_SERIF = ["TeX Gyre Termes", "Times New Roman", "Nimbus Roman", "STIXGeneral", "DejaVu Serif"]
+_MATH = {"mathtext.fontset": "custom", "mathtext.rm": "TeX Gyre Termes",
+         "mathtext.it": "TeX Gyre Termes:italic", "mathtext.bf": "TeX Gyre Termes:bold",
+         "mathtext.default": "it"}
+
+plt.rcParams.update({"font.family": "serif", "font.serif": _SERIF, **_MATH,
                      "font.size": 8, "axes.titlesize": 9, "legend.fontsize": 6.6, "pdf.fonttype": 42})
 
 LOCALIZED_PX = 2.0
