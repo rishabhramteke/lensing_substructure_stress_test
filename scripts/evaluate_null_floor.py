@@ -147,6 +147,53 @@ def main():
                     "full_1000": gate_analysis("results/baseline_a_full")}}
     (ROOT / "results/null_floor.json").write_text(json.dumps(res, indent=2))
 
+    # ---- ONE operating-point table on ONE sample (the full populations), replacing the two that
+    # compared different operating points on different samples and so quoted different clean rates
+    R = {pop: load("results/baseline_a_full", pop) for pop in ("no_subhalo", "test_fixed60", "test_fixed15", "multipole_m4_a1", "multipole_m4_a3")}
+    clean = [r for r in R["no_subhalo"] if r["reliable_fit"]]
+    dcl = np.array([r["delta_chi2"] for r in clean])
+    OPS = [("10\\% FPR", float(np.quantile(dcl, 0.90)), False),
+           ("$\\dchi>0$", 0.0, True), ("$\\dchi>20$", 20.0, False), ("$\\dchi>100$", 100.0, False)]
+    def hit(r, thr, strict):
+        return r["delta_chi2"] > thr if strict else r["delta_chi2"] >= thr
+    pos60 = [r for r in R["test_fixed60"] if r["reliable_fit"] and r["has_subhalo"]]
+    ops = []
+    for lab, thr, strict in OPS:
+        det = [r for r in pos60 if hit(r, thr, strict)]
+        off = np.array([np.hypot(r["best_x"] - truth60[r["index"]]["subhalo"]["x"],
+                                 r["best_y"] - truth60[r["index"]]["subhalo"]["y"]) for r in det])
+        merr = np.array([r["best_log10_m"] - truth60[r["index"]]["subhalo"]["log10_M200"] for r in det])
+        loc = off < LOC
+        comp = []
+        for lo, hi in BINS[2:]:
+            sel = [r for r in pos60 if lo <= r["log10_M200_true"] < hi]
+            comp.append(100 * np.mean([hit(r, thr, strict) for r in sel]) if sel else np.nan)
+        ops.append({"label": lab, "threshold": thr,
+                    "fpr_clean": float(np.mean([hit(r, thr, strict) for r in clean])),
+                    "fpr_mp_a1": float(np.mean([hit(r, thr, strict) for r in R["multipole_m4_a1"] if r["reliable_fit"]])),
+                    "fpr_mp_a3": float(np.mean([hit(r, thr, strict) for r in R["multipole_m4_a3"] if r["reliable_fit"]])),
+                    "n_detected": len(det), "n_positive": len(pos60),
+                    "frac_negative_dchi2": float(np.mean([r["delta_chi2"] < 0 for r in det])) if det else 0.0,
+                    "frac_localized": float(loc.mean()) if len(off) else None,
+                    "median_mass_error_localized": float(np.median(merr[loc])) if loc.any() else None,
+                    "completeness_bins": comp})
+    res["operating_points"] = ops
+    L = [r"\begin{tabular}{@{}l" + "c" * len(ops) + "@{}}", r"\toprule",
+         " & " + " & ".join(o["label"] for o in ops) + r" \\", r"\midrule",
+         "threshold on $\dchi$ & " + " & ".join(("none" if o["label"].startswith("10") and False else f"${o['threshold']:.1f}$") for o in ops) + r" \\",
+         "FPR, clean & " + " & ".join(f"{100*o['fpr_clean']:.2g}\%" for o in ops) + r" \\",
+         "of detections with $\dchi<0$ & " + " & ".join(f"{100*o['frac_negative_dchi2']:.0f}\%" for o in ops) + r" \\",
+         r"\addlinespace[2pt]",
+         r"FPR, multipole $a_m{=}0.01\,\thetaE$ & " + " & ".join(f"{100*o['fpr_mp_a1']:.0f}\%" for o in ops) + r" \\",
+         r"FPR, multipole $a_m{=}0.03\,\thetaE$ & " + " & ".join(f"{100*o['fpr_mp_a3']:.0f}\%" for o in ops) + r" \\",
+         r"\addlinespace[2pt]",
+         "compl.\\ $c{=}60$, 9--9.5 & " + " & ".join(f"{o['completeness_bins'][0]:.0f}\%" for o in ops) + r" \\",
+         "\\quad 9.5--10 / 10--10.5 & " + " & ".join(f"{o['completeness_bins'][1]:.0f} / {o['completeness_bins'][2]:.0f}\%" for o in ops) + r" \\",
+         "localized ($\le2$ px) & " + " & ".join((f"{100*o['frac_localized']:.0f}\%" if o["frac_localized"] is not None else "--") for o in ops) + r" \\",
+         "mass error, loc.\\ (dex) & " + " & ".join((f"${o['median_mass_error_localized']:+.1f}$" if o["median_mass_error_localized"] is not None else "--") for o in ops) + r" \\",
+         r"\bottomrule", r"\end{tabular}"]
+    (ROOT / "paper/tables/operating_points.tex").write_text("\n".join(L) + "\n")
+
     # ---- Table: raw vs floored statistic, full populations
     f = res["full_1000"]
     def pc(d, k):

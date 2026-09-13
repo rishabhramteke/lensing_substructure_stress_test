@@ -1956,3 +1956,29 @@ and null-floor tables. Conclusions cut 9 -> 7 items: **items 1 and 5 were near-d
 "fail on nearly disjoint inputs"; item 5 also still carried the retracted "most sensitive and
 best-localizing" claim for Family B) and the failed-training item was already stated in Limitations.
 Still 26 pages with 11 figures and 19 tables — the tables are the remaining bulk.
+
+### Length pass 2: table merges (no experiment or number dropped)
+
+Audited all 19 tables. Found genuine duplication, not just density:
+
+1. **`tab:fullpop` + `tab:matched` + `tab:accounting` → one table** (`tables/completeness.tex`).
+   Verified first that they carried *identical* numbers: A c=60 reported = 17/18/36/69/89/81 in both
+   fullpop and matched (`own`), same for A c=15, B c=60, B c=15. The only unique content in
+   `tab:matched` was the U-Net rows on the common sample, and `tab:accounting` was a c=60 slice of the
+   same data. The merged table has family × population × sample rows with Wilson intervals and keeps
+   every number, including the conservative bound and the floored Family-A block.
+2. **`tab:nullfloor` + `tab:thresholds` → one table** (`tables/operating_points.tex`). Both asked
+   "how do Family A's numbers depend on the operating point" but on *different samples*, which is why
+   the clean rate appeared as 0.2%, 0.4%, 0.68% and 0.7% in different places (a referee complaint).
+   Recomputed all four operating points — 10% FPR, Δχ²>0, Δχ²>20, Δχ²>100 — on the **same full
+   1000-lens populations**, which merges the tables and fixes the inconsistency at once.
+   Bug found while doing it: `"\\thetaE"` inside a non-raw Python string became a literal tab, so the
+   generated table read `\,	hetaE`. Fixed by making those strings raw.
+
+**Prose.** The "subsample results are confirmed on the full populations" paragraph recited 62 numbers
+that are now all in the merged table: cut 161 → 64 words. Removed eight referee-voice constructions
+the last report named ("A referee's objection to this framing", "against our expectation", "not in
+this paper's favour", "A fair objection is that", and four more).
+
+**Result: 19 → 16 tables, 26 → 25 pages, body 16 379 → 15 750 words, nothing dropped.**
+Remaining bulk is real content: 11 figures and 16 tables covering 13 distinct experiments.

@@ -151,6 +151,29 @@ def main():
 
     def fmt(d):
         return f"{100*d['p']:.0f}$^{{+{100*(d['hi']-d['p']):.0f}}}_{{-{100*(d['p']-d['lo']):.0f}}}$"
+
+    # ---- ONE completeness table, replacing the three that carried overlapping numbers
+    # (full populations, common-sample, and the accounting comparison were identical for A and B)
+    rows3 = [r"\begin{tabular}{@{}lll" + "c" * 6 + "@{}}", r"\toprule",
+             r"family & population & sample & " + " & ".join(f"{lo}--{hi}" for lo, hi in BINS) + r" \\", r"\midrule"]
+    blocks = [("A", "A scan"), ("A_floor", r"A scan, $\dchi>0$"), ("B", r"B linear $\delta\psi$"), ("C", "C U-Net")]
+    for fam, label in blocks:
+        first = True
+        for pop, cl in (("test_fixed60", "$c{=}60$"), ("test_fixed15", "$c{=}15$")):
+            d = res["families"][fam][pop]
+            variants = ([("own", "retained"), ("conservative", "excl.\\ as misses")] if fam != "C"
+                        else [("own", "all lenses"), ("matched", "A$\\cap$B lenses")])
+            for k, (key, vlab) in enumerate(variants):
+                if key not in d:
+                    continue
+                row = d[key]
+                cells = " & ".join(fmt(row[f"{lo}-{hi}"]) if isinstance(row[f"{lo}-{hi}"], dict) and "lo" in row[f"{lo}-{hi}"]
+                                   else f"{100*row[f'{lo}-{hi}']['p']:.0f}" for lo, hi in BINS)
+                rows3.append(f"{label if first else ''} & {cl if k == 0 else ''} & {vlab} & {cells} \\\\")
+                first = False
+        rows3.append(r"\addlinespace[2pt]")
+    rows3 += [r"\bottomrule", r"\end{tabular}"]
+    (ROOT / "paper/tables/completeness.tex").write_text("\n".join(rows3) + "\n")
     lines = [r"\begin{tabular}{@{}ll" + "c" * 6 + "@{}}", r"\toprule",
              "family & population & " + " & ".join(f"{lo}--{hi}" for lo, hi in BINS) + r" \\", r"\midrule"]
     for fam, label in (("A", "A scan"), ("A_floor", r"A scan, $\dchi>0$"), ("B", r"B linear $\delta\psi$"), ("C", "C U-Net")):
