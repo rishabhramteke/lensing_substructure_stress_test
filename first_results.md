@@ -2148,3 +2148,42 @@ them the hand version being wrong:
 Exact zero now prints as `0` at any precision, so a row cannot mix `0` with `0.00`. Regenerating
 twice gives byte-identical output for all 17 tables. Build clean: 0 errors, 0 overfull boxes, 0
 undefined references, 0 class warnings, 24 pages; line numbers still 0 overprints and 0 collisions.
+
+## Second audit pass: the conclusions and the cross-references
+
+With the tables generated, the remaining hand-written numbers are the ones in prose. Seven more
+errors, all of them in the summary text rather than in a measurement, and all of the same two kinds.
+
+**Double rounding.** A value is displayed to one decimal in the body, then rounded again to an
+integer in the conclusions, which lands on the wrong side of a half.
+
+- The concentration loss at the 10% calibration is 20.54 points. Table `conc` rounds it to 21; the
+  body, the conclusions and the table's own caption all said 6--20. Now 6--21 in all three.
+- The m=3+4 completeness cost is 11--20 by the table's cells and the body says so; the conclusions
+  said 10--20.
+- The multipole false-positive ranges: the conclusions gave 32--77% and 39--86%, which are the
+  *seed-set means* the figure plots, while the figure caption states that the text quotes the
+  full-population values and the body does quote them (31.5, 76.7, 39.6, 84.7%). Two of those sit
+  exactly on a rounding half, so the conclusions now carry the body's own one-decimal values and
+  the caption's claim about the text is true again.
+
+**The same rate written two ways.** The scan's clean false-positive rate on the 300-lens seed-0
+subsample is 0.678%. The depth bullet wrote it 0.7% and the line-of-sight bullet, two items later,
+wrote it 0.68%. Both now 0.68. (The 0.42% elsewhere is the *full 1000-lens* control, and one
+sentence in Sect. 2 says so explicitly, so those two are not in conflict.)
+
+**A stale cross-reference.** Table `conc`'s caption said its null-floor row is "quoted in the
+abstract and Conclusion~1". The abstract does not contain that number and it is Conclusion~2.
+
+**What was checked and found clean.** Every number in the prose was matched against a haystack
+built from all 220 results files and the 17 generated tables: 4 of 201 distinct numbers have no
+match, and all four are not measurements (a lens name, a package version, 64x64 pixels, and the
+647-lens union of the three seed subsamples, which was verified by recomputing the union). Every
+number in all 28 captions matches. A sweep for integer percentages that round the other way from
+their source found none. A sweep for sentence pairs restating one claim with different numbers
+found no real conflict. The bibliography has no duplicate keys, no uncited citations, no entry
+missing author, title or year; the eight key-year mismatches are all arXiv-year keys on
+journal-year entries, and the two same-year Ostdiek papers render correctly as 2022a and 2022b.
+
+Build clean: 0 errors, 0 overfull boxes, 0 undefined references, 0 class warnings, 24 pages, and
+0 line-number overprints or collisions over 205 numbers.
