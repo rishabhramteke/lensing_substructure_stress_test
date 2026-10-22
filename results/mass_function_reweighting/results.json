@@ -11,33 +11,33 @@
   "results": [
     {
       "label": "U-Net (Family C), c=60",
-      "naive_unweighted": 0.2956094887646441,
-      "cdm_mass_function_weighted": 0.1215574705443349
+      "naive_unweighted": 0.3976900851987601,
+      "cdm_mass_function_weighted": 0.1327753912215055
     },
     {
       "label": "U-Net (Family C), c=15",
-      "naive_unweighted": 0.11723430636888998,
-      "cdm_mass_function_weighted": 0.09574699935048674
+      "naive_unweighted": 0.14105684527156767,
+      "cdm_mass_function_weighted": 0.09300371536627004
     },
     {
       "label": "Family A, c=60",
-      "naive_unweighted": 0.5309296662895225,
-      "cdm_mass_function_weighted": 0.21361875870570732
+      "naive_unweighted": 0.860894149186988,
+      "cdm_mass_function_weighted": 0.6084938134278624
     },
     {
       "label": "Family A, c=15",
-      "naive_unweighted": 0.4823195476869743,
-      "cdm_mass_function_weighted": 0.19687775503527333
+      "naive_unweighted": 0.8158260530319353,
+      "cdm_mass_function_weighted": 0.5111184584901798
     },
     {
       "label": "Family B, c=60",
-      "naive_unweighted": 0.6259900695833404,
-      "cdm_mass_function_weighted": 0.22052703671686416
+      "naive_unweighted": 0.584369967555244,
+      "cdm_mass_function_weighted": 0.19706117604772264
     },
     {
       "label": "Family B, c=15",
-      "naive_unweighted": 0.43808074820112103,
-      "cdm_mass_function_weighted": 0.12220285235778428
+      "naive_unweighted": 0.3816479276299954,
+      "cdm_mass_function_weighted": 0.10371630595838822
     }
   ]
 }

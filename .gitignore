@@ -22,3 +22,10 @@ data/train_fixed60_30k/truth.jsonl
 # NPE stand-in checkpoints (negative result; the U-Net checkpoints are kept)
 checkpoints/npe_*/
 data/real_lens_b1938/*.fits
+# working drafts and scratch files (the manuscript stays out until acceptance)
+scratchpad/
+# run logs
+results/**/log*.txt
+# large training-set truth files, regenerable from their manifests and seeds
+data/train_*/truth.jsonl
+data/tier1/train_*/truth.jsonl

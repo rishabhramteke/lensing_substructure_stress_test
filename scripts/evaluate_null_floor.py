@@ -153,7 +153,7 @@ def main():
     clean = [r for r in R["no_subhalo"] if r["reliable_fit"]]
     dcl = np.array([r["delta_chi2"] for r in clean])
     OPS = [("10\\% FPR", float(np.quantile(dcl, 0.90)), False),
-           ("$\\dchi>0$", 0.0, True), ("$\\dchi>20$", 20.0, False), ("$\\dchi>100$", 100.0, False)]
+           ("$\\dchi>0$", 0.0, True), ("$\\dchi\\ge20$", 20.0, False), ("$\\dchi\\ge100$", 100.0, False)]
     def hit(r, thr, strict):
         return r["delta_chi2"] > thr if strict else r["delta_chi2"] >= thr
     pos60 = [r for r in R["test_fixed60"] if r["reliable_fit"] and r["has_subhalo"]]

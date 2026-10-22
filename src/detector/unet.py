@@ -47,3 +47,34 @@ class UNet(nn.Module):
         d2 = self.dec2(torch.cat([self.up2(d3), e2], dim=1))
         d1 = self.dec1(torch.cat([self.up1(d2), e1], dim=1))
         return self.out(d1)  # logits, (N,1,H,W)
+
+
+class ConvNeXtUNet(nn.Module):
+    """The same segmentation task with a modern backbone: a ConvNeXt encoder (Liu et al. 2022; timm `convnext_atto`,
+    randomly initialized, features at strides 4-32) under a U-Net decoder, with two shallow convolutional stages at
+    strides 1 and 2 as the high-resolution skips so the output keeps pixel-level localization."""
+    def __init__(self):
+        super().__init__()
+        import timm
+        self.enc = timm.create_model("convnext_atto", pretrained=False, in_chans=1, features_only=True)
+        ch = self.enc.feature_info.channels()          # [40, 80, 160, 320]
+        self.s1 = conv_block(1, 16); self.s2 = conv_block(16, 32)
+        self.up = nn.ModuleList([nn.ConvTranspose2d(ch[3], ch[2], 2, stride=2), nn.ConvTranspose2d(ch[2], ch[1], 2, stride=2),
+                                 nn.ConvTranspose2d(ch[1], ch[0], 2, stride=2), nn.ConvTranspose2d(ch[0], 32, 2, stride=2),
+                                 nn.ConvTranspose2d(32, 16, 2, stride=2)])
+        self.dec = nn.ModuleList([conv_block(2 * ch[2], ch[2]), conv_block(2 * ch[1], ch[1]), conv_block(2 * ch[0], ch[0]),
+                                  conv_block(64, 32), conv_block(32, 16)])
+        self.out = nn.Conv2d(16, 1, 1)
+
+    def forward(self, x):
+        f1 = self.s1(x); f2 = self.s2(nn.functional.max_pool2d(f1, 2))
+        e4, e8, e16, e32 = (t.contiguous() for t in self.enc(x))   # timm hands back permuted views; MPS backward needs contiguous
+        d = e32
+        for up, dec, skip in zip(self.up, self.dec, (e16, e8, e4, f2, f1)):
+            d = dec(torch.cat([up(d), skip], 1))
+        return self.out(d)
+
+
+def build_model(ckpt: dict | None = None, arch: str = "unet"):
+    arch = (ckpt or {}).get("arch", arch)
+    return ConvNeXtUNet() if arch == "convnext_unet" else UNet(in_ch=1, base=(ckpt or {}).get("base", 16))

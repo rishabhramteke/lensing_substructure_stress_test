@@ -1,0 +1,13 @@
+{
+  "b_threshold": 10.0,
+  "threshold_rule": "fixed",
+  "pops": {
+    "los_halo_z025": {
+      "n_retained": 279,
+      "n_flagged_b": 88,
+      "flag_rate_b": 0.3154121863799283,
+      "confirmed_20": 0.14695340501792115,
+      "confirmed_48": 0.12903225806451613
+    }
+  }
+}

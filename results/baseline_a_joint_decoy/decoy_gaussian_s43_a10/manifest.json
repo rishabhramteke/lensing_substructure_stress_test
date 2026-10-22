@@ -1,0 +1,36 @@
+{
+  "population": "decoy_gaussian_s43_a10",
+  "n": 100,
+  "seed": 0,
+  "subsample_n": 100,
+  "skipped_indices": [],
+  "concentration_assumed": "15",
+  "joint_refit_per_cell": true,
+  "grid": "3 radii x 8 angles, mass free in [7.5, 11.5]",
+  "lens_light_components": 0,
+  "controls": {
+    "polish": "smooth fit continued from its solution with max_nfev 24*40*(n_par+1)",
+    "macro_basin": "every cell's joint macro solution, perturber removed, macro params re-optimised (max_nfev 40*(n_par+1)); delta_chi2 is measured against the best smooth chi2 over all starts"
+  },
+  "lens_timeout_s": 900.0,
+  "n_truncated": 0,
+  "chi2_dof_unreliable_threshold": 10.0,
+  "n_unreliable_fits": 4,
+  "elapsed_s": 1457.3637120723724,
+  "workers": 4,
+  "basin_repair": {
+    "n_lenses": 1,
+    "n_changed": 1,
+    "k_best_cells": 3,
+    "date": "2026-09-16"
+  },
+  "n_unreliable_fits_initial": 9,
+  "gate": "reliable if best smooth chi2/dof < 10 over all starts (basin control) OR best joint chi2/dof < 10; regate_joint.py 2026-09-18",
+  "guard_completion": {
+    "n_completed": 0,
+    "n_rerun_full": 1,
+    "n_crossing_20": 0,
+    "script": "complete_truncated_joint.py",
+    "date": "2026-09-29"
+  }
+}

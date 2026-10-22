@@ -1,0 +1,10 @@
+test_fixed60:74
+no_subhalo:4
+multipole_m4_a3:11
+test_fixed60:156
+no_subhalo:20
+multipole_m4_a3:45
+test_fixed60:291
+no_subhalo:23
+multipole_m4_a3:57
+test_fixed60:320

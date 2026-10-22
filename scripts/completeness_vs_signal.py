@@ -70,7 +70,11 @@ def family_a_like(root, pop, floor=False):
     return {r["index"]: hit(r) for r in (json.loads(l) for l in open(p)) if r["reliable_fit"] and r["has_subhalo"]}
 
 
-def unet_detections(pop, ckpt=ROOT / "checkpoints/unet_v0/model_best.pt", results=ROOT / "results/detector_v0_best/results.json"):
+from paper_config import A_JOINT_FULL, B_FULL, unet_seeds  # noqa: E402
+_UNET_RUN, _UNET_CK = next(iter(unet_seeds().items()))   # first seed of the paper's primary U-Net set
+
+
+def unet_detections(pop, ckpt=ROOT / _UNET_CK / "model_best.pt", results=ROOT / "results" / _UNET_RUN / "results.json"):
     dev = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
     ck = torch.load(ckpt, map_location=dev); model = UNet(in_ch=1, base=ck.get("base", 16)).to(dev); model.load_state_dict(ck["model_state"]); model.eval()
     thr = json.loads(results.read_text())["threshold_at_10pct_fpr"]
@@ -243,13 +247,14 @@ def paired_permutation(res, fam, var, n_perm=4000, seed=0):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--a-root", default="results/baseline_a_full"); ap.add_argument("--b-root", default="results/baseline_b_full/fitted")
+    ap.add_argument("--a-root", default=A_JOINT_FULL); ap.add_argument("--b-root", default=B_FULL)
+    ap.add_argument("--a-floor", action="store_true", help="score Family A with the null-floored statistic (frozen scan); the joint scan is scored at its 10%%-FPR calibration like the other families")
     ap.add_argument("--out", default="results/completeness_vs_signal.json"); ap.add_argument("--table", default="paper/tables/signal_variables.tex")
     args = ap.parse_args()
     truths = {c: [json.loads(l) for l in open(ROOT / f"data/test_fixed{c}/truth.jsonl")] for c in (60, 15)}
     snr = {c: perturbation_snr(ROOT / f"data/test_fixed{c}") for c in (60, 15)}
-    res = {"variables": VARIABLES, "bin_width": BIN_WIDTH, "min_n_per_bin": MIN_N, "roots": {"A": args.a_root, "B": args.b_root, "C": "results/detector_v0_best (single seed, every lens)"}, "families": {}}
-    for fam, getter in (("A", lambda pop: family_a_like(args.a_root, pop, floor=True)), ("B", lambda pop: family_a_like(args.b_root, pop)), ("C", unet_detections)):
+    res = {"variables": VARIABLES, "bin_width": BIN_WIDTH, "min_n_per_bin": MIN_N, "roots": {"A": args.a_root, "B": args.b_root, "C": f"results/{_UNET_RUN} (single seed, every lens)"}, "families": {}}
+    for fam, getter in (("A", lambda pop: family_a_like(args.a_root, pop, floor=args.a_floor)), ("B", lambda pop: family_a_like(args.b_root, pop)), ("C", unet_detections)):
         res["families"][fam] = {}
         for c in (60, 15):
             det = getter(f"test_fixed{c}")
@@ -267,16 +272,17 @@ def main():
     res["joint"] = {fam: {var: joint_chi2(rows) for var, rows in byvar.items()} for fam, byvar in res["comparison"].items()}
     res["power"] = {fam: {var: min_detectable_difference(rows) for var, rows in byvar.items()} for fam, byvar in res["comparison"].items()}
     res["aperture_scan"] = {fam: aperture_scan(res, fam) for fam in ("A", "B", "C")}
-    res["permutation"] = {fam: {var: paired_permutation(res, fam, var) for var in ("log10_snr", "log10_Mproj_0p2")}
+    res["permutation"] = {fam: {var: paired_permutation(res, fam, var) for var in ("log10_snr", "log10_Mproj_0p1", "log10_Mproj_0p2")}
                           for fam in ("A", "B", "C")}
     (ROOT / args.out).write_text(json.dumps(res))
 
     # ---- text summary + LaTeX table: c15 - c60 at equal signal, per family and variable
     lines = [r"\begin{tabular}{@{}llrrrrr@{}}", r"\toprule",
              r"family & signal variable & bins & mean $\Delta$ & $\chi^2$/dof & $p$ & $p_{\rm perm}$ \\", r"\midrule"]
-    names = {"A": "A scan", "B": "B linear $\\delta\\psi$", "C": "C U-Net"}
+    names = {"A": "A joint scan", "B": "B free-form residual", "C": "C U-Net"}
     for fam, byvar in res["comparison"].items():
         print(f"== Family {fam}")
+        in_table = True
         for k, (var, rows) in enumerate(byvar.items()):
             if not rows:
                 continue
@@ -287,8 +293,8 @@ def main():
             P = (res.get("permutation", {}).get(fam, {}) or {}).get(var)
             def _fmt(x):
                 return "--" if x is None else (f"{x:.3f}" if x >= 0.001 else "$<0.001$")
-            lines.append(f"{names[fam] if k == 0 else ''} & {VARIABLES[var]} & {len(rows)} & {sign}{abs(100*diffs.mean()):.0f} & {J['chi2_per_dof']:.1f} & {_fmt(J['p_value'])} & {_fmt(P['p_permutation']) if P else '--'} \\\\")
-        lines.append(r"\addlinespace[2pt]")
+            if in_table: lines.append(f"{names[fam] if k == 0 else ''} & {VARIABLES[var]} & {len(rows)} & {sign}{abs(100*diffs.mean()):.0f} & {J['chi2_per_dof']:.1f} & {_fmt(J['p_value'])} & {_fmt(P['p_permutation']) if P else '--'} \\\\")
+        if in_table: lines.append(r"\addlinespace[2pt]")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / args.table).write_text("\n".join(lines) + "\n")
     print("\n== power (smallest constant per-bin difference rejectable at 95% power):")

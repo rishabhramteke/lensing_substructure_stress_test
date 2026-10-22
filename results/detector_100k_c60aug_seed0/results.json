@@ -1,0 +1,81 @@
+{
+  "threshold_at_10pct_fpr": 0.9879125356674194,
+  "fpr_at_threshold_calibration_set": 0.1,
+  "completeness_c60_by_mass_bin": {
+    "8.0-8.5": {
+      "n": 150,
+      "completeness": 0.08
+    },
+    "8.5-9.0": {
+      "n": 156,
+      "completeness": 0.16666666666666666
+    },
+    "9.0-9.5": {
+      "n": 136,
+      "completeness": 0.38235294117647056
+    },
+    "9.5-10.0": {
+      "n": 132,
+      "completeness": 0.7121212121212122
+    },
+    "10.0-10.5": {
+      "n": 178,
+      "completeness": 0.797752808988764
+    },
+    "10.5-11.0": {
+      "n": 153,
+      "completeness": 0.8954248366013072
+    }
+  },
+  "completeness_c15_by_mass_bin": {
+    "8.0-8.5": {
+      "n": 150,
+      "completeness": 0.08
+    },
+    "8.5-9.0": {
+      "n": 156,
+      "completeness": 0.1346153846153846
+    },
+    "9.0-9.5": {
+      "n": 136,
+      "completeness": 0.10294117647058823
+    },
+    "9.5-10.0": {
+      "n": 132,
+      "completeness": 0.20454545454545456
+    },
+    "10.0-10.5": {
+      "n": 178,
+      "completeness": 0.28651685393258425
+    },
+    "10.5-11.0": {
+      "n": 153,
+      "completeness": 0.5294117647058824
+    }
+  },
+  "paired_concentration_flip": {
+    "n_pairs": 905,
+    "detected_at_c60": 463,
+    "detected_at_c15": 206,
+    "detected_at_c60_not_c15": 294,
+    "detected_at_c15_not_c60": 37
+  },
+  "confounder_fpr": {
+    "no_subhalo (calibration set)": 0.1,
+    "multipole m=4, a=0.01*thetaE": 0.098,
+    "multipole m=4, a=0.03*thetaE": 0.111
+  },
+  "roc_auc_fixed60_vs_no_subhalo": 0.7249585635359116,
+  "n_test_fixed60": 1000,
+  "n_test_fixed15": 1000,
+  "n_no_subhalo": 1000,
+  "n_multipole_a1": 1000,
+  "n_multipole_a3": 1000,
+  "populations": {
+    "test60": "test_fixed60",
+    "test15": "test_fixed15",
+    "clean": "no_subhalo",
+    "mp_a1": "multipole_m4_a1",
+    "mp_a3": "multipole_m4_a3"
+  }
+}

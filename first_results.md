@@ -2187,3 +2187,87 @@ journal-year entries, and the two same-year Ostdiek papers render correctly as 2
 
 Build clean: 0 errors, 0 overfull boxes, 0 undefined references, 0 class warnings, 24 pages, and
 0 line-number overprints or collisions over 205 numbers.
+
+## 2026-09-15/16: round 17 — independent A&A-style referee report (6/10, major revision), and the revision
+
+The report's must-fix items and what was done:
+
+1. **Family A's frozen macro-model contaminated the headline.** The joint scan (`run_baseline_a_joint.py`, generalised to
+   carry lens light, LOS and decoy populations) is now Family A throughout: full 1 000-lens core populations
+   (`results/baseline_a_joint_full/`: clean, c=60/30/15, m=4 a=0.01/0.03, m=3 a=0.03; 9 workers, ~1.5–4 h each) and
+   the stress arms on the frozen scan's own 200–300-lens subsamples (`results/baseline_a_joint_{los,shallow,decoy,psf015,lenslight,lenslight2,tidal}/`).
+   The frozen fit-then-scan is Appendix B ("the fast shortcut"), with its null-floor, template, mass-mechanism and
+   multipole-freedom tables kept there.
+2. **Family B recast** as a linear δψ residual *diagnostic* (fixed source, one λ, first order, peak statistic), cited against
+   the method it stands in for (Vegetti+2010, 2012; Hezaveh+2016; Ritondale+2019 added to the bibliography) and removed from
+   the abstract's "physical detectors" claim.
+3. **U-Net at 30 000 images, four seeds** (`unet_30k_seed{2,3}` trained; `results/aggregate_30k`), now the paper's network;
+   the 8k set is the budget check. Retrained networks at the 0.15" PSF (`unet_30k_psf015_seed{0,1}`) and at the shallow
+   depth (`unet_30k_shallow_seed{0,1}`), each on its own 30k training population (`data/train_psf015_30k`, `data/train_shallow_30k`).
+4. **Null-floor finding demoted** from the abstract to Appendix B (the joint statistic nests the smooth model and needs no floor).
+5. **Summary grid regenerated from the results files** (`make_paper_figures.fig12_summary` reads every cell from JSON).
+6. **PSF widened to 0.15"** as its own stress (`tier0_psf` config, `psf015_*` populations, Sect. 4.10).
+7. **Length**: 24 → 20 pages; author line restored (it had been commented out); cosmology (Planck 2018 default of
+   `lenstronomy`) and the M200/c200-vs-critical-density convention stated; "misattribution rate" for LOS halos.
+
+Infrastructure: `scripts/paper_config.py` names the runs every table/figure is built from; `evaluate_joint_scan.py` produces
+`results/joint_scan.json` and the joint operating-point, LOS and gate tables; `evaluate_unet_populations.py` scores a seed set
+on arbitrary populations; `repair_joint_basin.py` completes the macro-basin control for lenses the 900 s per-lens guard cut
+short (without it one clean lens carried Δχ² = 3.5e4 and several a=0.01 multipole lenses 1e4–4e4, all credited to a
+perturber that had in fact found a better *smooth* basin); `run_paper_evaluators.sh` runs every evaluator in dependency order.
+
+### Joint scan, full populations (results/joint_scan.json, `core`)
+- Clean control: 963/1000 reliable; Δχ² median 2.8, 90th pct 6.4 (the 10%-FPR threshold), 99th 11.0; 0.31 % above 20
+  (three lenses with χ²/dof 7–9.5). 1.1 % negative (no cell converged). 69 lenses hit the 900 s guard (lower bounds).
+- c=60 completeness, 10 % cal: 48 81 98 99 98 98; Δχ²≥20: 15 53 93 94 98 98; conservative (cal): 46 76 96 92 76 36.
+  c=15, cal: 35 74 96 96 98 98; ≥20: 11 41 83 92 98 98. Paired flip 63:27 (cal), 44:5 (≥20) of 734 pairs.
+- Multipole FPR: a=0.01 → 98.3 / 87.6 / 47.0 % (cal / ≥20 / ≥100); a=0.03 → 99.4 / 99.1 / 92.2 %. Frozen: 31.5 / 76.7 % at cal.
+- Gate χ²/dof<1.2: 95 % clean pass, 11 % multipole pass, of which 100 % / 97 % flagged.
+- 630 detections at cal: 18.7 % localized (grid ceiling 21.5 %), median offset 0.27"; mass error +0.36 dex (74/630 low,
+  423 within 0.5 dex); localized +0.36 dex (7/118 low). The frozen shortcut: −1.1 dex, all low.
+- Cost: median fit+scan 14–39 s per lens (+ ~30 % basin control) vs 2–4 s frozen.
+
+### Cross-family numbers after the chain (2026-09-16 10:24; results/roc.json, matched_denominators.json, completeness_vs_signal.json, depth.json, mass_function_reweighting/, localization/summary_abc.json)
+- ROC (lenses A and B both retain): joint scan AUC 0.928 (c=60) / 0.922 (c=15) / 0.993 (multipole a=0.03); B 0.777 / 0.716 / 0.937;
+  frozen scan 0.709 / 0.705 / 0.884; U-Net 30k 0.621 / 0.518 / 0.503 (0.668 on every lens). Both physical detectors rank the
+  multipole population above real subhalos; the joint re-fit lifts real-subhalo ranking by 0.22 and the confounder's by 0.11.
+- Matched denominators: the joint scan is unchanged on the common set; the U-Net's top two bins fall 79→58 and 70→65 %.
+- Signal variables (paired permutation test): joint scan coincides against M_proj(<0.2") (χ²/dof 0.8, p_perm 0.63) and for every
+  aperture 0.2–0.4"; against S/N_pert mean diff −6 pts, p_perm 0.005. B coincides against M_proj(<0.2") only (window 0.15–0.2").
+  U-Net coincides against nothing (χ²/dof 18–24, p_perm < 0.001; −23 pts at equal S/N). Power: 4 pts (A), 8–9 pts (B, C).
+- CDM weighting (10 % cal, c=60): A 87→62 %, B 63→22 %, C 40→13 %; c=15: 83→51, 44→12, 14→9.
+- Localization (c=60, full population / seed 0): A 630 detections, 18.7 % within 2 px (grid ceiling 21.5 %); B 422, 55 %; U-Net 30k 369, 84 % (median 0.06"; 8k: 57 %).
+- Depth (joint scan; shallow = 300-lens subsamples): c=60 compl. at own 10 % cal 98 99 98 98 → 59 84 89 92 (bins ≥10^9); at Δχ²≥20 93 94 98 98 → 16 63 81 90;
+  clean FPR at ≥20 0.21 → 0.67 %; gate 167/1000 → 0/300 rejected; multipole 99/99 → 83/57 %. U-Net deep-trained: 88 % of shallow clean flagged at its
+  deep threshold, AUC 0.52; recalibrated 9 11 12 17 %; retrained on 30k shallow images: AUC 0.57, 14 19 34 53 %, c=15 collapse unchanged.
+- PSF 0.15" (same 300/200 lenses): frozen scan 12 17 38 71 85 85 → 12 20 39 78 89 94 (no loss), multipole 75→83 %; joint scan at ≥20:
+  10 43 90 96 97 93 (n≈30/bin) vs 15 53 93 94 98 98 at 0.08". U-Net trained at 0.08" fires on 40 % of 0.15" clean lenses (AUC 0.62 recal);
+  retrained at 0.15": AUC 0.67, c=60 15 12 12 39 60 78 (vs 11 8 19 51 70 79), c=15 11 11 7 10 17 25, multipole 13 %.
+- Decoys at 10σ: joint scan 25/42 % (Gaussian) and 18 % (dipole) at the 10 % cal, 2/1/0 % at Δχ²≥20; frozen 2–4 %; U-Net 30k 37/39/50 % (8k: 19/12/25); B 63–76 %.
+- LOS (joint, 300 lenses): z=0.25 flagged 78 % (cal) / 59 % (≥20), 6 % localized, median offset 1.25", mass −0.46 dex; z=0.75 44/26 %, −1.4 dex. U-Net 9.7/9.6 %.
+- 30k U-Net (4 seeds): AUC 0.668±0.006; c=60 11 8 19 51 70 79; c=15 9 9 9 15 14 28; flip 278:38 (7.3:1); multipole 9.2/10.4 %; c=30 10 28 44 64, flip 150:34.
+
+### Final numbers of the revision (2026-09-16 17:00; all joint-scan stress arms complete, results/joint_scan.json)
+- Free position (300 lenses, seed 0; `results/baseline_a_joint_freepos/`): clean threshold 10.3, clean FPR at Δχ²≥20 0 %, multipole 99 %;
+  c=60 compl. cal 48 82 97 100 100 92, ≥20: 28 73 94 100 100 92 (fixed grid on the same lenses ≥20: 12 47 94 95 98 100);
+  localized 92.2 % (cal, 192 det.) / 93.2 % (≥20), median offset 0.042" (73 % within 1 px); mass +0.40 dex. Multipole false alarms:
+  fitted position displaced from the node by a median 0.48", 55 % at the 0.5" box edge (real subhalos 0.04" from the truth).
+  c=15: cal 42 80 100 95 97 100; ≥20 19 61 91 95 95 100; flips 60→15 15:9 (cal), 17:2 (≥20) of 224 pairs.
+- m=3 multipole (full 1000): 799 reliable (201 rejected), FPR 99.2 / 99.0 / 97.2 % (cal / ≥20 / ≥100).
+- Lens light, joint scan (200 lenses, S1): single Sérsic — gate rejects 101/200 clean, 10 % threshold Δχ²=1179, clean FPR 100 % at ≥20 and
+  91 % at ≥100 (94/88 % gate lifted), multipole 100 % at ≥20; double Sérsic — gate 10/200, threshold 6.3, clean 0.53 % at ≥20 (1 of 190),
+  multipole 98 %, compl. c=60 cal 40 52 96 100 100 100, ≥20 8 32 83 95 100 100. U-Net (30k): raw 78 % flagged at Tier-0 thr, recal AUC 0.53;
+  single-subtracted AUC 0.58 / 0.57 (S1/S2), double 0.67 / 0.66 with 47–49 % of clean above the Tier-0 threshold.
+- Tidal track, joint (200 lenses, ≥20): c=15 fixed-τ 7 37 85 → tidal 3 23 79; c=30 16 41 90 → 13 28 90 (three bins below 10^9.5).
+- Manuscript: 21 pages, 0 placeholders, abstract ~250 words; Table 10 full-width; Fig. 7 left panel = free-position run; Fig. 10 cells all computed.
+
+### Closing audit (2026-09-16 17:30)
+- 61 headline numbers recomputed from results/*.json and searched for in main.tex: all present; two stale decimals fixed
+  (a=0.01 multipole rate at Δχ²≥100 is 46.8 %, frozen-scan c=15 ROC area 0.70).
+- Every \input table (18) and \includegraphics figure (10) exists; every \ref has a label; 52 citations ↔ 52 bibitems, none missing
+  (tejerocantero2020 remains in refs.bib uncited). All 41 DOIs resolve on Crossref with matching titles (four differ only between the arXiv
+  and journal title variants; aa.bst prints no titles). arXiv identifiers verified via the arXiv API for 42 entries; the other 11 were
+  rate-limited (HTTP 429) on both arXiv and Semantic Scholar, 8 of them carry Crossref-verified DOIs, and the last three (Ronneberger 2015,
+  Rowe 2015, Tejero-Cantero 2020) were resolved by their DOIs on Crossref.
+- Fonts (pdffonts): body txfonts/Nimbus Roman (Times), headings Nimbus Sans, figures TeX Gyre Termes — the aa.cls defaults; only CM symbol
+  glyphs (arrows, ≥) from matplotlib's mathtext fallback appear in figures. Colours: tab10 with a fixed family→colour map across all figures.

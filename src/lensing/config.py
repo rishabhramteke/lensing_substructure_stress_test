@@ -59,6 +59,12 @@ class SourceConfig:
     # than a point at the origin; radius as a fraction of theta_E.
     offset_frac_thetaE_range: tuple[float, float] = (0.05, 0.35)
     amp_range: tuple[float, float] = (60.0, 220.0)
+    # source-misspecification arm (referee round 22): `n_clumps` compact round Sersic clumps (n=1) added to the Sersic
+    # source, each carrying a fraction of the main component's amplitude-weighted flux and placed within one effective
+    # radius of its centre. Every fitter models a single Sersic, so the source model is misspecified by a known amount.
+    n_clumps: int = 0
+    clump_flux_frac_range: tuple[float, float] = (0.02, 0.06)
+    clump_R_range: tuple[float, float] = (0.03, 0.08)
 
     # COSMOS (Tier 1) knobs. `cosmos_sample="23.5"` is the F814W<23.5 training
     # sample (~56,000 galaxies, Zenodo 3242143) -- the same one `paltas` wraps.
@@ -103,6 +109,12 @@ class MultipoleConfig:
     m: int = 4  # 3 or 4, per Tsang/Lange/O'Riordan convention
     am_over_thetaE: float = 0.0
     phi_m_range_deg: tuple[float, float] = (0.0, 180.0)
+    # >0: draw a_m/theta_E per lens as |N(0, am_sigma)| instead of the fixed am_over_thetaE (a population of amplitudes,
+    # referee round 23); the ordinary populations keep am_sigma = 0
+    am_sigma: float = 0.0
+    # elliptical multipole (Paugnat & Gilman 2025; lenstronomy MULTIPOLE_ELL) defined on ellipses of the lens's own axis
+    # ratio: the out-of-family confounder for a macro-model that carries a circular multipole (referee round 22)
+    elliptical: bool = False
     note: str = "am/thetaE=0.01 and 0.03 are O'Riordan+2025's two test amplitudes (arXiv:2509.02660)"
 
 
@@ -146,7 +158,16 @@ class InstrumentConfig:
     # different depth: the referee point that every result here is at arc S/N ~1.6e3,
     # while a survey visit delivers far less (2026-09-13).
     exposure_time: float | None = None
+    # None -> the preset's own Gaussian FWHM (0.08", one pixel). Set it to render the SAME lenses
+    # through a wider PSF: the referee point that the preset is about half the real F160W width
+    # and one-pixel sampling favours every detector (2026-09-15).
+    psf_fwhm: float | None = None
     note: str = "HST/F160W/Gaussian/0.08\" is Tsang+2024's coarsest grid; 0.02\" reproduces their finest"
+    # inverse-crime control (referee round 23): render with a finer numerical supersampling and a slightly wider PSF than
+    # the fitters assume. The manifest keeps the NOMINAL kwargs_band the fitters read, so the forward model the detectors
+    # use differs from the one that made the data. 1 / 1.0 reproduce the ordinary renders exactly.
+    render_supersampling: int = 1
+    render_psf_scale: float = 1.0
 
 
 @dataclass
@@ -172,6 +193,28 @@ class LOSHaloConfig:
 
 
 @dataclass
+class PopulationConfig:
+    """A population of low-mass subhalos and line-of-sight halos below the suite's detection range, present in every
+    image of a population (including its subhalo-free control), so that a "clean" lens carries the sub-threshold
+    structure a real lens does (referee round 26, M7; Coogan et al. 2024, Despali et al. 2018, Amorisco et al. 2022).
+    Subhalos: dN/dM ~ M^-1.9 on [10^7, 10^8.5] Msun at the lens redshift, Dutton & Maccio concentrations with the
+    tidal boost of the main subhalo population, tau = 20, uniform within 1.5 theta_E, Poisson-distributed with a
+    projected mass of `f_sub` times a convergence of 0.5 over that disc (0.4%: the share of a ~1% substructure
+    fraction in this mass range). Line-of-sight halos: `los_to_sub_mass_ratio` times the subhalo mass, on their own
+    planes with z uniform in [0.05, 0.95] z_s, field concentrations. Drawn from a generator seeded by the lens's own
+    parameters, so the lenses, sources and main subhalos remain those of the population without it."""
+    enabled: bool = False
+    log10_mass_range: tuple = (7.0, 8.5)
+    slope: float = -1.9
+    f_sub: float = 0.004
+    disc_frac_thetaE: float = 1.5
+    los_to_sub_mass_ratio: float = 2.0
+    los_z_frac_range: tuple = (0.05, 0.95)
+    tau: float = 20.0
+    note: str = "sub-threshold subhalo + line-of-sight population; referee round 26"
+
+
+@dataclass
 class SimConfig:
     cosmology: CosmologyConfig = field(default_factory=CosmologyConfig)
     lens: LensConfig = field(default_factory=LensConfig)
@@ -180,6 +223,7 @@ class SimConfig:
     multipole: MultipoleConfig = field(default_factory=MultipoleConfig)
     los_halo: LOSHaloConfig = field(default_factory=LOSHaloConfig)
     lens_light: LensLightConfig = field(default_factory=LensLightConfig)
+    population: PopulationConfig = field(default_factory=PopulationConfig)
     instrument: InstrumentConfig = field(default_factory=InstrumentConfig)
     tier: str = "tier0"
 
@@ -210,6 +254,98 @@ def tier0_shallow(concentration_mode: str = "fixed60", exposure_time: float = 13
         cfg.multipole.am_over_thetaE = am_over_thetaE
         cfg.multipole.m = m
     cfg.tier = f"tier0_shallow{int(exposure_time)}s_{'no_subhalo' if no_subhalo else concentration_mode}" + (f"_m{m}a{am_over_thetaE}" if am_over_thetaE else "")
+    return cfg
+
+
+def tier0_psf(fwhm: float = 0.15, concentration_mode: str = "fixed60", no_subhalo: bool = False, am_over_thetaE: float = 0.0, m: int = 4) -> SimConfig:
+    """Tier 0 with the Gaussian PSF widened from the preset's 0.08" (one pixel) to `fwhm`, everything
+    else identical, so that given the same seed the lenses, sources, subhalos and noise draws match
+    the Tier-0 populations pixel for pixel before convolution. 0.15" is the real WFC3/F160W width."""
+    cfg = tier0_tsang(concentration_mode)
+    cfg.instrument.psf_fwhm = float(fwhm)
+    if no_subhalo:
+        cfg.subhalo.enabled = False
+        cfg.subhalo.presence_prob = 0.0
+    if am_over_thetaE:
+        cfg.multipole.enabled = True
+        cfg.multipole.am_over_thetaE = am_over_thetaE
+        cfg.multipole.m = m
+    cfg.tier = f"tier0_psf{fwhm:g}_{'no_subhalo' if no_subhalo else concentration_mode}" + (f"_m{m}a{am_over_thetaE}" if am_over_thetaE else "")
+    return cfg
+
+
+def tier0_realistic(concentration_mode: str = "fixed60", no_subhalo: bool = False, am_over_thetaE: float = 0.0, m: int = 4) -> SimConfig:
+    """The three instrument and lens realism axes at once: the 0.15" WFC3/F160W PSF, a 600 s snapshot-length exposure and
+    two-component lens light, everything else Tier 0, so that given the same seed the lenses, sources and subhalos are
+    those of the Tier-0 populations."""
+    cfg = tier0_psf(0.15, concentration_mode, no_subhalo=no_subhalo, am_over_thetaE=am_over_thetaE, m=m)
+    cfg.instrument.exposure_time = 600.0
+    cfg.lens_light.enabled = True
+    cfg.tier = f"tier0_realistic_{'no_subhalo' if no_subhalo else concentration_mode}" + (f"_m{m}a{am_over_thetaE}" if am_over_thetaE else "")
+    return cfg
+
+
+def tier0_clumpy_source(concentration_mode: str = "fixed60", no_subhalo: bool = False, am_over_thetaE: float = 0.0, m: int = 4) -> SimConfig:
+    """Tier 0 with two faint compact clumps added to the Sersic source (2-6% of its flux each): a source-model
+    misspecification that keeps the smooth fit within the gate, so the arm has a proper null."""
+    cfg = tier0_tsang(concentration_mode)
+    cfg.source.n_clumps = 2
+    if no_subhalo:
+        cfg.subhalo.enabled = False
+        cfg.subhalo.presence_prob = 0.0
+    if am_over_thetaE:
+        cfg.multipole.enabled = True
+        cfg.multipole.am_over_thetaE = am_over_thetaE
+        cfg.multipole.m = m
+    cfg.tier = f"tier0_clumpy_{'no_subhalo' if no_subhalo else concentration_mode}" + (f"_m{m}a{am_over_thetaE}" if am_over_thetaE else "")
+    return cfg
+
+
+def tier2_elliptical_multipole(am_over_thetaE: float = 0.03, m: int = 4) -> SimConfig:
+    """A subhalo-free population with an ELLIPTICAL multipole (Paugnat & Gilman 2025) on the lens's own axis ratio."""
+    cfg = tier2_multipole_confounder(am_over_thetaE=am_over_thetaE, m=m)
+    cfg.multipole.elliptical = True
+    cfg.tier = f"tier2_ellmultipole_m{m}_a{am_over_thetaE}"
+    return cfg
+
+
+def tier0_inverse_crime(concentration_mode: str = "fixed60", no_subhalo: bool = False, am_over_thetaE: float = 0.0, m: int = 4) -> SimConfig:
+    """Tier 0 rendered with 5x supersampling and a PSF 10% wider than the nominal 0.08" the fitters are told."""
+    cfg = tier0_tsang(concentration_mode)
+    cfg.instrument.render_supersampling = 5
+    cfg.instrument.render_psf_scale = 1.1
+    if no_subhalo:
+        cfg.subhalo.enabled = False
+        cfg.subhalo.presence_prob = 0.0
+    if am_over_thetaE:
+        cfg.multipole.enabled = True
+        cfg.multipole.am_over_thetaE = am_over_thetaE
+        cfg.multipole.m = m
+    cfg.tier = f"tier0_invcrime_{'no_subhalo' if no_subhalo else concentration_mode}" + (f"_m{m}a{am_over_thetaE}" if am_over_thetaE else "")
+    return cfg
+
+
+def tier0_supersampled(concentration_mode: str = "fixed60", no_subhalo: bool = False, am_over_thetaE: float = 0.0, m: int = 4) -> SimConfig:
+    """Tier 0 rendered with 5x supersampling only (the nominal PSF), fitted with the 1x model: the numerical half of the
+    inverse-crime control."""
+    cfg = tier0_inverse_crime(concentration_mode, no_subhalo=no_subhalo, am_over_thetaE=am_over_thetaE, m=m)
+    cfg.instrument.render_psf_scale = 1.0
+    cfg.tier = cfg.tier.replace("invcrime", "supersampled")
+    return cfg
+
+
+def tier0_multipole_subhalo(concentration_mode: str = "fixed60", no_subhalo: bool = False, am_sigma: float = 0.01, m: int = 4) -> SimConfig:
+    """Subhalo AND an m=4 multipole in the same lens, the amplitude drawn per lens as |N(0, am_sigma)| a_m/theta_E; with
+    the Tier-0 seed the lenses, sources and subhalos are those of the Tier-0 concentration populations."""
+    cfg = tier0_tsang(concentration_mode)
+    if no_subhalo:
+        cfg.subhalo.enabled = False
+        cfg.subhalo.presence_prob = 0.0
+    cfg.multipole.enabled = True
+    cfg.multipole.am_sigma = am_sigma
+    cfg.multipole.am_over_thetaE = am_sigma
+    cfg.multipole.m = m
+    cfg.tier = f"tier0_mpsub_{'no_subhalo' if no_subhalo else concentration_mode}_m{m}sig{am_sigma}"
     return cfg
 
 
@@ -322,4 +458,35 @@ def tier2_lens_light_multipole(am_over_thetaE: float = 0.03, m: int = 4) -> SimC
     cfg = tier2_multipole_confounder(am_over_thetaE=am_over_thetaE, m=m)
     cfg.lens_light.enabled = True
     cfg.tier = f"tier2_lenslight_multipole_m{m}_a{am_over_thetaE}"
+    return cfg
+
+
+def tier0_population(concentration_mode: str = "fixed60", no_subhalo: bool = False) -> SimConfig:
+    """Tier 0 plus the sub-threshold subhalo and line-of-sight population (`PopulationConfig`), with the same seeds as
+    the Tier-0 populations so the lenses pair with them."""
+    cfg = tier0_no_subhalo() if no_subhalo else tier0_tsang(concentration_mode)
+    cfg.population.enabled = True
+    cfg.tier = "tier0_population_" + ("no_subhalo" if no_subhalo else concentration_mode)
+    return cfg
+
+
+def tier0_euclid(concentration_mode: str = "fixed60", no_subhalo: bool = False, am_over_thetaE: float = 0.0, m: int = 4,
+                 source_mag_offset: float = 0.0) -> SimConfig:
+    """A Euclid-VIS-like survey arm (referee round 27, M4): lenstronomy's Euclid VIS preset (0.101" pixels, Gaussian PSF of
+    0.16", 4 x 566 s, its own zero point), the Tier-0 priors and (given the same seed) the same lenses, sources and subhalos.
+    Source amplitudes are rescaled from the F160W to the VIS zero point so the sources keep their magnitudes, and then made
+    fainter by `source_mag_offset` magnitudes, set so the median arc signal-to-noise is survey-typical."""
+    cfg = tier0_tsang(concentration_mode)
+    cfg.instrument.survey, cfg.instrument.band, cfg.instrument.pixel_scale = "Euclid", "VIS", 0.101
+    zp_scale = 10 ** (-0.4 * (25.96 - 25.72))
+    f = zp_scale * 10 ** (-0.4 * source_mag_offset)
+    cfg.source.amp_range = (cfg.source.amp_range[0] * f, cfg.source.amp_range[1] * f)
+    if no_subhalo:
+        cfg.subhalo.enabled = False
+        cfg.subhalo.presence_prob = 0.0
+    if am_over_thetaE:
+        cfg.multipole.enabled = True
+        cfg.multipole.am_over_thetaE = am_over_thetaE
+        cfg.multipole.m = m
+    cfg.tier = f"tier0_euclid_{'no_subhalo' if no_subhalo else concentration_mode}" + (f"_m{m}a{am_over_thetaE}" if am_over_thetaE else "") + (f"_dm{source_mag_offset:g}" if source_mag_offset else "")
     return cfg

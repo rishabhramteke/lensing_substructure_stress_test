@@ -1,0 +1,78 @@
+{
+  "arch": "nre",
+  "threshold_at_10pct_fpr": 0.11190514266490936,
+  "completeness_test_fixed60": {
+    "8.0-8.5": {
+      "n": 144,
+      "completeness": 0.06944444444444445
+    },
+    "8.5-9.0": {
+      "n": 128,
+      "completeness": 0.125
+    },
+    "9.0-9.5": {
+      "n": 162,
+      "completeness": 0.09259259259259259
+    },
+    "9.5-10.0": {
+      "n": 149,
+      "completeness": 0.1476510067114094
+    },
+    "10.0-10.5": {
+      "n": 152,
+      "completeness": 0.28289473684210525
+    },
+    "10.5-11.0": {
+      "n": 144,
+      "completeness": 0.5
+    }
+  },
+  "auc_test_fixed60": 0.5914459613196814,
+  "completeness_test_fixed15": {
+    "8.0-8.5": {
+      "n": 144,
+      "completeness": 0.08333333333333333
+    },
+    "8.5-9.0": {
+      "n": 128,
+      "completeness": 0.1640625
+    },
+    "9.0-9.5": {
+      "n": 162,
+      "completeness": 0.08024691358024691
+    },
+    "9.5-10.0": {
+      "n": 149,
+      "completeness": 0.11409395973154363
+    },
+    "10.0-10.5": {
+      "n": 152,
+      "completeness": 0.11842105263157894
+    },
+    "10.5-11.0": {
+      "n": 144,
+      "completeness": 0.1875
+    }
+  },
+  "auc_test_fixed15": 0.5223560864618885,
+  "paired_flip": {
+    "c60_not_c15": 101,
+    "c15_not_c60": 31
+  },
+  "fpr": {
+    "no_subhalo": 0.1,
+    "multipole_m4_a3": 0.125
+  },
+  "localization": {
+    "test_fixed60": {
+      "n_det": 178,
+      "frac_within_0p16": 0.33707865168539325,
+      "frac_within_0p3": 0.47191011235955055
+    },
+    "test_fixed15": {
+      "n_det": 108,
+      "frac_within_0p16": 0.027777777777777776,
+      "frac_within_0p3": 0.046296296296296294
+    }
+  }
+}

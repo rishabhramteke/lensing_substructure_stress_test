@@ -21,11 +21,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from detector.dataset import LensPatchDataset  # noqa: E402
 from detector.unet import UNet  # noqa: E402
+from paper_config import A_JOINT_FULL, A_ABS, unet_seeds  # noqa: E402
 
 BINS = [(9.0, 9.5), (9.5, 10.0), (10.0, 10.5), (10.5, 11.0)]
 POPS = ("test_fixed60", "test_fixed30", "test_fixed15")
-SEEDS = {"detector_v0_best": "checkpoints/unet_v0", "detector_v1_seed1": "checkpoints/unet_v1_seed1",
-         "detector_v2_seed2": "checkpoints/unet_v2_seed2", "detector_v3_seed3": "checkpoints/unet_v3_seed3"}
+SEEDS = unet_seeds()
 
 
 def wilson(k, n, z=1.0):
@@ -35,7 +35,7 @@ def wilson(k, n, z=1.0):
     return p, c - h, c + h
 
 
-def scan(pop, root="results/baseline_a"):
+def scan(pop, root=A_JOINT_FULL):
     p = ROOT / root / pop / "scan_results.jsonl"
     return [json.loads(l) for l in open(p)] if p.exists() else None
 
@@ -43,25 +43,25 @@ def scan(pop, root="results/baseline_a"):
 def family_a():
     clean = [r for r in scan("no_subhalo") if r["reliable_fit"]]
     thr = float(np.quantile([r["delta_chi2"] for r in clean], 0.90))
-    out = {"threshold": thr, "clean_fpr_floor": float(np.mean([r["delta_chi2"] > 0 for r in clean])), "populations": {}}
+    out = {"threshold": thr, "clean_fpr_abs": float(np.mean([r["delta_chi2"] >= A_ABS for r in clean])), "populations": {}}
     det = {}
     for pop in POPS:
         recs = scan(pop)
         if not recs: continue
         rel = [r for r in recs if r["reliable_fit"] and r["has_subhalo"]]
-        d = {"n_excluded": sum(1 for r in recs if not r["reliable_fit"]), "n": len(rel), "bins": {}, "bins_floor": {}}
+        d = {"n_excluded": sum(1 for r in recs if not r["reliable_fit"]), "n": len(rel), "bins": {}, "bins_abs": {}}
         for lo, hi in BINS:
             sel = [r for r in rel if lo <= r["log10_M200_true"] < hi]
-            for key, f in (("bins", lambda r: r["delta_chi2"] >= thr), ("bins_floor", lambda r: r["delta_chi2"] > 0)):
+            for key, f in (("bins", lambda r: r["delta_chi2"] >= thr), ("bins_abs", lambda r: r["delta_chi2"] >= A_ABS)):
                 k = sum(1 for r in sel if f(r)); p_, l_, h_ = wilson(k, len(sel))
                 d[key][f"{lo}-{hi}"] = {"n": len(sel), "k": k, "p": p_, "lo": l_, "hi": h_}
         out["populations"][pop] = d
-        det[pop] = {r["index"]: (r["delta_chi2"] >= thr, r["delta_chi2"] > 0) for r in rel}
+        det[pop] = {r["index"]: (r["delta_chi2"] >= thr, r["delta_chi2"] >= A_ABS) for r in rel}
     out["flips"] = {}
     for hi_pop, lo_pop in (("test_fixed60", "test_fixed30"), ("test_fixed30", "test_fixed15"), ("test_fixed60", "test_fixed15")):
         if hi_pop not in det or lo_pop not in det: continue
         common = sorted(set(det[hi_pop]) & set(det[lo_pop]))
-        for j, key in ((0, "at_threshold"), (1, "floored")):
+        for j, key in ((0, "at_threshold"), (1, "abs20")):
             lost = sum(1 for i in common if det[hi_pop][i][j] and not det[lo_pop][i][j])
             gained = sum(1 for i in common if det[lo_pop][i][j] and not det[hi_pop][i][j])
             out["flips"].setdefault(f"{hi_pop}_to_{lo_pop}", {})[key] = {"n_pairs": len(common), "lost": lost, "gained": gained}
@@ -121,7 +121,7 @@ def main():
     (ROOT / "results/intermediate_concentration.json").write_text(json.dumps(res, indent=2))
     A, C = res["A"], res["C"]
     lines = [r"\begin{tabular}{@{}lccc@{}}", r"\toprule", r"completeness at 10\% FPR & $c=60$ & $c=30$ & $c=15$ \\", r"\midrule",
-             r"\multicolumn{4}{@{}l}{Family A, parametric scan} \\"]
+             r"\multicolumn{4}{@{}l}{Family A, joint parametric scan} \\"]
     for lo, hi in BINS:
         k = f"{lo}-{hi}"
         lines.append(f"\\quad $10^{{{lo}}}$--$10^{{{hi}}}\\Msun$ & " +
@@ -145,7 +145,7 @@ def main():
     print("A thr %.1f | excluded %s" % (A["threshold"], {p: A["populations"][p]["n_excluded"] for p in POPS}))
     for p in POPS:
         print("  A", p, " ".join(f"{100*A['populations'][p]['bins'][f'{lo}-{hi}']['p']:.0f}" for lo, hi in BINS),
-              "| floored", " ".join(f"{100*A['populations'][p]['bins_floor'][f'{lo}-{hi}']['p']:.0f}" for lo, hi in BINS))
+              "| abs20", " ".join(f"{100*A['populations'][p]['bins_abs'][f'{lo}-{hi}']['p']:.0f}" for lo, hi in BINS))
     print("  A flips:", json.dumps(A["flips"]))
     print("C seeds", C["n_seeds"])
     for lo, hi in BINS:

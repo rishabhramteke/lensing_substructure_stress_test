@@ -1,0 +1,111 @@
+{
+  "arch": "nre",
+  "threshold_at_10pct_fpr": -0.35135847330093384,
+  "completeness_test_fixed60": {
+    "8.0-8.5": {
+      "n": 150,
+      "completeness": 0.13333333333333333
+    },
+    "8.5-9.0": {
+      "n": 156,
+      "completeness": 0.1794871794871795
+    },
+    "9.0-9.5": {
+      "n": 136,
+      "completeness": 0.4117647058823529
+    },
+    "9.5-10.0": {
+      "n": 132,
+      "completeness": 0.7878787878787878
+    },
+    "10.0-10.5": {
+      "n": 178,
+      "completeness": 0.8764044943820225
+    },
+    "10.5-11.0": {
+      "n": 153,
+      "completeness": 0.9607843137254902
+    }
+  },
+  "auc_test_fixed60": 0.7883767955801105,
+  "completeness_test_fixed15": {
+    "8.0-8.5": {
+      "n": 150,
+      "completeness": 0.08
+    },
+    "8.5-9.0": {
+      "n": 156,
+      "completeness": 0.12179487179487179
+    },
+    "9.0-9.5": {
+      "n": 136,
+      "completeness": 0.1323529411764706
+    },
+    "9.5-10.0": {
+      "n": 132,
+      "completeness": 0.2803030303030303
+    },
+    "10.0-10.5": {
+      "n": 178,
+      "completeness": 0.43258426966292135
+    },
+    "10.5-11.0": {
+      "n": 153,
+      "completeness": 0.6928104575163399
+    }
+  },
+  "auc_test_fixed15": 0.6482508287292817,
+  "completeness_test_fixed30": {
+    "8.0-8.5": {
+      "n": 150,
+      "completeness": 0.10666666666666667
+    },
+    "8.5-9.0": {
+      "n": 156,
+      "completeness": 0.1794871794871795
+    },
+    "9.0-9.5": {
+      "n": 136,
+      "completeness": 0.20588235294117646
+    },
+    "9.5-10.0": {
+      "n": 132,
+      "completeness": 0.5454545454545454
+    },
+    "10.0-10.5": {
+      "n": 178,
+      "completeness": 0.7808988764044944
+    },
+    "10.5-11.0": {
+      "n": 153,
+      "completeness": 0.9019607843137255
+    }
+  },
+  "auc_test_fixed30": 0.7336950276243094,
+  "paired_flip": {
+    "c60_not_c15": 257,
+    "c15_not_c60": 15
+  },
+  "fpr": {
+    "no_subhalo": 0.1,
+    "multipole_m4_a1": 0.115,
+    "multipole_m4_a3": 0.145,
+    "multipole_m3_a3": 0.121,
+    "ellmultipole_m4_a3": 0.212,
+    "decoy_gaussian_s42_a10": 0.58,
+    "decoy_gaussian_s43_a10": 0.58,
+    "decoy_dipole_s42_a10": 0.71
+  },
+  "localization": {
+    "test_fixed60": {
+      "n_det": 511,
+      "frac_within_0p16": 0.8277886497064579,
+      "frac_within_0p3": 0.8590998043052838
+    },
+    "test_fixed15": {
+      "n_det": 269,
+      "frac_within_0p16": 0.6171003717472119,
+      "frac_within_0p3": 0.6691449814126395
+    }
+  }
+}

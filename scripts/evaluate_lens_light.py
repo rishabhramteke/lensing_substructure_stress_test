@@ -24,11 +24,14 @@ sys.path.insert(0, str(ROOT / "src"))
 from detector.dataset import normalize  # noqa: E402
 from detector.unet import UNet  # noqa: E402
 
+sys.path.insert(0, str(ROOT / "scripts"))
+from paper_config import A_JOINT_LL, A_JOINT_LL2, A_FROZEN_LL, A_FROZEN_LL2, unet_seeds  # noqa: E402
+
 BINS = [(8.0, 8.5), (8.5, 9.0), (9.0, 9.5), (9.5, 10.0), (10.0, 10.5), (10.5, 11.0)]
-A_ROOT = ROOT / "results/baseline_a_lenslight"
+A_ROOT = ROOT / A_FROZEN_LL   # the frozen run holds the subtracted images the network is scored on (the smooth+light fit is the same first step)
 SUFFIX = ""          # population suffix, e.g. "_s8" for the second lens-light seed set (set from the CLI)
-CKPT = ROOT / "checkpoints/unet_v0/model_best.pt"
-ORIG_THR = json.loads((ROOT / "results/detector_v0_best/results.json").read_text())["threshold_at_10pct_fpr"]
+SEEDS = unet_seeds()
+CKPT = None; ORIG_THR = None   # set per seed in unet_all()
 
 
 def truths(pop):
@@ -147,6 +150,29 @@ def auc(pos_scores, pos_truths, neg_scores):
     return float(np.mean([(p > neg).mean() + 0.5 * (p == neg).mean() for p in pos]))
 
 
+def _mean_tree(trees):
+    """Element-wise mean of numeric leaves over per-seed result dicts (None where any seed lacks the value)."""
+    t0 = trees[0]
+    if isinstance(t0, dict):
+        return {k: _mean_tree([t[k] for t in trees]) for k in t0}
+    if isinstance(t0, (int, float)) and not isinstance(t0, bool):
+        vals = [t for t in trees if t is not None]
+        return float(np.mean(vals)) if len(vals) == len(trees) else None
+    return t0
+
+
+def unet_all():
+    """The primary U-Net set, each seed at its own Tier-0 threshold, averaged over seeds."""
+    global CKPT, ORIG_THR
+    per = []
+    for run, ck in SEEDS.items():
+        CKPT = ROOT / ck / "model_best.pt"
+        ORIG_THR = json.loads((ROOT / "results" / run / "results.json").read_text())["threshold_at_10pct_fpr"]
+        per.append(unet())
+    out = _mean_tree(per); out["n_seeds"] = len(per); out["seeds"] = list(SEEDS)
+    return out
+
+
 def main():
     import argparse
     ap = argparse.ArgumentParser()
@@ -155,13 +181,20 @@ def main():
     args = ap.parse_args()
     global SUFFIX, A_ROOT
     SUFFIX = args.suffix
-    A_ROOT = ROOT / ("results/baseline_a_lenslight" + SUFFIX)
+    A_ROOT = ROOT / (A_FROZEN_LL + SUFFIX)
     extra = {}
-    for key, rel in (("family_a_double_sersic", "results/baseline_a_lenslight2" + SUFFIX), ("family_b_single_sersic", "results/baseline_b_lenslight" + SUFFIX + "/fitted"), ("family_b_double_sersic", "results/baseline_b_lenslight2" + SUFFIX + "/fitted")):
+    # Family A = the joint scan where it has been run on this seed set (first set only), the fixed-macro scan alongside
+    for key, rel in (("family_a", A_JOINT_LL + SUFFIX), ("family_a_double_sersic", A_JOINT_LL2 + SUFFIX),
+                     ("family_a_frozen", A_FROZEN_LL + SUFFIX), ("family_a_frozen_double_sersic", A_FROZEN_LL2 + SUFFIX),
+                     ("family_b_single_sersic", "results/baseline_b_lenslight" + SUFFIX + "/fitted"), ("family_b_double_sersic", "results/baseline_b_lenslight2" + SUFFIX + "/fitted")):
         if (ROOT / rel / ("lenslight_no_subhalo" + SUFFIX) / "scan_results.jsonl").exists():
             extra[key] = family_a(ROOT / rel)
-    res = {"family_a": family_a(), "unet_v0": (None if args.skip_unet else unet()), **extra,
-           "note": "True lens light is two-component (bulge n=3-5 + n=1 envelope); Family A fits ONE Sersic jointly with the mass model; 'subtracted' = data minus that fitted light. U-Net v0 was trained on Tier-0 images without lens light."}
+    if "family_a" not in extra and "family_a_frozen" in extra:
+        extra["family_a"] = extra["family_a_frozen"]; extra["family_a_is_frozen"] = True
+    if "family_a_double_sersic" not in extra and "family_a_frozen_double_sersic" in extra:
+        extra["family_a_double_sersic"] = extra["family_a_frozen_double_sersic"]; extra["family_a_double_is_frozen"] = True
+    res = {**extra, "unet": (None if args.skip_unet else unet_all()),
+           "note": "True lens light is two-component (bulge n=3-5 + n=1 envelope); the smooth model fits ONE Sersic jointly with the mass model; 'subtracted' = data minus that fitted light. The U-Net was trained on Tier-0 images without lens light."}
     (ROOT / ("results/lens_light_experiment" + SUFFIX + ".json")).write_text(json.dumps(res, indent=2))
     print(json.dumps(res, indent=1))
 

@@ -1,0 +1,38 @@
+{
+  "population": "test_fixed60",
+  "n": 300,
+  "seed": 0,
+  "subsample_n": 300,
+  "skipped_indices": [],
+  "concentration_assumed": "15",
+  "joint_refit_per_cell": true,
+  "grid": "3 radii x 8 angles, mass free in [7.5, 11.5]",
+  "lens_light_components": 0,
+  "free_position": false,
+  "position_box_arcsec": null,
+  "macro_multipole": true,
+  "macro_multipole_orders": [
+    4
+  ],
+  "smooth_restarts": 1,
+  "explicit_indices": null,
+  "controls": {
+    "polish": "smooth fit continued from its solution with max_nfev 24*40*(n_par+1)",
+    "macro_basin": "every cell's joint macro solution, perturber removed, macro params re-optimised (max_nfev 40*(n_par+1)); delta_chi2 is measured against the best smooth chi2 over all starts"
+  },
+  "lens_timeout_s": 900.0,
+  "n_truncated": 0,
+  "chi2_dof_unreliable_threshold": 10.0,
+  "n_unreliable_fits": 21,
+  "elapsed_s": 2730.01695394516,
+  "workers": 7,
+  "n_unreliable_fits_initial": 44,
+  "gate": "reliable if best smooth chi2/dof < 10 over all starts (basin control) OR best joint chi2/dof < 10; regate_joint.py 2026-09-18",
+  "guard_completion": {
+    "n_completed": 0,
+    "n_rerun_full": 7,
+    "n_crossing_20": 0,
+    "script": "complete_truncated_joint.py",
+    "date": "2026-09-29"
+  }
+}

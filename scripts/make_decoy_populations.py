@@ -24,8 +24,10 @@ def main():
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--n", type=int, default=100)
     p.add_argument("--amps", type=float, nargs="+", default=[3.0, 6.0, 10.0])
+    p.add_argument("--src", default="no_subhalo", help="clean population the decoys are injected into (realistic_no_subhalo for the combined arm)")
+    p.add_argument("--prefix", default="", help="prefix of the output population names")
     args = p.parse_args()
-    src = ROOT / "data/no_subhalo"
+    src = ROOT / "data" / args.src
     manifest = json.loads((src / "manifest.json").read_text())
     truths = [json.loads(l) for l in open(src / "truth.jsonl")]
     images = np.load(src / "images_full_noisy.npy"); control = np.load(src / "images_control_noiseless.npy")
@@ -34,7 +36,7 @@ def main():
     rng_decoy = np.random.default_rng(args.seed + 1)
     sim = SimAPI(num_pix=num_pix, kwargs_single_band=kwargs_band, kwargs_model={"lens_model_list": ["EPL", "SHEAR"], "source_light_model_list": ["SERSIC_ELLIPSE"]})
     for amp in args.amps:
-        out = ROOT / "data" / f"decoy_{args.shape}_s{args.seed}_a{int(amp)}"; out.mkdir(parents=True, exist_ok=True)
+        out = ROOT / "data" / f"{args.prefix}decoy_{args.shape}_s{args.seed}_a{int(amp)}"; out.mkdir(parents=True, exist_ok=True)
         imgs, trs = [], []
         for i in idx:
             truth = dict(truths[i]); theta_E = truth["lens_macro"]["theta_E"]

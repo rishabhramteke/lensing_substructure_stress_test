@@ -20,10 +20,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from detector.dataset import LensPatchDataset  # noqa: E402
 from detector.unet import UNet  # noqa: E402
+from paper_config import A_JOINT_FULL, A_FROZEN_FULL, B_FULL, unet_seeds  # noqa: E402
 
-A_ROOT, B_ROOT = "results/baseline_a_full", "results/baseline_b_full/fitted"
-SEEDS = {"detector_v0_best": "checkpoints/unet_v0", "detector_v1_seed1": "checkpoints/unet_v1_seed1",
-         "detector_v2_seed2": "checkpoints/unet_v2_seed2", "detector_v3_seed3": "checkpoints/unet_v3_seed3"}
+A_ROOT, B_ROOT = A_JOINT_FULL, B_FULL          # Family A = the joint scan (revision 2026-09-15); the fixed-macro scan is scored alongside
+SEEDS = unet_seeds()
 POPS = ("test_fixed60", "test_fixed15", "multipole_m4_a3")
 
 
@@ -101,6 +101,15 @@ def main():
             r = auc_and_tpr(neg, pos)
             if r:
                 res["families"][fam][pop] = r
+    AF = {p: scans(A_FROZEN_FULL, p) for p in ("no_subhalo",) + POPS}
+    if all(AF.values()):
+        res["families"]["A_frozen"] = {}
+        neg = [AF["no_subhalo"][i]["delta_chi2"] for i in neg_idx if i in AF["no_subhalo"]]
+        for pop in POPS:
+            pos = [AF[pop][i]["delta_chi2"] for i in keep[pop] if i in AF[pop] and (AF[pop][i].get("has_subhalo") or pop.startswith("multipole"))]
+            r = auc_and_tpr(neg, pos)
+            if r:
+                res["families"]["A_frozen"][pop] = r
     U = {p: unet_scores(p) for p in ("no_subhalo",) + POPS}
     res["families"]["C"] = {}
     for pop in POPS:
@@ -118,7 +127,7 @@ def main():
             res["families"]["C"][pop]["n_seeds"] = len(rows)
     (ROOT / "results/roc.json").write_text(json.dumps(res, indent=2))
 
-    names = {"A": "A scan", "B": r"B linear $\delta\psi$", "C": "C U-Net"}
+    names = {"A": "A joint scan", "B": r"B free-form residual", "C": "C U-Net"}
     plab = {"test_fixed60": "$c{=}60$", "test_fixed15": "$c{=}15$", "multipole_m4_a3": "multipole"}
     lines = [r"\begin{tabular}{@{}llccc@{}}", r"\toprule",
              r"family & population & AUC & TPR at 10\% FPR & TPR at 1\% FPR \\", r"\midrule"]
@@ -134,9 +143,9 @@ def main():
         lines.append(r"\addlinespace[2pt]")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / "paper/tables/roc.tex").write_text("\n".join(lines) + "\n")
-    for fam in ("A", "B", "C"):
+    for fam in ("A", "A_frozen", "B", "C"):
         for pop in POPS:
-            d = res["families"][fam].get(pop)
+            d = res["families"].get(fam, {}).get(pop)
             if d:
                 print(f"  {fam} {pop:18s} AUC {d['auc']:.3f}  TPR@10% {100*d['tpr_at_fpr0.1']:5.1f}%  TPR@1% {100*d['tpr_at_fpr0.01']:5.1f}%  (n {d.get('n_pos','?')})")
 

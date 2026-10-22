@@ -114,21 +114,26 @@ def unet_detections(ckpt_path: Path, thr: float, population: str):
     return tp, fp
 
 
+# Okabe & Ito (2002) colorblind-safe: localized / mislocalized / false alarm
+C_LOC, C_MISLOC, C_FALSE = "#0072B2", "#E69F00", "#222222"
+
+
 def panel(ax, tp, fp, title, stat_line):
-    """Reported positions only (no connecting lines, no truth crosses): green = localized, orange = not,
-    small red stars = false alarms. Redrawn 2026-09-12 after a referee found the lined version unreadable."""
+    """Reported positions only (no connecting lines, no truth crosses): blue = localized, orange = not,
+    small black x's = false alarms. Redrawn 2026-09-12 after a referee found the lined version unreadable;
+    recoloured 2026-09-28 (referee round 20) from green/red to Okabe-Ito blue/orange/black."""
     theta = np.linspace(0, 2 * np.pi, 200)
     for r in (0.6, 1.3):
         ax.plot(r * np.cos(theta), r * np.sin(theta), color="#555555", lw=0.8, ls=":", zorder=0)
     if fp:
-        ax.plot([f[0] for f in fp], [f[1] for f in fp], "*", color="#d62728", ms=4.5, mew=0, alpha=0.45, zorder=1)
+        ax.plot([f[0] for f in fp], [f[1] for f in fp], "x", color=C_FALSE, ms=2.8, mew=0.7, alpha=0.45, zorder=1)
     for row in tp:
         tx, ty, gx, gy = row[0], row[1], row[2], row[3]
         d = np.hypot(gx - tx, gy - ty)
-        ax.plot(gx, gy, "o", color="#2ca02c" if d < LOCALIZED_ARCSEC else "#ff7f0e", ms=3.6, mew=0, alpha=0.9, zorder=2)
+        ax.plot(gx, gy, "o", color=C_LOC if d < LOCALIZED_ARCSEC else C_MISLOC, ms=2.2, mew=0, alpha=0.75, zorder=2)
     ax.set_xlim(-1.8, 1.8); ax.set_ylim(-1.8, 1.8); ax.set_aspect("equal")
     ax.set_xlabel("x (arcsec)"); ax.set_ylabel("y (arcsec)")
-    ax.set_title(title, fontweight="bold")
+    ax.set_title(title, fontweight="bold", fontsize=7.5)
     # (stat line moved to the caption on referee request -- illegible at print size)
 
 
@@ -136,18 +141,18 @@ def offset_hist(ax, tp, color):
     """Bottom row: distribution of |reported - true| for the correct finds, with the 2-px criterion."""
     d = np.array([np.hypot(t[2] - t[0], t[3] - t[1]) for t in tp])
     ax.hist(d, bins=np.linspace(0, 1.2, 25), color=color, alpha=0.85)
-    ax.axvline(LOCALIZED_ARCSEC, color="#2ca02c", lw=1.2)
-    ax.text(0.97, 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", transform=ax.transAxes, ha="right", va="top", fontsize=9.0, color="#2ca02c")
+    ax.axvline(LOCALIZED_ARCSEC, color="#222222", lw=1.2, ls="--")
+    ax.text(0.97, 0.9, f"{100*(d < LOCALIZED_ARCSEC).mean():.0f}% within 2 px", transform=ax.transAxes, ha="right", va="top", fontsize=7.5, color="#222222")
     ax.set_xlabel("offset from true subhalo (arcsec)"); ax.set_ylabel("correct finds")
 
 
 def shared_legend(fig):
     """One legend for all panels (referee: per-panel legends covered the data)."""
     from matplotlib.lines import Line2D
-    handles = [Line2D([], [], marker="o", color="#2ca02c", ls="none", ms=5, label=f"correct find, localized (≤{LOCALIZED_PX:.0f} px of truth)"),
-               Line2D([], [], marker="o", color="#ff7f0e", ls="none", ms=5, label="correct find, mislocalized (right call, wrong spot)"),
-               Line2D([], [], marker="*", color="#d62728", ls="none", ms=7, mew=0, alpha=0.6, label="false alarm (no subhalo present; multipole population)")]
-    fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=9, frameon=False, bbox_to_anchor=(0.5, -0.01))
+    handles = [Line2D([], [], marker="o", color=C_LOC, ls="none", ms=5, label=f"correct find, localized (≤{LOCALIZED_PX:.0f} px of truth)"),
+               Line2D([], [], marker="o", color=C_MISLOC, ls="none", ms=5, label="correct find, mislocalized (right call, wrong spot)"),
+               Line2D([], [], marker="x", color=C_FALSE, ls="none", ms=6, mew=1.3, alpha=0.6, label="false alarm (no subhalo present; multipole population)")]
+    fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=7.5, frameon=False, bbox_to_anchor=(0.5, -0.01))
 
 
 def main():
@@ -178,19 +183,19 @@ def main():
         b_tp, b_fp, b_thr = family_a_data(args.b_root, truths)
         b_d = np.array([np.hypot(t[2] - t[0], t[3] - t[1]) for t in b_tp])
     ncol = 3 if b_tp is not None else 2
-    fig, axes2 = plt.subplots(2, ncol, figsize=(7.09 if ncol == 2 else 10.2, 5.4), gridspec_kw={"height_ratios": [3.0, 1.15]})
+    fig, axes2 = plt.subplots(2, ncol, figsize=(7.09, 4.6 if ncol == 3 else 5.4), gridspec_kw={"height_ratios": [3.0, 1.15]})
     axes = axes2[0]
     panel(axes[0], a_tp, a_fp, args.a_label,
           f"localized ≤{LOCALIZED_PX:.0f} px: {100*a_loc.mean():.0f}% of {len(a_tp)} correct finds · median offset {np.median(a_d):.2f}″")
     if b_tp is not None:
-        panel(axes[1], b_tp, b_fp, "Family B (linear $\delta\psi$)",
+        panel(axes[1], b_tp, b_fp, "Family B (free-form residual)",
               f"localized ≤{LOCALIZED_PX:.0f} px: {100*(b_d<LOCALIZED_ARCSEC).mean():.0f}% of {len(b_tp)} correct finds · median offset {np.median(b_d):.2f}″")
     panel(axes[-1], c_tp, c_fp, "Family C (U-Net)",
           f"localized ≤{LOCALIZED_PX:.0f} px: {100*(c_d<LOCALIZED_ARCSEC).mean():.0f}% of {len(c_tp)} correct finds · median offset {np.median(c_d):.2f}″")
-    offset_hist(axes2[1][0], a_tp, "#ff7f0e")
+    offset_hist(axes2[1][0], a_tp, "#555555")
     if b_tp is not None:
-        offset_hist(axes2[1][1], b_tp, "#2ca02c")
-    offset_hist(axes2[1][-1], c_tp, "#1f77b4")
+        offset_hist(axes2[1][1], b_tp, "#555555")
+    offset_hist(axes2[1][-1], c_tp, "#555555")
     fig.tight_layout(rect=(0, 0.05, 1, 1))
     shared_legend(fig)
     fig.savefig(OUT / f"localization_accuracy{suffix}.png", dpi=200, bbox_inches="tight")

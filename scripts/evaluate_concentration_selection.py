@@ -51,14 +51,14 @@ def threshold():
     return float(np.quantile([r["delta_chi2"] for r in cl], 0.90)), float(np.mean([r["delta_chi2"] > 0 for r in cl]))
 
 
-def completeness(root, thr, floor):
+def completeness(root, thr, floor, bins=BINS):
     recs = load(root)
     if recs is None:
         return None
     pos = [r for r in recs if r["reliable_fit"] and r["has_subhalo"]]
     hit = (lambda r: r["delta_chi2"] > 0) if floor else (lambda r: r["delta_chi2"] >= thr)
     out = {}
-    for lo, hi in BINS:
+    for lo, hi in bins:
         sel = [r for r in pos if lo <= r["log10_M200_true"] < hi]
         k = sum(1 for r in sel if hit(r)); p_, l_, h_ = wilson(k, len(sel))
         out[f"{lo}-{hi}"] = {"n": len(sel), "k": k, "p": p_, "lo": l_, "hi": h_}
@@ -79,40 +79,29 @@ def main():
     for c, root in TIDAL.items():
         res["tidal"][c] = {"cal": completeness(root, thr, False), "floor": completeness(root, thr, True)}
 
-    # ---- 1. detection selection in concentration
-    cs = np.array(sorted(ARMS))                       # 15, 30, 60
-    logc = np.log10(cs)
-    grid_c = np.logspace(np.log10(8), np.log10(80), 200)
-    mass_mid = np.array([0.5 * (lo + hi) for lo, hi in BINS])
-    w_mass = 10.0 ** ((ALPHA + 1) * (mass_mid - mass_mid[0]))   # CDM weight per 0.5-dex bin
-    w_mass = w_mass / w_mass.sum()
-    sel = {}
-    for key in ("cal", "floor"):
-        p_det = np.zeros((len(BINS), len(grid_c)))
-        for i, (lo, hi) in enumerate(BINS):
-            y = np.array([res["completeness"][c][key][f"{lo}-{hi}"]["p"] for c in cs])
-            p_det[i] = np.clip(np.interp(np.log10(grid_c), logc, y), 0, 1)
-        out = {}
-        for boost, lab, sig in [(1.0, "field", 0.11), (MOLINE_BOOST, "tidally_boosted", 0.11),
-                                (MOLINE_BOOST, "boosted_scatter0.2", 0.20), (MOLINE_BOOST, "boosted_scatter0.3", 0.30),
-                                (MOLINE_BOOST, "boosted_scatter0.5", 0.50)]:
-            num_in = np.zeros_like(grid_c); num_det = np.zeros_like(grid_c)
-            for i, m in enumerate(mass_mid):
-                mu = np.log10(boost * dutton_maccio(m))
-                pc = np.exp(-0.5 * ((np.log10(grid_c) - mu) / sig) ** 2)
-                pc = pc / np.trapezoid(pc, np.log10(grid_c))
-                num_in += w_mass[i] * pc
-                num_det += w_mass[i] * pc * p_det[i]
-            det = num_det / np.trapezoid(num_det, np.log10(grid_c)) if np.trapezoid(num_det, np.log10(grid_c)) > 0 else num_det
-            inp = num_in / np.trapezoid(num_in, np.log10(grid_c))
-            mean_in = 10 ** np.trapezoid(np.log10(grid_c) * inp, np.log10(grid_c))
-            mean_det = 10 ** np.trapezoid(np.log10(grid_c) * det, np.log10(grid_c))
-            frac = float(np.trapezoid(num_det, np.log10(grid_c)) / np.trapezoid(num_in, np.log10(grid_c)))
-            out[lab] = {"median_c_input": float(mean_in), "median_c_detected": float(mean_det),
-                        "shift_dex": float(np.log10(mean_det / mean_in)), "overall_completeness": frac}
-        sel[key] = out
-    res["selection"] = sel
+    res["selection"] = selection(res["completeness"], BINS, ("cal", "floor"))
+    # the paper's primary statistic (referee round 21, m6): the joint scan on the full 1 000-lens populations, at its
+    # 10% calibration and at Delta chi^2 >= 20, over the five bins from 10^8 to 10^10.5 (the companion bin excluded)
+    J_ARMS = {60: "results/baseline_a_joint_full/test_fixed60", 30: "results/baseline_a_joint_full/test_fixed30", 15: "results/baseline_a_joint_full/test_fixed15"}
+    cl = [r for r in load("results/baseline_a_joint_full/no_subhalo") if r["reliable_fit"]]
+    thr_j = float(np.quantile([r["delta_chi2"] for r in cl], 0.90))
+    JB = [(8.0, 8.5), (8.5, 9.0), (9.0, 9.5), (9.5, 10.0), (10.0, 10.5)]
+    comp_j = {c: {"cal": completeness(root, thr_j, False, JB), "abs": completeness(root, 20.0, False, JB)} for c, root in J_ARMS.items()}
+    res["joint"] = {"threshold_10pct": thr_j, "completeness": comp_j, "selection": selection(comp_j, JB, ("cal", "abs"))}
+    # binomial bootstrap of the per-bin completeness -> uncertainty of the selection shift (referee round 22, minor 4)
+    rng_b = np.random.default_rng(0); boot = {"cal": [], "abs": []}
+    for _ in range(2000):
+        cb = {c: {k: {b_: {"p": rng_b.binomial(v["n"], v["p"]) / v["n"] if v["n"] else 0.0} for b_, v in comp_j[c][k].items()} for k in ("cal", "abs")} for c in comp_j}
+        sb = selection(cb, JB, ("cal", "abs"))
+        for k in ("cal", "abs"):
+            boot[k].append(sb[k]["tidally_boosted"]["shift_dex"])
+    res["joint"]["shift_boot"] = {k: {"median": float(np.median(v)), "lo16": float(np.percentile(v, 16)), "hi84": float(np.percentile(v, 84))} for k, v in boot.items()}
+    print("joint selection shift bootstrap:", res["joint"]["shift_boot"])
     (ROOT / "results/concentration_selection.json").write_text(json.dumps(res, indent=2))
+    for key in ("cal", "abs"):
+        t = res["joint"]["selection"][key]["tidally_boosted"]; w = res["joint"]["selection"][key]["boosted_scatter0.5"]
+        print(f"joint {key}: median c input {t['median_c_input']:.1f} detected {t['median_c_detected']:.1f} ({t['shift_dex']:+.3f} dex); scatter 0.5: {w['shift_dex']:+.3f} dex")
+
 
     # ---- bound mass within r_t, so the reader can see whether "fixed M200" compares like with like
     import sys as _sys
@@ -122,9 +111,13 @@ def main():
     _LC, _P = LensCosmo(z_lens=0.5, z_source=1.0), TNFW()
 
     def _bound(sub):
-        Rs, aRs = _LC.nfw_physical2angle(M=10 ** sub["log10_M200"], c=sub["concentration"])
-        rho0 = _P.alpha2rho0(alpha_Rs=aRs, Rs=Rs); rt = sub["tau"] * Rs
-        return float(_P.mass_3d(rt, Rs, rho0, rt) * _LC.sigma_crit_angle)
+        """Total mass of the truncated (Baltz, Marshall & Oguri 2009) NFW as used by lenstronomy's TNFW, in Msun:
+        M_tot = M200 m(tau) / m_NFW(c), m(tau) = tau^2/(tau^2+1)^2 [(tau^2-1) ln tau + pi tau - (tau^2+1)].
+        (Replaces a mass_3d call whose units gave values 5-8 times too small; referee round 23. The simulation's
+        M200 -> (R_s, alpha_Rs) conversion itself is verified: the untruncated NFW built from those parameters holds M200.)"""
+        c, tau = sub["concentration"], sub["tau"]; t2 = tau ** 2
+        m_tau = t2 / (t2 + 1) ** 2 * ((t2 - 1) * np.log(tau) + np.pi * tau - (t2 + 1))
+        return float(10 ** sub["log10_M200"] * m_tau / (np.log(1 + c) - c / (1 + c)))
 
     res["bound_mass"] = {}
     for pop in ("test_fixed60", "test_fixed30", "test_fixed15", "test_tidal_c30", "test_tidal_c15"):
@@ -154,7 +147,7 @@ def main():
                      f"{100*res['tidal'][15]['floor'][k]['p']:.0f}\\%" + r" \\")
     B = res["bound_mass"]
     lines.append(r"\addlinespace[2pt]")
-    lines.append(r"\multicolumn{4}{@{}l}{median bound mass within $r_{\rm t}$, as a fraction of $M_{200}$} \\")
+    lines.append(r"\multicolumn{4}{@{}l}{total mass of the truncated profile, as a fraction of $M_{200}$} \\")
     lines.append(r"\quad $\tau=20$ fixed & " + " & ".join(f"{B[p]['median_Mbound_over_M200']:.2f}" for p in ("test_fixed60", "test_fixed30", "test_fixed15")) + r" \\")
     lines.append(r"\quad tidal track & " + f"{B['test_fixed60']['median_Mbound_over_M200']:.2f} & {B['test_tidal_c30']['median_Mbound_over_M200']:.2f} & {B['test_tidal_c15']['median_Mbound_over_M200']:.2f}" + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
@@ -171,6 +164,42 @@ def main():
             print(f"   selection ({lab}): input median c {d['median_c_input']:.1f} -> detected {d['median_c_detected']:.1f} "
                   f"({d['shift_dex']:+.2f} dex), overall completeness {100*d['overall_completeness']:.1f}%")
 
+
+def selection(comp, bins, keys):
+    """Input vs detected concentration distribution for an input p(c|M) and the CDM mass function, from the
+    per-bin completeness at the three matched concentrations (interpolated in log c)."""
+    cs = np.array(sorted(comp))                       # 15, 30, 60
+    logc = np.log10(cs)
+    grid_c = np.logspace(np.log10(8), np.log10(80), 200)
+    mass_mid = np.array([0.5 * (lo + hi) for lo, hi in bins])
+    w_mass = 10.0 ** ((ALPHA + 1) * (mass_mid - mass_mid[0]))   # CDM weight per 0.5-dex bin
+    w_mass = w_mass / w_mass.sum()
+    sel = {}
+    for key in keys:
+        p_det = np.zeros((len(bins), len(grid_c)))
+        for i, (lo, hi) in enumerate(bins):
+            y = np.array([comp[c][key][f"{lo}-{hi}"]["p"] for c in cs])
+            p_det[i] = np.clip(np.interp(np.log10(grid_c), logc, y), 0, 1)
+        out = {}
+        for boost, lab, sig in [(1.0, "field", 0.11), (MOLINE_BOOST, "tidally_boosted", 0.11),
+                                (MOLINE_BOOST, "boosted_scatter0.2", 0.20), (MOLINE_BOOST, "boosted_scatter0.3", 0.30),
+                                (MOLINE_BOOST, "boosted_scatter0.5", 0.50)]:
+            num_in = np.zeros_like(grid_c); num_det = np.zeros_like(grid_c)
+            for i, m in enumerate(mass_mid):
+                mu = np.log10(boost * dutton_maccio(m))
+                pc = np.exp(-0.5 * ((np.log10(grid_c) - mu) / sig) ** 2)
+                pc = pc / np.trapezoid(pc, np.log10(grid_c))
+                num_in += w_mass[i] * pc
+                num_det += w_mass[i] * pc * p_det[i]
+            det = num_det / np.trapezoid(num_det, np.log10(grid_c)) if np.trapezoid(num_det, np.log10(grid_c)) > 0 else num_det
+            inp = num_in / np.trapezoid(num_in, np.log10(grid_c))
+            mean_in = 10 ** np.trapezoid(np.log10(grid_c) * inp, np.log10(grid_c))
+            mean_det = 10 ** np.trapezoid(np.log10(grid_c) * det, np.log10(grid_c))
+            frac = float(np.trapezoid(num_det, np.log10(grid_c)) / np.trapezoid(num_in, np.log10(grid_c)))
+            out[lab] = {"median_c_input": float(mean_in), "median_c_detected": float(mean_det),
+                        "shift_dex": float(np.log10(mean_det / mean_in)), "overall_completeness": frac}
+        sel[key] = out
+    return sel
 
 if __name__ == "__main__":
     main()

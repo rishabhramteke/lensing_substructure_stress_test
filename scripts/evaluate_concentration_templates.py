@@ -80,7 +80,7 @@ def main():
             lines.append(f"\\quad {label}, $c{{=}}15$ pop. & " + row(key, stat, "test_fixed15") + r" \\")
             L = res["templates"][key].get(f"{stat}_loss")
             if L:
-                lines.append(f"\\quad\\quad loss (points) & " + " & ".join(f"{L[b]:.0f}" for b in res["bins"]) + r" \\")
+                lines.append(f"\\quad\\quad loss (points) & " + " & ".join((f"${L[b]:.0f}$" if L[b] < 0 else f"{L[b]:.0f}") for b in res["bins"]) + r" \\")
         lines.append(r"\addlinespace[2pt]")
     lines += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / "paper/tables/conc.tex").write_text("\n".join(lines) + "\n")

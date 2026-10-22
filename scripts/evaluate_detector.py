@@ -24,7 +24,7 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from detector.dataset import LensPatchDataset
-from detector.unet import UNet
+from detector.unet import UNet, build_model
 
 MASS_BINS = [(8.0, 8.5), (8.5, 9.0), (9.0, 9.5), (9.5, 10.0), (10.0, 10.5), (10.5, 11.0)]
 
@@ -71,12 +71,15 @@ def main():
     p.add_argument("--model", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--data-root", type=Path, default=Path("data"))
+    # population names, so the same evaluation runs on a re-rendered tier (shallow, PSF-widened, ...)
+    p.add_argument("--test60", default="test_fixed60"); p.add_argument("--test15", default="test_fixed15")
+    p.add_argument("--clean", default="no_subhalo"); p.add_argument("--mp-a1", default="multipole_m4_a1"); p.add_argument("--mp-a3", default="multipole_m4_a3")
     args = p.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
     dev = device()
     ckpt = torch.load(args.model, map_location=dev)
-    model = UNet(in_ch=1, base=ckpt.get("base", 16)).to(dev)
+    model = build_model(ckpt).to(dev)
     model.load_state_dict(ckpt["model_state"])
     scale = ckpt["scale"]
     print(f"loaded model, trained scale={scale:.4f}, device={dev}")
@@ -84,17 +87,18 @@ def main():
     def load(name):
         return LensPatchDataset(args.data_root / name, scale=scale)
 
-    ds_test60 = load("test_fixed60")
-    ds_test15 = load("test_fixed15")
-    ds_no_sub = load("no_subhalo")
-    ds_mp_a1 = load("multipole_m4_a1")
-    ds_mp_a3 = load("multipole_m4_a3")
+    ds_test60 = load(args.test60)
+    ds_test15 = load(args.test15)
+    ds_no_sub = load(args.clean)
+    have_a1 = (args.data_root / args.mp_a1 / "manifest.json").exists()
+    ds_mp_a1 = load(args.mp_a1) if have_a1 else None
+    ds_mp_a3 = load(args.mp_a3)
 
     print("scoring populations...")
     s_test60 = score_population(model, ds_test60, dev)
     s_test15 = score_population(model, ds_test15, dev)
     s_no_sub = score_population(model, ds_no_sub, dev)
-    s_mp_a1 = score_population(model, ds_mp_a1, dev)
+    s_mp_a1 = score_population(model, ds_mp_a1, dev) if have_a1 else None
     s_mp_a3 = score_population(model, ds_mp_a3, dev)
 
     # ---- calibrate the operating threshold on the CLEAN negative pool, exactly
@@ -139,9 +143,11 @@ def main():
     # ---- RQ2: false-positive rate under each confounder, at the SAME threshold ----
     fpr_confounders = {
         "no_subhalo (calibration set)": fpr_at_thr_calib_set,
-        "multipole m=4, a=0.01*thetaE": float((s_mp_a1 >= thr).mean()),
+        "multipole m=4, a=0.01*thetaE": (float((s_mp_a1 >= thr).mean()) if have_a1 else None),
         "multipole m=4, a=0.03*thetaE": float((s_mp_a3 >= thr).mean()),
     }
+    if not have_a1:
+        fpr_confounders.pop("multipole m=4, a=0.01*thetaE")
 
     # ---- plots ----
     fig, ax = plt.subplots(figsize=(6, 4.2))
@@ -167,7 +173,7 @@ def main():
 
     fig, ax = plt.subplots(figsize=(6, 4))
     names = list(fpr_confounders.keys()); vals = [fpr_confounders[k] for k in names]
-    colors = ["#8e93a3", "#ffb86b", "#ff6fb0"]
+    colors = ["#8e93a3", "#ffb86b", "#ff6fb0"][:len(names)]
     ax.bar(range(len(names)), vals, color=colors)
     ax.axhline(0.10, color="k", ls=":", lw=1, label="nominal 10% operating point")
     ax.set_xticks(range(len(names))); ax.set_xticklabels(names, rotation=15, ha="right", fontsize=8)
@@ -184,7 +190,8 @@ def main():
         "confounder_fpr": fpr_confounders,
         "roc_auc_fixed60_vs_no_subhalo": auc,
         "n_test_fixed60": len(ds_test60), "n_test_fixed15": len(ds_test15),
-        "n_no_subhalo": len(ds_no_sub), "n_multipole_a1": len(ds_mp_a1), "n_multipole_a3": len(ds_mp_a3),
+        "n_no_subhalo": len(ds_no_sub), "n_multipole_a1": (len(ds_mp_a1) if have_a1 else 0), "n_multipole_a3": len(ds_mp_a3),
+        "populations": {"test60": args.test60, "test15": args.test15, "clean": args.clean, "mp_a1": (args.mp_a1 if have_a1 else None), "mp_a3": args.mp_a3},
     }
     with open(args.out / "results.json", "w") as f:
         json.dump(results, f, indent=2)

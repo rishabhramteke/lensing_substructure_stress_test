@@ -1,67 +1,67 @@
 {
   "config": {
-    "threshold_peak_abs_dkappa_lam1e5": 0.09186965656016045,
+    "threshold_peak_abs_dkappa_lam1e5": 0.09519541469363088,
     "source": "results/baseline_b_decoy/fitted",
     "note": "same decoys as noise_decoy_control.py (seed 42)"
   },
   "gaussian": {
     "3.0": {
-      "b_fpr": 0.125,
+      "b_fpr": 0.14583333333333334,
       "n_reliable": 96,
       "n": 100,
-      "median_peak": 0.0773982814738571
+      "median_peak": 0.07752616742496508
     },
     "6.0": {
-      "b_fpr": 0.28125,
+      "b_fpr": 0.2604166666666667,
       "n_reliable": 96,
       "n": 100,
-      "median_peak": 0.08201873937593285
+      "median_peak": 0.08534300093615951
     },
     "10.0": {
-      "b_fpr": 0.6666666666666666,
+      "b_fpr": 0.6875,
       "n_reliable": 96,
       "n": 100,
-      "median_peak": 0.11736701859594104
+      "median_peak": 0.11922215073002072
     }
   },
   "dipole": {
     "3.0": {
-      "b_fpr": 0.16842105263157894,
+      "b_fpr": 0.14736842105263157,
       "n_reliable": 95,
       "n": 100,
-      "median_peak": 0.07551952803421819
+      "median_peak": 0.07782400739104586
     },
     "6.0": {
       "b_fpr": 0.4895833333333333,
       "n_reliable": 96,
       "n": 100,
-      "median_peak": 0.09043132393574796
+      "median_peak": 0.0947553742812948
     },
     "10.0": {
-      "b_fpr": 0.7604166666666666,
+      "b_fpr": 0.8020833333333334,
       "n_reliable": 96,
       "n": 100,
-      "median_peak": 0.13706214910696926
+      "median_peak": 0.14225210212432288
     }
   },
   "gaussian_seed43": {
     "3.0": {
-      "b_fpr": 0.13829787234042554,
+      "b_fpr": 0.10638297872340426,
       "n_reliable": 94,
       "n": 100,
-      "median_peak": 0.07823745928422332
+      "median_peak": 0.08080744119753383
     },
     "6.0": {
-      "b_fpr": 0.5,
+      "b_fpr": 0.4574468085106383,
       "n_reliable": 94,
       "n": 100,
-      "median_peak": 0.09204314498995528
+      "median_peak": 0.09322469112897974
     },
     "10.0": {
-      "b_fpr": 0.6276595744680851,
+      "b_fpr": 0.6063829787234043,
       "n_reliable": 94,
       "n": 100,
-      "median_peak": 0.1119780008389225
+      "median_peak": 0.10880291405738646
     }
   }
 }

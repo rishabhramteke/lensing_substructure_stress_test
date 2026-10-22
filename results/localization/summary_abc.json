@@ -1,27 +1,27 @@
 {
   "family_a": {
-    "a_root": "/Users/rishabh.ramteke/Documents/space_research/projects/05_dark_matter_strong_lensing/results/baseline_a",
-    "threshold_delta_chi2": -10.628952986416875,
-    "n_correct_find": 108,
-    "frac_localized_2px": 0.1388888888888889,
-    "n_localized": 15,
-    "median_offset_arcsec": 0.2967313587646371,
-    "n_negative_delta_chi2_among_correct": 18,
+    "a_root": "../results/baseline_a_joint_freepos_full",
+    "threshold_delta_chi2": 10.022135323409657,
+    "n_correct_find": 748,
+    "frac_localized_2px": 0.9144385026737968,
+    "n_localized": 684,
+    "median_offset_arcsec": 0.04469484967869613,
+    "n_negative_delta_chi2_among_correct": 0,
     "localized_mass_error_dex": {
-      "n": 15,
-      "median": -0.9972281911909491,
-      "min": -1.9369150005979758,
-      "max": -0.47314360713965264,
-      "n_underestimated": 15,
-      "n_within_0p5dex": 1
+      "n": 684,
+      "median": 0.4305205513492947,
+      "min": -0.5925195351379848,
+      "max": 1.2857534015975283,
+      "n_underestimated": 12,
+      "n_within_0p5dex": 416
     },
-    "n_false_alarms_shown": 198
+    "n_false_alarms_shown": 937
   },
   "family_c_unet": {
-    "unet_ckpt": "/Users/rishabh.ramteke/Documents/space_research/projects/05_dark_matter_strong_lensing/checkpoints/unet_v0/model_best.pt",
-    "n_correct_find": 263,
-    "frac_localized_2px": 0.5665399239543726,
-    "median_offset_arcsec": 0.1349373209852209,
-    "n_false_alarms_shown": 95
+    "unet_ckpt": "../checkpoints/unet_30k_seed0/model_best.pt",
+    "n_correct_find": 369,
+    "frac_localized_2px": 0.8373983739837398,
+    "median_offset_arcsec": 0.06093022213095349,
+    "n_false_alarms_shown": 97
   }
 }

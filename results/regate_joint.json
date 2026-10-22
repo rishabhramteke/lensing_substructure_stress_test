@@ -1,0 +1,37 @@
+{
+ "results/baseline_a_joint_realistic_full/decoy_gaussian_s43_a10": {
+  "n": 100,
+  "unreliable_initial": 0,
+  "unreliable_now": 0,
+  "rescued_basin": 0,
+  "rescued_joint": 0
+ },
+ "results/baseline_a_joint_realistic_full/multipole_m4_a3": {
+  "n": 1000,
+  "unreliable_initial": 4,
+  "unreliable_now": 1,
+  "rescued_basin": 2,
+  "rescued_joint": 1
+ },
+ "results/baseline_a_joint_realistic_full/no_subhalo": {
+  "n": 1000,
+  "unreliable_initial": 2,
+  "unreliable_now": 1,
+  "rescued_basin": 1,
+  "rescued_joint": 0
+ },
+ "results/baseline_a_joint_realistic_full/test_fixed15": {
+  "n": 1000,
+  "unreliable_initial": 3,
+  "unreliable_now": 3,
+  "rescued_basin": 0,
+  "rescued_joint": 0
+ },
+ "results/baseline_a_joint_realistic_full/test_fixed60": {
+  "n": 1000,
+  "unreliable_initial": 11,
+  "unreliable_now": 4,
+  "rescued_basin": 1,
+  "rescued_joint": 6
+ }
+}

@@ -16,7 +16,9 @@
   "lens_timeout_s": 900.0,
   "n_truncated": 0,
   "chi2_dof_unreliable_threshold": 10.0,
-  "n_unreliable_fits": 7,
+  "n_unreliable_fits": 4,
   "elapsed_s": 1488.974939107895,
-  "workers": 3
+  "workers": 3,
+  "n_unreliable_fits_initial": 7,
+  "gate": "reliable if best smooth chi2/dof < 10 over all starts (basin control) OR best joint chi2/dof < 10; regate_joint.py 2026-09-18"
 }

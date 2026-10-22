@@ -1,0 +1,13 @@
+{
+  "b_threshold": 10.0,
+  "threshold_rule": "fixed",
+  "pops": {
+    "no_subhalo": {
+      "n_retained": 172,
+      "n_flagged_b": 83,
+      "flag_rate_b": 0.48255813953488375,
+      "confirmed_20": 0.31976744186046513,
+      "confirmed_48": 0.27906976744186046
+    }
+  }
+}

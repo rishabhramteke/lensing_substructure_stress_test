@@ -44,8 +44,12 @@ def main():
     weights = np.array([bin_weight(lo, hi) for lo, hi in BINS])
     weights = weights / weights.sum()
 
-    d_unet = json.loads((ROOT / "results/aggregate/summary.json").read_text())
-    d_a = json.loads((ROOT / "results/baseline_a/aggregate/summary.json").read_text())
+    import sys as _sys; _sys.path.insert(0, str(ROOT / "scripts"))
+    from paper_config import UNET_AGG
+    d_unet = json.loads((ROOT / UNET_AGG / "summary.json").read_text())
+    # Family A = the joint scan on the full populations at its 10%-FPR calibration (results/joint_scan.json)
+    core = json.loads((ROOT / "results/joint_scan.json").read_text())["core"]["cal"]
+    d_a = {k: {b: {"mean": v["p"]} for b, v in core[k].items()} for k in ("completeness_c60", "completeness_c15")}
 
     rows = []
     entries = [
@@ -54,9 +58,12 @@ def main():
         ("Family A, c=60", d_a["completeness_c60"]),
         ("Family A, c=15", d_a["completeness_c15"]),
     ]
-    b_agg = next((ROOT / f"results/baseline_b/aggregate_fitted_{k}seeds.json" for k in (4, 3, 2) if (ROOT / f"results/baseline_b/aggregate_fitted_{k}seeds.json").exists()), None)
-    if b_agg is not None:   # Family B (fitted variant), added 2026-09-12 -- pure arithmetic on numbers already in hand
-        d_b = json.loads(b_agg.read_text())
+    # Family B on the full 1 000-lens populations (results/full_populations.json), the numbers of Table 4, so the
+    # weighted figure is reproducible from the table the reader has (referee round 22)
+    fpb = ROOT / "results/full_populations.json"
+    if fpb.exists():
+        B = json.loads(fpb.read_text())["B"]
+        d_b = {k: {bn: {"mean": v["completeness"]} for bn, v in B[k].items()} for k in ("completeness_c60", "completeness_c15")}
         entries += [("Family B, c=60", d_b["completeness_c60"]), ("Family B, c=15", d_b["completeness_c15"])]
     for label, comp in entries:
         w, u = weighted_and_naive(comp, weights)

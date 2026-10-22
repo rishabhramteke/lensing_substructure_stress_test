@@ -31,12 +31,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from detector.dataset import LensPatchDataset  # noqa: E402
 from detector.unet import UNet  # noqa: E402
+from paper_config import A_JOINT_FULL, B_FULL, A_ABS, unet_seeds  # noqa: E402
 
 BINS = [(8.0, 8.5), (8.5, 9.0), (9.0, 9.5), (9.5, 10.0), (10.0, 10.5), (10.5, 11.0)]
 POPS = ("no_subhalo", "test_fixed60", "test_fixed15")
-A_ROOT, B_ROOT = "results/baseline_a_full", "results/baseline_b_full/fitted"
-SEEDS = {"detector_v0_best": "checkpoints/unet_v0", "detector_v1_seed1": "checkpoints/unet_v1_seed1",
-         "detector_v2_seed2": "checkpoints/unet_v2_seed2", "detector_v3_seed3": "checkpoints/unet_v3_seed3"}
+A_ROOT, B_ROOT = A_JOINT_FULL, B_FULL       # Family A = the joint scan; "A_abs" scores it at the absolute Delta chi^2 >= 20 threshold
+SEEDS = unet_seeds()
 
 
 def wilson(k, n, z=1.0):
@@ -83,6 +83,20 @@ def completeness(hit, truths, idx):
     return d
 
 
+
+def unet500k_rows():
+    """The U-Net trained at the published scale (5e5 images, one seed), scored on every lens of the full populations."""
+    U = json.loads((ROOT / "results/detector_30k_c60pub_seed0/results.json").read_text())
+    out = []
+    for k, (key, cl) in enumerate((("completeness_c60_by_mass_bin", "$c{=}60$"), ("completeness_c15_by_mass_bin", "$c{=}15$"))):
+        cells = []
+        for lo, hi in BINS:
+            b = U[key][f"{lo}-{hi}"]; n = b["n"]; kk = round(b["completeness"] * n)
+            p = kk / n; d = 1 + 1 / n; c = (p + 1 / (2 * n)) / d; h = np.sqrt(p * (1 - p) / n + 1 / (4 * n * n)) / d
+            cells.append(f"{100*p:.0f}$^{{+{100*(min(1, c+h)-p):.0f}}}_{{-{100*(p-max(0, c-h)):.0f}}}$")
+        out.append(f"{'C U-Net, $5{\\times}10^{5}$' if k == 0 else ''} & {cl} & all lenses & " + " & ".join(cells) + r" \\")
+    return out + [r"\addlinespace[2pt]"]
+
 def main():
     truths = {p: [json.loads(l) for l in open(ROOT / "data" / p / "truth.jsonl")] for p in POPS}
     A = {p: scans(A_ROOT, p) for p in POPS}
@@ -103,15 +117,19 @@ def main():
     clean = keep["no_subhalo"]
     thrA = float(np.quantile([A["no_subhalo"][i]["delta_chi2"] for i in clean], 0.90))
     thrB = float(np.quantile([B["no_subhalo"][i]["delta_chi2"] for i in clean], 0.90))
-    res["thresholds"] = {"A_10pct": thrA, "A_floor": 0.0, "B_10pct": thrB}
+    # each family's OWN 10%-FPR threshold, over all of its own reliable clean lenses: what the "retained" and
+    # "conservative" rows (and the prose, via evaluate_joint_scan.py) use; the common-set threshold is for "matched"
+    thrA_own = float(np.quantile([r["delta_chi2"] for r in A["no_subhalo"].values() if r["reliable_fit"]], 0.90))
+    thrB_own = float(np.quantile([r["delta_chi2"] for r in B["no_subhalo"].values() if r["reliable_fit"]], 0.90))
+    res["thresholds"] = {"A_10pct": thrA, "A_abs": A_ABS, "B_10pct": thrB, "A_10pct_own": thrA_own, "B_10pct_own": thrB_own}
     res["clean_fpr"] = {"A_10pct": float(np.mean([A["no_subhalo"][i]["delta_chi2"] >= thrA for i in clean])),
-                        "A_floor": float(np.mean([A["no_subhalo"][i]["delta_chi2"] > 0 for i in clean])),
+                        "A_abs": float(np.mean([A["no_subhalo"][i]["delta_chi2"] >= A_ABS for i in clean])),
                         "B_10pct": float(np.mean([B["no_subhalo"][i]["delta_chi2"] >= thrB for i in clean]))}
 
     U = {p: unet_scores(p) for p in ("test_fixed60", "test_fixed15")}
     res["n_unet_seeds"] = len(U["test_fixed60"])
 
-    for fam in ("A", "A_floor", "B", "C"):
+    for fam in ("A", "A_abs", "B", "C"):
         res["families"][fam] = {}
         for pop in ("test_fixed60", "test_fixed15"):
             if fam == "C":
@@ -133,19 +151,23 @@ def main():
                 for run, d in U[pop].items():
                     hit = {i: (s >= d["threshold"]) for i, s in d["scores"].items()}
                     per_seed_all.append(completeness(hit, truths[pop], allidx))
-                res["families"][fam][pop]["own"] = {f"{lo}-{hi}": {
-                    "n": per_seed_all[0][f"{lo}-{hi}"]["n"],
-                    "p": float(np.mean([c[f"{lo}-{hi}"]["p"] for c in per_seed_all]))} for lo, hi in BINS}
+                own = {}
+                for lo, hi in BINS:   # Wilson interval on the seed-mean count, as for the common set (referee round 22)
+                    k_ = f"{lo}-{hi}"; n_ = per_seed_all[0][k_]["n"]
+                    p_, l_, h_ = wilson(int(round(np.mean([c[k_]["k"] for c in per_seed_all]))), n_)
+                    own[k_] = {"n": n_, "p": float(np.mean([c[k_]["p"] for c in per_seed_all])), "lo": l_, "hi": h_}
+                res["families"][fam][pop]["own"] = own
                 continue
             S = A[pop] if fam.startswith("A") else B[pop]
-            thr = thrA if fam == "A" else (0.0 if fam == "A_floor" else thrB)
-            strict = fam == "A_floor"
-            hit = {i: ((S[i]["delta_chi2"] > thr) if strict else (S[i]["delta_chi2"] >= thr)) for i in S}
-            # conservative: a macro-fit failure can never be a detection, so it counts as a miss
-            hit_cons = {i: (hit[i] and S[i]["reliable_fit"]) for i in S}
+            thr = thrA if fam == "A" else (A_ABS if fam == "A_abs" else thrB)
+            thr_own = thrA_own if fam == "A" else (A_ABS if fam == "A_abs" else thrB_own)
+            hit = {i: (S[i]["delta_chi2"] >= thr) for i in S}
+            hit_own = {i: (S[i]["delta_chi2"] >= thr_own) for i in S}
+            # conservative: a lens neither model fits can never be a detection, so it counts as a miss
+            hit_cons = {i: (hit_own[i] and S[i]["reliable_fit"]) for i in S}
             res["families"][fam][pop] = {
                 "matched": completeness(hit, truths[pop], keep[pop]),
-                "own": completeness(hit, truths[pop], [i for i in S if S[i]["reliable_fit"]]),
+                "own": completeness(hit_own, truths[pop], [i for i in S if S[i]["reliable_fit"]]),
                 "conservative": completeness(hit_cons, truths[pop], list(S.keys()))}
     (ROOT / "results/matched_denominators.json").write_text(json.dumps(res, indent=2))
 
@@ -156,13 +178,33 @@ def main():
     # (full populations, common-sample, and the accounting comparison were identical for A and B)
     rows3 = [r"\begin{tabular}{@{}lll" + "c" * 6 + "@{}}", r"\toprule",
              r"family & population & sample & " + " & ".join(f"{lo}--{hi}" for lo, hi in BINS) + r" \\", r"\midrule"]
-    blocks = [("A", "A scan"), ("A_floor", r"A scan, $\dchi>0$"), ("B", r"B linear $\delta\psi$"), ("C", "C U-Net")]
+    def block_rows(blocks):
+        rows3 = [r"\begin{tabular}{@{}lll" + "c" * 6 + "@{}}", r"\toprule",
+                 r"family & population & sample & " + " & ".join(f"{lo}--{hi}" for lo, hi in BINS) + r" \\", r"\midrule"]
+        for fam, label in blocks:
+            first = True
+            for pop, cl in (("test_fixed60", "$c{=}60$"), ("test_fixed15", "$c{=}15$")):
+                d = res["families"][fam][pop]
+                variants = ([("own", "retained"), ("conservative", "excl.\\ as misses")] if fam != "C"
+                            else [("own", "all lenses"), ("matched", "common set")])
+                for k, (key, vlab) in enumerate(variants):
+                    if key not in d:
+                        continue
+                    row = d[key]
+                    cells = " & ".join(fmt(row[f"{lo}-{hi}"]) if isinstance(row[f"{lo}-{hi}"], dict) and "lo" in row[f"{lo}-{hi}"]
+                                       else f"{100*row[f'{lo}-{hi}']['p']:.0f}" for lo, hi in BINS)
+                    rows3.append(f"{label if first else ''} & {cl if k == 0 else ''} & {vlab} & {cells} \\\\")
+                    first = False
+            rows3.append(r"\addlinespace[2pt]")
+        rows3[-1:] = [r"\bottomrule", r"\end{tabular}"]
+        return rows3
+    blocks = [("A", "A scan"), ("A_abs", r"A scan, $\dchi\ge20$"), ("B", r"B free-form residual"), ("C", "C U-Net")]
     for fam, label in blocks:
         first = True
         for pop, cl in (("test_fixed60", "$c{=}60$"), ("test_fixed15", "$c{=}15$")):
             d = res["families"][fam][pop]
             variants = ([("own", "retained"), ("conservative", "excl.\\ as misses")] if fam != "C"
-                        else [("own", "all lenses"), ("matched", "A$\\cap$B lenses")])
+                        else [("own", "all lenses"), ("matched", "common set")])
             for k, (key, vlab) in enumerate(variants):
                 if key not in d:
                     continue
@@ -172,11 +214,12 @@ def main():
                 rows3.append(f"{label if first else ''} & {cl if k == 0 else ''} & {vlab} & {cells} \\\\")
                 first = False
         rows3.append(r"\addlinespace[2pt]")
+    rows3 += unet500k_rows()
     rows3 += [r"\bottomrule", r"\end{tabular}"]
     (ROOT / "paper/tables/completeness.tex").write_text("\n".join(rows3) + "\n")
     lines = [r"\begin{tabular}{@{}ll" + "c" * 6 + "@{}}", r"\toprule",
              "family & population & " + " & ".join(f"{lo}--{hi}" for lo, hi in BINS) + r" \\", r"\midrule"]
-    for fam, label in (("A", "A scan"), ("A_floor", r"A scan, $\dchi>0$"), ("B", r"B linear $\delta\psi$"), ("C", "C U-Net")):
+    for fam, label in (("A", "A scan"), ("A_abs", r"A scan, $\dchi\ge20$"), ("B", r"B linear $\delta\psi$"), ("C", "C U-Net")):
         first = True
         for pop, cl in (("test_fixed60", "$c{=}60$"), ("test_fixed15", "$c{=}15$")):
             row = res["families"][fam][pop]["matched"]
@@ -206,7 +249,7 @@ def main():
 
     print("common retained:", {p: f"{len(keep[p])}/{len(truths[p])} ({100*len(keep[p])/len(truths[p]):.0f}%)" for p in POPS})
     print("thresholds:", {k: round(v, 2) for k, v in res["thresholds"].items()}, "clean FPR:", {k: round(v, 4) for k, v in res["clean_fpr"].items()})
-    for fam in ("A", "A_floor", "B", "C"):
+    for fam in ("A", "A_abs", "B", "C"):
         for pop in ("test_fixed60", "test_fixed15"):
             m = res["families"][fam][pop]["matched"]
             own = res["families"][fam][pop]["own"]

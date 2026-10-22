@@ -3,6 +3,7 @@ forward model and noise estimator -- see the package docstring for the two
 stated idealizations (near-truth init; fixed-concentration grid scan)."""
 from __future__ import annotations
 
+import os
 import numpy as np
 from scipy.optimize import least_squares
 
@@ -12,10 +13,25 @@ from lenstronomy.SimulationAPI.sim_api import SimAPI
 PARAM_NAMES = ["theta_E", "gamma", "e1", "e2", "g1", "g2", "src_x", "src_y", "R_sersic", "n_sersic", "e1_s", "e2_s", "amp"]
 
 
+# the fitter's own pixel supersampling (referee round 28: the render-misspecification test with a supersampled fitter)
+FIT_SUPERSAMPLING = int(os.environ.get("FIT_SUPERSAMPLING", "1"))
+
 N_MACRO = 13          # EPL+shear+Sersic-source parameters
 N_LENS_LIGHT = 5      # optional single-Sersic lens light: amp, R, n, e1, e2 (centre fixed at the lens centre)
 N_MULTIPOLE = 2       # parameters per multipole order in the macro-model: a_m, phi_m (added 2026-09-12, referee round 3)
 MULTIPOLE_ORDERS = (4,)   # orders carried when multipoles are switched on; (3, 4) tests the cost of the extra freedom (round 4)
+
+
+FREE_CENTRE = False   # referee round 26: the lens centre as two further macro parameters (indices 13, 14)
+
+
+def set_free_centre(on=True):
+    """Fit the lens centre (process-wide). The macro block becomes 15 parameters, centre last, initialised at the true
+    centre plus the additive jitter every near-zero parameter gets, bounded to +-0.2"."""
+    global FREE_CENTRE, N_MACRO
+    if on and not FREE_CENTRE:
+        FREE_CENTRE, N_MACRO = True, 15
+        BOUNDS.extend([(-0.2, 0.2), (-0.2, 0.2)]); SCALE.extend([0.02, 0.02])
 
 
 def set_multipole_orders(orders):
@@ -60,9 +76,10 @@ def _sim(kwargs_band, num_pix, model_list, lens_light=0, multipole=0):
 
 
 def _unpack(vec):
-    theta_E, gamma, e1, e2, g1, g2, sx, sy, R, n, e1s, e2s, amp = vec[:N_MACRO]
+    theta_E, gamma, e1, e2, g1, g2, sx, sy, R, n, e1s, e2s, amp = vec[:13]
+    cx, cy = (float(vec[13]), float(vec[14])) if FREE_CENTRE else (0.0, 0.0)
     kwargs_lens = [
-        {"theta_E": theta_E, "gamma": gamma, "e1": e1, "e2": e2, "center_x": 0.0, "center_y": 0.0},
+        {"theta_E": theta_E, "gamma": gamma, "e1": e1, "e2": e2, "center_x": cx, "center_y": cy},
         {"gamma1": g1, "gamma2": g2, "ra_0": 0.0, "dec_0": 0.0},
     ]
     kwargs_source = [{"amp": max(amp, 1e-3), "R_sersic": max(R, 1e-3), "n_sersic": np.clip(n, 0.3, 6.0), "e1": e1s, "e2": e2s, "center_x": sx, "center_y": sy}]
@@ -88,7 +105,7 @@ def _unpack3(vec):
             raise ValueError(f"vector carries {n_mp} multipole orders but MULTIPOLE_ORDERS={MULTIPOLE_ORDERS}; call set_multipole_orders first")
         mp = vec[-N_MULTIPOLE * n_mp:]
         for k, m in enumerate(MULTIPOLE_ORDERS):
-            kl = kl + [{"m": int(m), "a_m": mp[2 * k], "phi_m": mp[2 * k + 1], "center_x": 0.0, "center_y": 0.0, "r_E": vec[0]}]
+            kl = kl + [{"m": int(m), "a_m": mp[2 * k], "phi_m": mp[2 * k + 1], "center_x": kl[0]["center_x"], "center_y": kl[0]["center_y"], "r_E": vec[0]}]
     kll = None
     if n_ll:
         kll = []
@@ -100,7 +117,8 @@ def _unpack3(vec):
 
 def _truth_vec(truth):
     lm, s = truth["lens_macro"], truth["source"]
-    return np.array([lm["theta_E"], lm["gamma"], lm["e1"], lm["e2"], lm["gamma1"], lm["gamma2"], s["x"], s["y"], s["R_sersic"], s["n_sersic"], s["e1"], s["e2"], s["amp"]])
+    v = np.array([lm["theta_E"], lm["gamma"], lm["e1"], lm["e2"], lm["gamma1"], lm["gamma2"], s["x"], s["y"], s["R_sersic"], s["n_sersic"], s["e1"], s["e2"], s["amp"]])
+    return np.concatenate([v, [0.0, 0.0]]) if FREE_CENTRE else v
 
 
 def _init_vec(truth, data):
@@ -121,8 +139,9 @@ def _init_vec(truth, data):
     lm, s = truth["lens_macro"], truth["source"]
     if s.get("type") == "cosmos":
         amp_guess = float(np.clip(data.max() * 3.0, 1.0, 1000.0))
-        return np.array([lm["theta_E"], lm["gamma"], lm["e1"], lm["e2"], lm["gamma1"], lm["gamma2"],
-                          s["x"], s["y"], 0.15, 1.5, 0.0, 0.0, amp_guess])
+        v = np.array([lm["theta_E"], lm["gamma"], lm["e1"], lm["e2"], lm["gamma1"], lm["gamma2"],
+                      s["x"], s["y"], 0.15, 1.5, 0.0, 0.0, amp_guess])
+        return np.concatenate([v, [0.0, 0.0]]) if FREE_CENTRE else v
     return _truth_vec(truth)
 
 
@@ -143,7 +162,7 @@ def lens_light_image(vec, kwargs_band, num_pix):
     """The fitted single-Sersic lens light alone (PSF-convolved), for subtraction."""
     kl, ks, kll = _unpack3(vec)
     sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=len(kll), multipole=has_multipole(vec))
-    image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
+    image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": FIT_SUPERSAMPLING})
     return image_model.lens_surface_brightness(kwargs_lens_light=kll)
 
 
@@ -179,7 +198,10 @@ def _blind_init_vec(data, kwargs_band, num_pix, noise_std):
     theta_E = float(np.sum(w * r) / np.sum(w)) if w.sum() > 0 else 1.0
     theta_E = float(np.clip(theta_E, 0.5, 1.6))
     amp = float(np.clip(data.max() * 3.0, 1.0, 1000.0))
-    return np.array([theta_E, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.15, 1.5, 0.0, 0.0, amp])
+    v = [theta_E, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.15, 1.5, 0.0, 0.0, amp]
+    if FREE_CENTRE:   # the lens centre, when fitted, starts at the frame centre (no truth)
+        v += [0.0, 0.0]
+    return np.array(v)
 
 
 def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, maxiter=200, blind=False, lens_light_components=1, macro_multipole=False):
@@ -194,7 +216,7 @@ def fit_smooth(data, truth, kwargs_band, num_pix, jitter_frac=0.15, rng=None, ma
         set_multipole_orders(macro_multipole)
     n_mp = _n_multipole(macro_multipole)
     sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR"], lens_light=n_ll, multipole=n_mp)
-    image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
+    image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": FIT_SUPERSAMPLING})
     noise_std = sim.estimate_noise(data)
 
     if blind:
@@ -235,7 +257,7 @@ def scan_subhalo(data, noise_std, smooth_vec, kwargs_band, num_pix, theta_E, chi
     grid (the detection statistic) and the argmax (position, mass)."""
     kwargs_lens_smooth, kwargs_source, kwargs_ll = _unpack3(smooth_vec)
     sim = _sim(kwargs_band, num_pix, ["EPL", "SHEAR", "TNFW"], lens_light=0 if kwargs_ll is None else len(kwargs_ll), multipole=has_multipole(smooth_vec))
-    image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": 1})
+    image_model = sim.image_model_class(kwargs_numerics={"supersampling_factor": FIT_SUPERSAMPLING})
     lc = LensCosmo(z_lens=z_lens, z_source=z_source)
 
     radii = np.linspace(0.5, 1.4, n_radii) * theta_E

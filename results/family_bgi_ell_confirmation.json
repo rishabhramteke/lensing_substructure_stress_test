@@ -1,0 +1,13 @@
+{
+  "b_threshold": 10.0,
+  "threshold_rule": "fixed",
+  "pops": {
+    "ellmultipole_m4_a3": {
+      "n_retained": 271,
+      "n_flagged_b": 151,
+      "flag_rate_b": 0.5571955719557196,
+      "confirmed_20": 0.4317343173431734,
+      "confirmed_48": 0.41697416974169743
+    }
+  }
+}

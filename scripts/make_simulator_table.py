@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-from lensing.config import tier0_tsang, tier2_lens_light  # noqa: E402
+from lensing.config import tier0_tsang, tier2_lens_light, tier0_los_halo, tier0_clumpy_source  # noqa: E402
 from lensing.simulate import LensRenderer  # noqa: E402
 
 
@@ -24,6 +24,8 @@ def rng(pair, unit="", fmt="{:g}"):
 def main():
     cfg = tier0_tsang("fixed60")
     ll = tier2_lens_light("fixed60").lens_light
+    los = tier0_los_halo(0.25).los_halo
+    cl = tier0_clumpy_source().source
     kb = LensRenderer(cfg).kwargs_band
     L, S, H, I, C = cfg.lens, cfg.source, cfg.subhalo, cfg.instrument, cfg.cosmology
 
@@ -36,7 +38,8 @@ def main():
         (r"Source (Tier 0)", r"S\'ersic $R_{\rm e}$", rng(S.R_sersic_range, r"''"), r"\citet{ostdiek2020}"),
         ("", r"S\'ersic index $n$", rng(S.n_sersic_range), r"\citet{ostdiek2020}"),
         ("", r"offset from centre", rng(S.offset_frac_thetaE_range, r"\,\thetaE"), "our choice"),
-        ("", r"unlensed magnitude", r"$19.5$--$24.7$", "from amplitudes"),
+        ("", r"amp.\ (mag $19.5$--$24.7$)", rng(S.amp_range), "our choice"),
+        ("", r"clumps (one variant)", f"${cl.n_clumps}\\times$ " + rng(tuple(100 * x for x in cl.clump_flux_frac_range), r"\%"), "our choice"),
         ("Subhalo", r"$\log_{10}(M_{200}/\Msun)$", rng(H.log10_mass_range), r"\citet{tsang2024}"),
         ("", r"truncation $\tau=r_{\rm t}/r_{\rm s}$", f"${H.tau:g}$", r"\citet{tsang2024}"),
         ("", r"concentration $c$", r"$60$, $30$, $15$ or $c$--$M$", "switch; Sect.~\\ref{sec:rq4}"),
@@ -44,14 +47,21 @@ def main():
         ("", r"present in", f"${100*H.presence_prob:g}\\%$ of images", r"\citet{tsang2024}"),
         ("Confounder", r"multipole order $m$", r"$4$ (and $3$)", r"\citet{oriordan2025}"),
         ("", r"amplitude $a_m/\thetaE$", r"$0.01$, $0.03$", r"\citet{oriordan2025}"),
+        ("", r"elliptical form (one variant)", r"on the lens $q$", r"\citet{paugnat2025}"),
+        ("Decoys", r"Gaussian; dipole lobes", r"1~px; 0.9~px apart", "our choice"),
+        ("", r"amplitude", r"$3$, $6$, $10\,\sigma$", "our choice"),
+        ("LOS halo", r"$\log_{10}(M_{200}/\Msun)$", rng(los.log10_mass_range) + f", $\\tau={los.tau:g}$", "as subhalo"),
+        ("", r"$z$; concentration", r"$0.25$, $0.75$; $c$--$M$", r"\citet{dutton2014}"),
         ("Lens light", r"bulge $n$, $R_{\rm e}$", rng(ll.bulge_n_range) + ", " + rng(ll.bulge_R_range, r"''"), "our choice"),
         ("", r"envelope $R_{\rm e}$", rng(ll.envelope_R_range, r"''"), "our choice"),
+        ("", r"bulge / source amp.", rng(ll.bulge_amp_ratio_range), "our choice"),
+        ("", r"envelope / bulge amp.", rng(ll.envelope_flux_frac_range), "our choice"),
         ("Instrument", r"pixel scale, grid", f"${I.pixel_scale:g}''$, ${I.num_pix}\\times{I.num_pix}$", r"\citet{tsang2024}"),
         ("", r"exposure time", f"${kb['exposure_time']:g}$~s", "HST preset"),
         ("", r"zero point", f"${kb['magnitude_zero_point']:g}$", "HST preset"),
         ("", r"sky brightness", f"${kb['sky_brightness']:g}$~mag\\,arcsec$^{{-2}}$", "HST preset"),
         ("", r"read noise, gain", f"${kb['read_noise']:g}\\,e^-$, ${kb['ccd_gain']:g}$", "HST preset"),
-        ("", r"PSF FWHM (Gaussian)", f"${kb['seeing']:g}''$", "HST preset"),
+        ("", r"PSF FWHM (Gaussian)", f"${kb['seeing']:g}''$", r"\citet{tsang2024}"),
     ]
     out = [r"\begin{tabular}{@{}llll@{}}", r"\toprule",
            r"component & parameter & value & source \\", r"\midrule"]

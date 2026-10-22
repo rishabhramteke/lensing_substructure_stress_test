@@ -1,0 +1,6 @@
+{
+  "population": "test_fixed60",
+  "n": 299,
+  "trimmed": true,
+  "note": "stopped at a reduced sample to free CPU (referee round 26); the records are the first lenses of the seed subsample to finish"
+}

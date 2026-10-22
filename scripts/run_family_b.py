@@ -61,6 +61,9 @@ sys.path.insert(0, str(ROOT / "src"))
 import autolens as al  # noqa: E402
 import autoarray as aa  # noqa: E402
 from autolens.potential_correction import FitDpsiImaging, DpsiPixelization, RegularDpsiMesh, AnalyticSrcFactory  # noqa: E402
+from autolens.potential_correction.src_factory import SrcFactory  # noqa: E402
+from lenstronomy.LensModel.lens_model import LensModel  # noqa: E402
+from lenstronomy.LightModel.light_model import LightModel  # noqa: E402
 from autolens.potential_correction import util as pc_util  # noqa: E402
 from lenstronomy.SimulationAPI.sim_api import SimAPI  # noqa: E402
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo  # noqa: E402
@@ -127,11 +130,30 @@ def params_from_fitted_vec(vec, cosmology):
             "cosmology": cosmology}, kwargs_lens, kwargs_source
 
 
-def dpsi_inversion(mi, residual, params, flux_scale, reg_coeff, factor, preloads=None):
-    lens, source = galaxies_from(params, flux_scale)
+class LenstronomySrcFactory(SrcFactory):
+    """The fitted (or true) source evaluated with lenstronomy's own SERSIC_ELLIPSE, in data units per pixel, so the
+    source gradient comes from the same model the residual is taken against (referee round 24: the PyAutoLens power
+    law at lenstronomy's Einstein radius differs by up to 6% of theta_E for flattened lenses)."""
+    def __init__(self, kwargs_source, scale):
+        self.light, self.kw, self.scale = LightModel(["SERSIC_ELLIPSE"]), kwargs_source, scale
+
+    def eval_func(self, xgrid, ygrid):
+        return self.scale * self.light.surface_brightness(np.ravel(xgrid), np.ravel(ygrid), self.kw).reshape(np.shape(xgrid))
+
+
+_LENS_EPL = LensModel(["EPL", "SHEAR"])
+
+
+def dpsi_inversion(mi, residual, params, flux_scale, reg_coeff, factor, preloads=None, kwargs_lens=None, kwargs_source=None, pixel_area=None):
     grid = np.asarray(mi.grid.slim)
-    src_pos = grid - np.asarray(lens.deflections_yx_2d_from(grid=mi.grid.slim))
-    src_grad = AnalyticSrcFactory(source).eval_grad(src_pos[:, 1], src_pos[:, 0])
+    if kwargs_lens is not None:
+        # source-plane positions and source profile both from lenstronomy (no Einstein-radius convention conversion needed)
+        bx, by = _LENS_EPL.ray_shooting(grid[:, 1], grid[:, 0], kwargs_lens[:2])
+        src_grad = LenstronomySrcFactory(kwargs_source[:1], pixel_area).eval_grad(bx, by)
+    else:
+        lens, source = galaxies_from(params, flux_scale)
+        src_pos = grid - np.asarray(lens.deflections_yx_2d_from(grid=mi.grid.slim))
+        src_grad = AnalyticSrcFactory(source).eval_grad(src_pos[:, 1], src_pos[:, 0])
     pix = DpsiPixelization(mesh=RegularDpsiMesh(factor=factor), regularization=aa.reg.CurvatureMask(coefficient=reg_coeff))
     fit = FitDpsiImaging(masked_imaging=mi, image_residual=residual, source_gradient=src_grad, dpsi_pixelization=pix, preloads=preloads)
     dpsi = np.asarray(fit.solve_dpsi())
@@ -158,6 +180,7 @@ def main():
     p.add_argument("--population", required=True)
     p.add_argument("--data-root", type=Path, default=ROOT / "data")
     p.add_argument("--variant", choices=["fitted", "oracle"], default="fitted")
+    p.add_argument("--pyautolens-gradient", action="store_true", help="the pre-round-24 source gradient through PyAutoLens's power law (for comparison only)")
     p.add_argument("--n", type=int, default=300)
     p.add_argument("--seed", type=int, default=0, help="subsample selection seed (same rule as run_baseline_a.py)")
     p.add_argument("--out", type=Path, required=True)
@@ -205,6 +228,11 @@ def main():
                     reliable = chi2_per_dof < CHI2_DOF_UNRELIABLE
                 else:
                     params, macro = truth, control[i]
+                    lm_, s_ = truth["lens_macro"], truth["source"]
+                    kwargs_lens = [{"theta_E": lm_["theta_E"], "gamma": lm_["gamma"], "e1": lm_["e1"], "e2": lm_["e2"], "center_x": 0.0, "center_y": 0.0},
+                                   {"gamma1": lm_["gamma1"], "gamma2": lm_["gamma2"], "ra_0": 0.0, "dec_0": 0.0}]
+                    kwargs_source = [{"amp": s_["amp"], "R_sersic": s_["R_sersic"], "n_sersic": s_["n_sersic"], "e1": s_["e1"], "e2": s_["e2"],
+                                      "center_x": s_["x"], "center_y": s_["y"]}]
                     chi2_per_dof = float(np.mean(((data - macro) / noise) ** 2))
                     reliable = True
                     ll_img = 0.0   # the oracle macro render already contains the true lens light
@@ -219,7 +247,9 @@ def main():
                 residual = np.asarray(mi.data.slim) - macro_slim
                 preloads, per_lam = None, {}
                 for lam in args.lams:
-                    res = dpsi_inversion(mi, residual, params, flux_scale, lam, args.factor, preloads)
+                    res = dpsi_inversion(mi, residual, params, flux_scale, lam, args.factor, preloads,
+                                         kwargs_lens=None if args.pyautolens_gradient else kwargs_lens,
+                                         kwargs_source=None if args.pyautolens_gradient else kwargs_source, pixel_area=ps ** 2)
                     preloads = res["preloads"]
                     per_lam[lam] = (res, peak_stats(res, lc))
                 t_inv = time.time() - t2

@@ -1,24 +1,24 @@
 {
-  "threshold_delta_chi2_at_10pct_fpr": 0.09210760897048585,
+  "threshold_delta_chi2_at_10pct_fpr": 0.09512510510252542,
   "fpr_at_threshold_calibration_set": 0.1,
   "n_no_subhalo_reliable": 300,
   "n_no_subhalo_unreliable": 0,
   "completeness_c60_by_mass_bin": {
     "8.0-8.5": {
       "n": 52,
-      "completeness": 0.2692307692307692
+      "completeness": 0.15384615384615385
     },
     "8.5-9.0": {
       "n": 46,
-      "completeness": 0.3695652173913043
+      "completeness": 0.15217391304347827
     },
     "9.0-9.5": {
       "n": 32,
-      "completeness": 0.90625
+      "completeness": 0.53125
     },
     "9.5-10.0": {
       "n": 43,
-      "completeness": 0.9767441860465116
+      "completeness": 0.9069767441860465
     },
     "10.0-10.5": {
       "n": 62,
@@ -32,23 +32,23 @@
   "completeness_c15_by_mass_bin": {
     "8.0-8.5": {
       "n": 52,
-      "completeness": 0.2692307692307692
+      "completeness": 0.038461538461538464
     },
     "8.5-9.0": {
       "n": 46,
-      "completeness": 0.4782608695652174
+      "completeness": 0.06521739130434782
     },
     "9.0-9.5": {
       "n": 32,
-      "completeness": 0.6875
+      "completeness": 0.125
     },
     "9.5-10.0": {
       "n": 43,
-      "completeness": 0.8604651162790697
+      "completeness": 0.5581395348837209
     },
     "10.0-10.5": {
       "n": 62,
-      "completeness": 1.0
+      "completeness": 0.9516129032258065
     },
     "10.5-11.0": {
       "n": 40,
@@ -57,15 +57,15 @@
   },
   "paired_concentration_flip": {
     "n_pairs": 275,
-    "detected_at_c60": 204,
-    "detected_at_c15": 197,
-    "detected_at_c60_not_c15": 23,
-    "detected_at_c15_not_c60": 16
+    "detected_at_c60": 173,
+    "detected_at_c15": 132,
+    "detected_at_c60_not_c15": 48,
+    "detected_at_c15_not_c60": 7
   },
   "confounder_fpr": {
     "no_subhalo (calibration set)": 0.1,
-    "multipole m=4, a=0.01*thetaE": 0.62,
-    "multipole m=4, a=0.03*thetaE": 0.92
+    "multipole m=4, a=0.01*thetaE": 0.12,
+    "multipole m=4, a=0.03*thetaE": 0.5533333333333333
   },
   "n_unreliable_fits": {
     "test_fixed60": 0,
@@ -74,5 +74,5 @@
     "multipole_a1": 0,
     "multipole_a3": 0
   },
-  "mean_time_per_image_s": 0.4005179119110107
+  "mean_time_per_image_s": 0.2469673498471578
 }
