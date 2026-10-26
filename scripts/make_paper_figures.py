@@ -14,6 +14,7 @@ single source of truth for it.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -1058,8 +1059,13 @@ def fig12_summary():
         L_[k_] = "30k: " + L_[k_]
         return ("\n".join(L_), c30[1])
     rows = [(lab, [cells[0], gi_cells(lab), cells[1], c5_cells(lab, cells[2])]) for lab, cells in rows]
+    no_gi = os.environ.get("FIG12_WITH_GI") != "1"   # the paper has no gravitational-imaging column; FIG12_WITH_GI=1 restores it
+    if no_gi:
+        rows = [(lab, [c[0], c[2], c[3]]) for lab, c in rows]
     cols = ["A  joint scan\n(idealized: exact\nsource family)", "GI  linearized grav.\nimaging (pixelized\nsource, confirmed)",
             "B  free-form $\\delta\\psi$\n(diagnostic,\nnot a detector)", "C  U-Net, $5\\times10^{5}$\nimages (\"30k\": the\n30 000-image network)"]
+    if no_gi:
+        cols = [cols[0], cols[2], cols[3]]
     # rows grouped by the mechanism they test (Sect. 5.1), each group under a header
     GROUPS = [("Unmodelled lensing or light structure", ("lens-shape", "elliptical", "line-of-sight", "sub-threshold", "lens light, single", "lens light, double")),
               ("Non-physical structure", ("non-physical",)),

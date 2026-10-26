@@ -45,10 +45,17 @@ def _psf_only(cfg):
     return cfg
 
 
+def _mass_range(cfg, rng):
+    cfg.subhalo.log10_mass_range = tuple(rng)
+    cfg.tier = cfg.tier + f"_logm{rng[0]:g}-{rng[1]:g}"
+    return cfg
+
+
 CONFIGS = {
     "tsang_fixed60": lambda: tier0_tsang("fixed60"),
     "tsang_fixed30": lambda: tier0_tsang("fixed30"),
     "tsang_fixed15": lambda: tier0_tsang("fixed15"),
+    "tsang_fixed15_highmass": lambda: _mass_range(tier0_tsang("fixed15"), (10.0, 11.0)),   # positive control: c=15 where its signal is strong
     "tsang_cdm": lambda: tier0_tsang("cdm"),
     "no_subhalo": tier0_no_subhalo,
     "tidal_c15": lambda: tier0_tidal_track(15.0),

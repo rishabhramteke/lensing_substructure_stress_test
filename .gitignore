@@ -29,3 +29,5 @@ results/**/log*.txt
 # large training-set truth files, regenerable from their manifests and seeds
 data/train_*/truth.jsonl
 data/tier1/train_*/truth.jsonl
+# submission package (manuscript, private until acceptance)
+submission/
