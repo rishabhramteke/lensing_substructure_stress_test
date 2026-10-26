@@ -1,0 +1,28 @@
+\begin{tabular}{@{}lccc@{}}
+\toprule
+ & deep & 600 s & shallow \\
+exposure time & 5400 s & 600 s & 135 s \\
+median arc S/N$^{b}$ & $1.5\times10^{3}$ & $4.9\times10^{2}$ & $2.2\times10^{2}$ \\
+median peak-pixel S/N & 235 & 78 & 37 \\
+\midrule
+\multicolumn{4}{@{}l}{\emph{A, joint scan}} \\
+\quad threshold at 10\% FPR & $6.3$ & $5.8$ & $6.7$ \\
+\quad clean FPR at $\dchi\ge20$ & 0.20\% & 0.00\% & 1.00\% \\
+\quad macro fits rejected, $c{=}60$ & 70/1000 & 2/200 & 0/300 \\
+\quad compl.\ $c{=}60$, 10\% cal.$^{a}$ & 98 / 99 / 96 / 97 & 76 / 96 / 95 / 93 & 59 / 84 / 89 / 92 \\
+\quad compl.\ $c{=}60$, 10\% cal., 8--8.5 / 8.5--9 & 47 / 79 & -- & 8 / 9 \\
+\quad compl.\ $c{=}60$, $\dchi\ge20$$^{a}$ & 93 / 95 / 96 / 97 & 52 / 89 / 93 / 93 & 16 / 63 / 81 / 90 \\
+\quad compl.\ $c{=}15$, $\dchi\ge20$$^{a}$ & 82 / 92 / 94 / 97 & -- & 6 / 37 / 58 / 88 \\
+\quad FPR multipole, cal.\ / $\ge20$ & 97\% / 96\% & -- & 83\% / 57\% \\
+\addlinespace[2pt]
+\multicolumn{4}{@{}l}{\emph{C, U-Net trained deep (4 seeds)}} \\
+\quad clean FPR at deep threshold & 10\% & 79\% & 88\% \\
+\quad AUC, $c{=}60$ vs.\ clean & 0.67 & 0.58 & 0.52 \\
+\quad compl.\ $c{=}60$, recal.\ 10\%$^{a}$ & 19 / 51 / 70 / 79 & 12 / 16 / 32 / 40 & 9 / 11 / 12 / 17 \\
+\addlinespace[2pt]
+\multicolumn{4}{@{}l}{\emph{C, U-Net retrained on 30\,000 shallow images (2 seeds)}} \\
+\quad AUC, $c{=}60$ vs.\ clean & -- & -- & 0.57 \\
+\quad compl.\ $c{=}60$$^{a}$ & -- & -- & 14 / 19 / 34 / 53 \\
+\quad compl.\ $c{=}15$$^{a}$ & -- & -- & 12 / 12 / 12 / 13 \\
+\bottomrule
+\end{tabular}

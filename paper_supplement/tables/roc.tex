@@ -1,0 +1,18 @@
+\begin{tabular}{@{}llccc@{}}
+\toprule
+family & population & AUC & TPR at 10\% FPR & TPR at 1\% FPR \\
+\midrule
+A joint scan & $c{=}60$ & 0.921 & 85\% & 78\% \\
+ & $c{=}15$ & 0.908 & 81\% & 76\% \\
+ & multipole & 0.975 & 98\% & 97\% \\
+\addlinespace[2pt]
+B free-form residual & $c{=}60$ & 0.751 & 53\% & 16\% \\
+ & $c{=}15$ & 0.683 & 38\% & 2\% \\
+ & multipole & 0.897 & 70\% & 2\% \\
+\addlinespace[2pt]
+C U-Net & $c{=}60$ & 0.620 & 32\% & 21\% \\
+ & $c{=}15$ & 0.517 & 12\% & 3\% \\
+ & multipole & 0.504 & 10\% & 2\% \\
+\addlinespace[2pt]
+\bottomrule
+\end{tabular}

@@ -1,0 +1,21 @@
+\begin{tabular}{@{}llcccccccccc@{}}
+\toprule
+ & & \multicolumn{4}{c}{$c=60$ completeness (\%)} & clean & \multicolumn{4}{c}{multipole (\%)} & decoy \\ \cmidrule(lr){3-6}\cmidrule(lr){8-11}
+flag & statistic & $10^{9}$ & $10^{9.5}$ & $10^{10}$ & $10^{10.5}$ & (\%) & $m{=}4$, 0.03 & $m{=}4$, 0.01 & $m{=}3$ & ell. & (\%) \\
+\midrule
+U-Net $5\times10^{5}$, 10\% & scan, $\dchi\ge20$ & 93 & 95 & 96 & 97 & 0.2 & 96 & 86 & 98 & 98 & 1 \\
+ & network & 38 & 74 & 83 & 88 & 10 & 15 & 10 & 9 & 23 & 56 \\
+ & hybrid & 38 & 72 & 81 & 85 & 0.0 & 14 & 9 & 9 & 22 & 1 \\
+\addlinespace
+ratio est., 10\% & network & 41 & 78 & 86 & 94 & 10 & 14 & 11 & 12 & 20 & 62 \\
+ & hybrid & 38 & 73 & 84 & 91 & 0.1 & 13 & 7 & 11 & 19 & 1 \\
+\addlinespace
+ratio est., 1\% & network & 29 & 68 & 82 & 85 & 1.0 & 2 & 2 & 2 & 6 & 55 \\
+ & hybrid & 29 & 66 & 80 & 82 & 0.0 & 2 & 1 & 2 & 6 & 1 \\
+\addlinespace
+\midrule \multicolumn{12}{@{}l}{\emph{combined realism, ratio estimator retrained there, 10\%}} \\
+ & scan, $\dchi\ge20$ & 30 & 69 & 89 & 96 & 0.4 & 75 & -- & -- & -- & -- \\
+ & network & 9 & 15 & 28 & 51 & 10 & 13 & -- & -- & -- & -- \\
+ & hybrid & 2 & 11 & 26 & 50 & 0.0 & 9 & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}

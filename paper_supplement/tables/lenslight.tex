@@ -1,0 +1,26 @@
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & none & \multicolumn{2}{c}{single} & \multicolumn{2}{c}{double} \\
+ & & S1 & S2 & S1 & S2 \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{smooth fit of the fixed-macro scan (shared with B)}} \\
+clean fits rejected (of 300) & 5 & 141 & 148 & 21 & 12 \\
+\multicolumn{6}{@{}l}{\emph{A, joint scan (first seed set, 200 lenses; ``none'': full 1\,000-lens populations)}} \\
+\quad threshold, 10\% FPR ($\dchi$) & 6.3 & 1179 & -- & 6.2 & -- \\
+\quad FPR clean, $\dchi\ge20$ / $\ge100$ & 0.20 / 0.20\% & 97 / 88\% & -- & 0.51 / 0.51\% & -- \\
+\quad FPR multipole, $\dchi\ge20$ / $\ge100$ & 96 / 90\% & 99 / 98\% & -- & 97 / 85\% & -- \\
+\quad compl.\ $10^{9.5}$--$10^{10}\Msun$, 10\% cal.\ & 99\% & 58\% & -- & 96\% & -- \\
+\quad compl.\ $10^{10}$--$10^{10.5}\Msun$, 10\% cal.\ & 96\% & 100\% & -- & 97\% & -- \\
+\multicolumn{6}{@{}l}{\emph{A, fixed-macro scan (Appendix C)}} \\
+\quad threshold, 10\% FPR ($\dchi$) & $-10.6$ & $+86$ & $+99$ & $-7.5$ & $-9.3$ \\
+\quad FPR clean, $\dchi{>}20$ / ${>}100$ & 0.68 / 0\% & 25 / 9\% & 26 / 10\% & 0 / 0\% & 0.35 / 0\% \\
+\quad compl.\ $10^{10}$--$10^{10.5}\Msun$ & 85\% & 53\% & 64\% & 79\% & 89\% \\
+\multicolumn{6}{@{}l}{\emph{B, free-form residual statistic}} \\
+\quad threshold, $\max|\delta\kappa|$ & 0.10 & 0.96 & -- & 0.09 & -- \\
+\quad compl.\ $10^{10}$--$10^{10.5}\Msun$ & 92\% & 12\% & -- & 98\% & -- \\
+\multicolumn{6}{@{}l}{\emph{C, U-Net (four seeds), on the subtracted images}} \\
+\quad AUC ($c{=}60$ vs.\ clean) & 0.67 & 0.58 & 0.57 & 0.67 & 0.66 \\
+\quad FPR clean at Tier-0 thr.\ & 10\% & 78\% & 80\% & 47\% & 49\% \\
+\quad compl.\ $10^{10}$--$10^{10.5}\Msun$, recal.\ & 70\% & 24\% & 28\% & 56\% & 60\% \\
+\bottomrule
+\end{tabular}

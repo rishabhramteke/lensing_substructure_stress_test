@@ -1,0 +1,16 @@
+\begin{tabular}{@{}p{2.35cm}p{2.55cm}p{2.3cm}@{}}
+\toprule
+Item & Specified in the paper & This work \\
+\midrule
+Architecture & ``U-Net image segmentation'' & 4-level, base 16 \\
+Training images & $5\times10^5$ & 30\,000 (8\,000 to $5\times10^5$ in the budget checks) \\
+Sources, lens & COSMOS; shear, $m=3,4$ multipoles & S\'ersic; shear, no multipoles \\
+Loss & not specified & BCE, weight 150 \\
+Image score & max pixel probability & same \\
+Success criterion & within 2 pixels & 2-px disc target \\
+Subhalo placement & not specified & uniform in $0.6$--$1.3\,\thetaE$, not arc-weighted \\
+Completeness at $10^{9}$--$10^{9.5}\Msun$, $c=60$ & 33.6\% at $0.08''$ (their Table 2; 71\% at their finest resolution) & $19.3\pm1.5$\% (30k); $14.7\pm3.8$\% (8k); 38\% ($5\times10^5$) \\
+$c=15$ behaviour & near ``random guessing'' & same, with a different source and lens \\
+Code released & no & yes (this work) \\
+\bottomrule
+\end{tabular}

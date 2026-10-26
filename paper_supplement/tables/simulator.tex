@@ -1,0 +1,45 @@
+\begin{tabular}{@{}llll@{}}
+\toprule
+component & parameter & value & source \\
+\midrule
+Macro-model & Einstein radius $\thetaE$ & $0.8$--$1.2''$ & \citet{tsang2024} \\
+ & power-law slope $\gamma$ & $1.5$--$2.5$ & \citet{tsang2024} \\
+ & axis ratio $q$ & $0.5$--$1$ & \citet{tsang2024} \\
+ & external shear $|\gamma_{\rm ext}|$ & $\le0.05$ & our choice \\
+ & $z_{\rm lens}$, $z_{\rm source}$ & $0.5$, $1$ & \citet{ostdiek2020} \\
+\addlinespace[2pt]
+Source (Tier 0) & S\'ersic $R_{\rm e}$ & $0.05$--$0.3''$ & \citet{ostdiek2020} \\
+ & S\'ersic index $n$ & $0.7$--$4$ & \citet{ostdiek2020} \\
+ & offset from centre & $0.05$--$0.35\,\thetaE$ & our choice \\
+ & amp.\ (mag $19.5$--$24.7$) & $60$--$220$ & our choice \\
+ & clumps (one variant) & $2\times$ $2$--$6\%$ & our choice \\
+\addlinespace[2pt]
+Subhalo & $\log_{10}(M_{200}/\Msun)$ & $8$--$11$ & \citet{tsang2024} \\
+ & truncation $\tau=r_{\rm t}/r_{\rm s}$ & $20$ & \citet{tsang2024} \\
+ & concentration $c$ & $60$, $30$, $15$ or $c$--$M$ & switch; Sect.~\ref{sec:rq4} \\
+ & placement annulus & $0.6$--$1.3\,\thetaE$ & our choice \\
+ & present in & $90\%$ of images & \citet{tsang2024} \\
+\addlinespace[2pt]
+Confounder & multipole order $m$ & $4$ (and $3$) & \citet{oriordan2025} \\
+ & amplitude $a_m/\thetaE$ & $0.01$, $0.03$ & \citet{oriordan2025} \\
+ & elliptical form (one variant) & on the lens $q$ & \citet{paugnat2025} \\
+\addlinespace[2pt]
+Decoys & Gaussian; dipole lobes & 1~px; 0.9~px apart & our choice \\
+ & amplitude & $3$, $6$, $10\,\sigma$ & our choice \\
+\addlinespace[2pt]
+LOS halo & $\log_{10}(M_{200}/\Msun)$ & $8$--$11$, $\tau=20$ & as subhalo \\
+ & $z$; concentration & $0.25$, $0.75$; $c$--$M$ & \citet{dutton2014} \\
+\addlinespace[2pt]
+Lens light & bulge $n$, $R_{\rm e}$ & $3$--$5$, $0.25$--$0.5''$ & our choice \\
+ & envelope $R_{\rm e}$ & $0.7$--$1.3''$ & our choice \\
+ & bulge / source amp. & $0.5$--$2$ & our choice \\
+ & envelope / bulge amp. & $0.3$--$0.7$ & our choice \\
+\addlinespace[2pt]
+Instrument & pixel scale, grid & $0.08''$, $64\times64$ & \citet{tsang2024} \\
+ & exposure time & $5400$~s & HST preset \\
+ & zero point & $25.96$ & HST preset \\
+ & sky brightness & $22.3$~mag\,arcsec$^{-2}$ & HST preset \\
+ & read noise, gain & $4\,e^-$, $2.5$ & HST preset \\
+ & PSF FWHM (Gaussian) & $0.08''$ & \citet{tsang2024} \\
+\bottomrule
+\end{tabular}

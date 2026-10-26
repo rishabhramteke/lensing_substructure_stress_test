@@ -1,0 +1,207 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[T1]{fontenc}\usepackage{amsmath}\usepackage{txfonts}\usepackage{booktabs}\usepackage{graphicx}\usepackage{natbib}\usepackage{xr}\externaldocument{../paper/Ramteke_2026_substructure_stress_test}
+\usepackage[margin=2cm]{geometry}\usepackage{caption}
+\renewcommand{\thetable}{S\arabic{table}}\renewcommand{\thefigure}{S\arabic{figure}}
+\newcommand{\Msun}{M_\odot}
+\newcommand{\thetaE}{\theta_{\rm E}}
+\newcommand{\dchi}{\Delta\chi^2}
+\newcommand{\dpsi}{$\delta\psi$}
+\newcommand{\TODO}[1]{\textcolor{red}{[#1]}}
+\renewcommand{\topfraction}{0.9}\renewcommand{\bottomfraction}{0.8}\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}\renewcommand{\dbltopfraction}{0.9}\renewcommand{\dblfloatpagefraction}{0.75}
+\begin{document}
+\begin{center}{\Large\bfseries Supplementary tables and figures}\\[4pt]
+\emph{Stress-testing dark-matter substructure detectors on a common simulation suite}\\ R. Ramteke, submitted to A\&A (AA63827-26)\end{center}
+\noindent These tables and figures are cited from the paper as supplementary Tables S1--S15 and Figs.~S1--S3. Section, table and figure numbers inside the captions refer to the paper.
+
+\begin{table}[!htbp]
+\caption{Threshold-free comparison. Area under the ROC curve against the clean control, and completeness at 10\% and 1\% false-positive rate, on the common set of Table~\ref{tab:fullpop}, each threshold set on the 1\,000-lens clean control; Table~\ref{tab:lowfpr} gives the 1\% values on the larger clean controls. The common set excludes the most massive lenses, which lowers the U-Net's AUC (0.62 here, 0.67 on all lenses). The U-Net is the mean of four seeds.}
+\label{tab:roc}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\input{tables/roc.tex}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{Family~A, the joint scan, at three operating points on the full 1\,000-lens Tier-0 populations. Completeness on retained fits; the paired flip counts the 831 lenses both concentration scans retain; the mass error of the localized detections agrees with that of all detections to within 0.02~dex.}
+\label{tab:joint_ops}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\input{tables/joint_operating_points.tex}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{The same lenses at three depths, everything else identical. The joint scan is calibrated on the clean control of its own variant (deep: full populations; 600~s: 200-lens subsamples; shallow: 300-lens subsamples). The U-Net trained deep is scored at its deep threshold and recalibrated on each variant's control; a second set is retrained on 30\,000 shallow images. $^{a}$Four bins, $10^{9}$--$10^{9.5}$ / $10^{9.5}$--$10^{10}$ / $10^{10}$--$10^{10.5}$ / $10^{10.5}$--$10^{11}\,\Msun$, in per cent. $^{b}$Median over the $c=60$ population of $[\sum_{\rm pix}(I_{\rm noiseless}/\sigma)^2]^{1/2}$.}
+\label{tab:depth}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\input{tables/depth.tex}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{Lens light added and subtracted two ways, 300 lenses per population (joint scan on the first 200), $c=15$ template; fits with $\chi^2/{\rm dof}\ge10$ excluded. ``None'': Tier~0 without lens light. ``Single'': one S\'ersic fitted to the two-component truth; ``double'': the correctly specified fit. S1 and S2 are two independent 300-lens seed sets; the joint scan and the free-form statistic are run on S1 only. The U-Net is the four-seed mean on each set.}
+\label{tab:lenslight}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\input{tables/lenslight}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{$c=60$ completeness (\%) at each family's own 10\% threshold on the full population, counting all detections and only those whose reported position lies within 2~pixels ($0.16''$) of the subhalo.}
+\label{tab:loccomp}
+\centering
+\footnotesize
+\input{tables/loccomp}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{Localization on the same lenses: the 726 $c=60$ lenses that Families A and B both retain, each family at its own 10\% threshold. Per cent of detections within 2~pixels of the true subhalo, with the number of detections in parentheses, per bin of $M_{200}$ and of the perturbation signal-to-noise. U-Net: seed~0.}
+\label{tab:locmatched}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\input{tables/loc_matched}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{Line-of-sight halos, traced multi-plane, with no subhalo at the lens plane; joint scan on 300 lenses per variant, which share lenses, sources, halo masses and projected positions; only the halo redshift differs. The scan assumes $z=0.5$. Localization and mass error are for detections at $\dchi\ge20$, on the fixed grid.}
+\label{tab:los}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\input{tables/los.tex}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{A third matched concentration. The same lenses, sources, subhalo masses and positions rendered at $c=60$, $30$ and $15$, scored at each family's own 10\% FPR threshold. $c=30$ is the tidally boosted value appropriate for a subhalo near $\thetaE$ \citep{moline2017}. Paired flip is detections lost\,:\,gained relative to $c=60$ on the same lenses (U-Net: mean of four seeds).}
+\label{tab:c30}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\input{tables/c30.tex}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{The U-Net trained at three concentrations with one recipe and no hyperparameter search. Three training populations of $30\,000$ images generated from the same seed, so that only the subhalo concentration differs, each scored on the same Tier-0 test populations at its own 10\% threshold. Mean and standard deviation over seeds. The two low-concentration training sets give no detector (Sect.~\ref{sec:rq4}), so their multipole row is uninformative: a network that does not detect subhalos cannot be confused by a confounder.}
+\label{tab:unet_lowc}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\input{tables/unet_lowc}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{U-Net training objectives, each trained on the same 30\,000-image populations at $c=60$ and at $c=15$ and scored by the AUC of the $c=60$ test population against the clean control; two seeds are given as their two values, four as mean and standard deviation.}
+\label{tab:unet_obj}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\input{tables/unet_objectives}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{The $c=15$ minus $c=60$ completeness difference at equal signal (percentage points, averaged over bins holding at least 20 lenses of each population) and the pooled two-proportion $\chi^2$ per bin, on the full 1\,000-lens populations. $p$ is the unpaired tail probability; $p_{\rm perm}$ swaps each paired lens's two variants and is the one to read. U-Net: seed 0, every lens.}
+\label{tab:signal}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\input{tables/signal_variables.tex}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{The paired permutation $p$ of the concentration-coincidence test against the TNFW mass projected within each aperture, full 1\,000-lens populations. Bold: rejected at family-wise $\alpha=0.05$ after Holm's correction for the seven apertures. U-Net: seed~0.}
+\label{tab:aperture}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\input{tables/aperture_scan}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{The fit-quality cut of Sect.~\ref{sec:metric} on the full 1\,000-lens joint-scan populations: lenses whose first smooth start fails $\chi^2/{\rm dof}<10$; of those, the number retained because a smooth re-fit (from a joint solution with the perturber removed, or from the seven-start re-fit) reaches the fit-quality cut, and because only the joint model does; and the number excluded, with the excluded subhalo-bearing lenses below $10^{10}\,\Msun$.}
+\label{tab:gate}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\input{tables/gate}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{The perturber-template control for the joint scan: the loss in $c=60$ minus $c=15$ completeness, in points, on the same 300-lens subsample, for the $c=15$ template used throughout, the $c=60$ template and the \citet{dutton2014} relation, each calibrated on the same 300-lens clean control (thr.\ is its 10\% threshold on $\dchi$).}
+\label{tab:tmpl_joint}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\input{tables/tmpl_joint}
+\end{table}
+
+\clearpage
+
+\begin{table}[!htbp]
+\caption{Concentration and truncation varied together, fixed-macro scan, rates at the null-floored $\dchi>0$ (Appendix~\ref{app:shortcut}). The upper block holds $\tau=20$ fixed while varying $c$, as elsewhere in this paper; the lower block fixes the truncation radius in physical terms so $\tau$ scales with $c$. Same lenses, sources, masses and positions throughout.}
+\label{tab:tidal}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\input{tables/tidal.tex}
+\end{table}
+
+\clearpage
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/fig8_family_b.pdf}
+\caption{The free-form residual statistic's one free choice, the regularization strength $\lambda$. (a) Completeness at $c=60$ on the full 1\,000-lens populations for the fitted macro-model at three $\lambda$ ($10^{5}$ is the value used throughout; 68\% Wilson intervals) and, on the 300-lens seed-0 subsample, for the exact macro-model at $\lambda=10^{5}$ (black stars, the ceiling at that $\lambda$; a fitted curve at another $\lambda$ can exceed it). $\lambda=10^{4}$, $10^{5}$ and $10^{6}$ in light to dark shades of one hue. At $\lambda=10^{4}$ the statistic is dominated by fitted noise and its low-mass points scatter about the 10\% chance line; a point below the line is a fluctuation. (b) False-positive rate on the two multipole populations at the same three $\lambda$ (hatched: $a_m/\thetaE=0.01$).}
+\label{fig:familyb}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/fig11_lenslight.pdf}
+\caption{What lens light does to the image a detector sees. One $c=60$ subhalo lens: (a) as observed; (b) after subtracting the single S\'ersic fitted jointly with the mass model, whose misfit leaves a central residual brighter than any subhalo signature; (c) after the correctly specified double S\'ersic; (d) with the true lens light removed. The circle marks the true subhalo. Same arcsinh stretch throughout.}
+\label{fig:lenslight}
+\end{figure}
+
+\clearpage
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/fig4_localization.pdf}
+\caption{Where each method points ($c=60$ population; the joint scan with the perturber position free, the free-form statistic and the U-Net seed~0), for the detections at each family's own 10\% threshold. Top: the reported position of every detection, blue if within 2~pixels ($0.16''$) of the true subhalo, orange if not; grey $\times$: false alarms on the multipole population; dotted rings: the placement annulus. Bottom: offsets of the correct finds, with the 2-pixel criterion dashed. Fractions are for each family's full detection sample; supplementary Table~S6 compares them on the common set.}
+\label{fig:localization}
+\end{figure}
+
+\clearpage
+\bibliographystyle{aa}\bibliography{refs}
+\end{document}

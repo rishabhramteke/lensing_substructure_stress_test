@@ -1,0 +1,33 @@
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & \multicolumn{2}{c}{U-Net, $5\times10^{5}$} & \multicolumn{2}{c}{ratio estimator} \\
+\multicolumn{5}{@{}l}{\emph{confounders: flagged (\%) at the Tier-0 calibration}} \\
+multipole $m{=}4$, $a_4/\thetaE=0.01$ & \multicolumn{2}{c}{10} & \multicolumn{2}{c}{12} \\
+multipole $m{=}4$, 0.03 & \multicolumn{2}{c}{15} & \multicolumn{2}{c}{14} \\
+multipole $m{=}3$, 0.03 & \multicolumn{2}{c}{9} & \multicolumn{2}{c}{12} \\
+elliptical $m{=}4$, 0.03 & \multicolumn{2}{c}{21} & \multicolumn{2}{c}{21} \\
+decoy, Gaussian $10\sigma$ (draw 1) & \multicolumn{2}{c}{53} & \multicolumn{2}{c}{58} \\
+decoy, Gaussian $10\sigma$ (draw 2) & \multicolumn{2}{c}{55} & \multicolumn{2}{c}{58} \\
+decoy, dipole $10\sigma$ & \multicolumn{2}{c}{58} & \multicolumn{2}{c}{71} \\
+line-of-sight halo, $z=0.25$ & \multicolumn{2}{c}{11} & \multicolumn{2}{c}{14} \\
+line-of-sight halo, $z=0.75$ & \multicolumn{2}{c}{9} & \multicolumn{2}{c}{12} \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{re-rendered variants, recalibrated: AUC and $c=60$ completeness (\%) at $10^{9.5}$--$10^{10}\,\Msun$}} \\
+ & AUC & compl. & AUC & compl. \\
+600~s & 0.62 & 29 & 0.60 & 17 \\
+135~s & 0.53 & 8 & 0.52 & 18 \\
+$0.15''$ PSF & 0.64 & 14 & 0.56 & 6 \\
+lens light, raw & 0.55 & 11 & 0.55 & 13 \\
+combined realism & 0.52 & 12 & 0.51 & 9 \\
+clumpy source & 0.64 & 17 & 0.61 & 9 \\
+$5\times$ supersampled & 0.74 & 69 & 0.76 & 70 \\
+$5\times$ supersampled, PSF $+10\%$ & 0.73 & 67 & 0.73 & 52 \\
+sub-threshold population & 0.74 & 73 & 0.79 & 80 \\
+Tier~1 (COSMOS) & 0.49 & 7 & 0.49 & 14 \\
+Euclid-VIS-like & 0.58 & 16 & 0.58 & 11 \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{ratio estimator retrained on 30\,000 images of the variant itself}} \\
+135~s & -- & -- & 0.67 & 28 \\
+combined realism & -- & -- & 0.59 & 15 \\
+\bottomrule
+\end{tabular}

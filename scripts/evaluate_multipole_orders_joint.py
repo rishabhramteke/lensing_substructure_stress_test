@@ -114,7 +114,7 @@ def main():
         ("FPR, $m{=}4$, $a_4{=}0.03\\,\\thetaE$: cal.\\,/\\,${\\ge}20$", lambda d: pair(d["multipole_m4_a3"]["fpr_10pct"], d["multipole_m4_a3"]["fpr_20"])),
         ("FPR, $m{=}3$, $a_3{=}0.03\\,\\thetaE$: cal.\\,/\\,${\\ge}20$", lambda d: pair(d["multipole_m3_a3"]["fpr_10pct"], d["multipole_m3_a3"]["fpr_20"])),
         ("median $\\dchi$, $m{=}4$, $a_4{=}0.03\\,\\thetaE$", lambda d: f"{d['multipole_m4_a3']['dchi2_median']:.0f}"),
-        ("removed by the fit-quality cut (of 300): clean/$m{=}4$/$m{=}3$/$c{=}60$", lambda d: "/".join("--" if d["rejected"][k] is None else str(d["rejected"][k]) for k in ("no_subhalo", "multipole_m4_a3", "multipole_m3_a3", "test_fixed60"))),
+        ("excluded (of 300): clean/$m{=}4$/$m{=}3$/$c{=}60$", lambda d: "/".join("--" if d["rejected"][k] is None else str(d["rejected"][k]) for k in ("no_subhalo", "multipole_m4_a3", "multipole_m3_a3", "test_fixed60"))),
         ("compl.\\ $c{=}60$, 10\\% cal.$^{a}$", lambda d: comp4(d, "cal")),
         ("compl.\\ $c{=}60$, $\\dchi\\ge20$$^{a}$", lambda d: comp4(d, "abs")),
         ("paired flip $c{=}60\\to15$, $\\dchi\\ge20$", lambda d: f"{d['flip_60_to_15']['abs']['lost']}\\,:\\,{d['flip_60_to_15']['abs']['gained']}"),

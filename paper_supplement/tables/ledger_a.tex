@@ -1,0 +1,15 @@
+\begin{tabular}{@{}p{1.55cm}p{2.85cm}p{3.0cm}@{}}
+\toprule
+Item & Published scans & This work \\
+\midrule
+Source model & pixelized, regularization set by the evidence & analytic S\'ersic (the Tier-0 truth) \\
+Macro-model & EPL+shear, multipoles since \citet{lange2024} & EPL+shear; free $m{=}4$ or $m{=}3{+}4$ as a variant \\
+Perturber & NFW or truncated NFW, $c$ from a $c$--$M$ relation & truncated NFW, $c{=}15$, $\tau{=}20$; $c{=}60$ and $c$--$M$ controls \\
+Position & sensitivity map on a fine grid, or free & 24 nodes; free within $0.5''$ of a node as a variant \\
+Inference & nested sampling, $\Delta\ln Z$ & least squares, $\dchi$ (no Occam penalty) \\
+Threshold & absolute, $\Delta\ln Z>10$ & 10\% FPR on the clean control and $\dchi\ge20$ \\
+Initialization & broad priors & within 15\% of the truth; data-only control \\
+Fit-quality cut & inspection of the smooth fit & $\chi^2/{\rm dof}<10$ from any start, or joint fit \\
+Cost per lens & hours to days & 18--47~s \\
+\bottomrule
+\end{tabular}

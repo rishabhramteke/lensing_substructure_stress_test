@@ -1,0 +1,47 @@
+\begin{tabular}[t]{@{}lrcccc@{}}
+\toprule
+ & & reference & \multicolumn{3}{c}{protocol} \\ \cmidrule(lr){4-6}
+population & $n$ & $\dchi\ge20$ & $\dchi\ge20$ & $\dchi\ge48$ & $+$fit \\
+\midrule
+clean & 200 & 0 & 1.0 & 0 & 0 \\
+$m{=}4$, $a_4/\thetaE=0.03$ & 200 & 98 & 0 & 0 & 0 \\
+$m{=}4$, 0.01 & 200 & 86 & 0.5 & 0 & 0 \\
+$m{=}3$, 0.03 & 200 & 98 & 0 & 0 & 0 \\
+elliptical $m{=}4$, 0.03 & 200 & 100 & 70 & 54 & 35 \\
+decoy, Gaussian (1) & 100 & 2.1 & 24 & 1.0 & 1.0 \\
+decoy, Gaussian (2) & 100 & 1.0 & 21 & 3.0 & 3.0 \\
+decoy, dipole & 100 & 0 & 9.0 & 0 & 0 \\
+realism: clean & 200 & 1.0 & 1.0 & 1.0 & 1.0 \\
+realism: $m{=}4$, 0.03 & 200 & 84 & 0 & 0 & 0 \\
+\addlinespace\multicolumn{6}{@{}l}{\emph{forward-model variants, exact model otherwise}} \\
+clean, PSF 2\% too wide & 200 & 28 & 14 & 1.5 & 1.0 \\
+clean, PSF 5\% & 200 & 69 & 54 & 28 & 4.5 \\
+clean, clumps 0.5\% & 200 & 44 & 56 & 35 & 4.5 \\
+clean, clumps 1\% & 200 & 65 & 74 & 60 & 6.6 \\
+clean, clumps 2\% & 200 & 76 & 84 & 76 & 11 \\
+clean, clumps 4\% & 200 & 87 & 91 & 81 & 6.0 \\
+clean, real source$^{a}$ & 200 & 100 & 100 & 100 & 0 \\
+\bottomrule
+\end{tabular}
+\hfill
+\begin{tabular}[t]{@{}llcccccc@{}}
+\toprule
+ & & \multicolumn{6}{c}{completeness (\%)} \\ \cmidrule(lr){3-8}
+population & rule & $10^{8}$ & $10^{8.5}$ & $10^{9}$ & $10^{9.5}$ & $10^{10}$ & $10^{10.5}$ \\
+\midrule
+$c=60$ & reference & 13 & 40 & 90 & 96 & 97 & 94 \\
+ & $\dchi\ge20$ & 23 & 30 & 76 & 100 & 95 & 100 \\
+ & $\dchi\ge48$ & 13 & 20 & 62 & 93 & 90 & 100 \\
+ & $+$fit & 13 & 20 & 62 & 74 & 45 & 28 \\
+\addlinespace
+$c=15$ & reference & 6.5 & 37 & 81 & 93 & 93 & 96 \\
+ & $\dchi\ge20$ & 10 & 17 & 67 & 89 & 86 & 100 \\
+ & $\dchi\ge48$ & 0 & 3.3 & 38 & 71 & 73 & 93 \\
+ & $+$fit & 0 & 3.3 & 38 & 71 & 73 & 93 \\
+\addlinespace
+realism: $c=60$ & reference & 0 & 0 & 24 & 66 & 96 & 97 \\
+ & $\dchi\ge20$ & 0 & 4.5 & 17 & 56 & 77 & 90 \\
+ & $\dchi\ge48$ & 0 & 0 & 10 & 31 & 58 & 77 \\
+ & $+$fit & 0 & 0 & 10 & 31 & 58 & 55 \\
+\bottomrule
+\end{tabular}
