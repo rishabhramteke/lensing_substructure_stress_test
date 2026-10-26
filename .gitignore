@@ -31,3 +31,8 @@ data/train_*/truth.jsonl
 data/tier1/train_*/truth.jsonl
 # submission package (manuscript, private until acceptance)
 submission/
+paper_supplement/*.aux
+paper_supplement/*.bbl
+paper_supplement/*.blg
+paper_supplement/*.log
+paper_supplement/*.out
