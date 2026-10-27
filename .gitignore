@@ -36,3 +36,4 @@ paper_supplement/*.bbl
 paper_supplement/*.blg
 paper_supplement/*.log
 paper_supplement/*.out
+project_status.md

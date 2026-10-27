@@ -7,6 +7,6 @@ export OMP_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM
 P="--blind --restarts 7 --free-centre --free-position --macro-multipole --macro-multipole-orders 3,4"
 O=results/baseline_a_joint_protocol_heldout; mkdir -p $O
 for p in no_subhalo test_fixed60 multipole_m4_a3; do
-  echo "start $p $(date)"; python scripts/run_baseline_a_joint.py --population $p --indices $(cat scratchpad/heldout_$p.txt) --seed 0 --workers 6 ${=P} --out $O/$p > $O/$p.log 2>&1
+  echo "start $p $(date)"; python scripts/run_baseline_a_joint.py --population $p --indices $(cat $O/heldout_indices_$p.txt) --seed 0 --workers 6 ${=P} --out $O/$p > $O/$p.log 2>&1
 done
 echo "HELDOUT DONE $(date)"
